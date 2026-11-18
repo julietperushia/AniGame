@@ -36,26 +36,6 @@ Instead of collecting many characters, each player builds and upgrades **one sin
 
 ---
 
-## 🚀 Getting Started
-
-```bash
-# Clone the repository
-git clone https://github.com/[USERNAME]/[REPO_NAME].git
-cd [REPO_NAME]
-
-# Install dependencies
-[INSTALL_COMMAND]
-
-# Configure your environment
-cp .env.example .env
-# then fill in your Discord bot token and other settings
-
-# Run the bot
-[RUN_COMMAND]
-```
-
----
-
 ## 📜 Legal
 
 - [Terms of Service](TERMS_OF_SERVICE.md)
@@ -73,6 +53,6 @@ Contributions, bug reports and suggestions are welcome. Please open an issue or 
 
 ## 📬 Contact
 
-For questions, takedown requests or concerns: **[CONTACT]**
+For questions, takedown requests or concerns: Discord: **thisisjuli174**
 
 If you are a representative of Anigame and have any concerns about this project, please reach out and it will be addressed promptly.
