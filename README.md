@@ -1,6 +1,6 @@
-# [BOT_NAME]
+# [ANIGAME]
 
-> A fan-made, non-commercial Discord card game inspired by **Anigame**.
+> A fan-made, non-commercial card game built with **Unity**, inspired by the Discord game **Anigame**.
 
 ---
 
@@ -8,9 +8,10 @@
 
 **This project was created purely for entertainment and personal learning.**
 
-- It is **inspired by** the Discord game **Anigame**, but it is **not affiliated with, endorsed by, sponsored by, or connected to Anigame** or its developers in any way.
+- Its gameplay is **inspired by** **Anigame**, a card game on Discord. This project is **not affiliated with, endorsed by, sponsored by, or connected to Anigame** or its developers in any way.
+- This project is a standalone Unity game. It is **not** a Discord bot and does not run on Discord.
 - All trademarks, names and references to Anigame belong to their respective owners.
-- This project is **strictly non-commercial**. It does **not** sell, trade or accept real money for any in-game items, currency, cards or accounts.
+- This project is **strictly non-commercial**. It does **not** sell, trade or accept real money for any in-game items, currency, cards or accounts, and contains no in-app purchases or ads.
 - In-game currencies (Gold, Diamonds) and items **have no real-world value** and cannot be bought, sold or exchanged for real money or goods.
 
 See [DISCLAIMER.md](DISCLAIMER.md) for the full statement.
@@ -36,9 +37,50 @@ Instead of collecting many characters, each player builds and upgrades **one sin
 
 ---
 
+## 🛠️ Requirements
+
+- **Unity** 6000.2.15f1 (installed via Unity Hub)
+- Target platform(s): Windows
+
+---
+
+## 🚀 Getting Started
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/julietperushia/AniGame.git
+   ```
+2. Open **Unity Hub** → **Add** → select the cloned folder.
+3. Open the project with Unity [UNITY_VERSION].
+4. Open the main scene at `[Assets/Scenes/MainScene.unity]`.
+5. Press **Play** to run in the Editor.
+
+### Building
+
+1. Go to **File → Build Settings**.
+2. Choose your target platform and click **Switch Platform** if needed.
+3. Click **Build** and choose an output folder.
+
+---
+
+## 📁 Project Structure
+
+```
+Assets/
+├── Scenes/        # Game scenes
+├── Scripts/       # C# gameplay code
+├── Prefabs/       # Reusable game objects
+├── Art/           # Sprites, UI and other visuals
+└── Data/          # ScriptableObjects (rarity, talents, packs, floors)
+```
+
+*(Adjust to match your actual folder layout.)*
+
+---
+
 ## 📜 Legal
 
-- [Terms of Service](TERMS_OF_SERVICE.md)
+- [Terms of Use](TERMS_OF_USE.md)
 - [Privacy Policy](PRIVACY_POLICY.md)
 - [Disclaimer](DISCLAIMER.md)
 - [License](LICENSE): non-commercial use only
@@ -53,6 +95,6 @@ Contributions, bug reports and suggestions are welcome. Please open an issue or 
 
 ## 📬 Contact
 
-For questions, takedown requests or concerns: Discord: **thisisjuli174**
+For questions, takedown requests or concerns: **[CONTACT]**
 
-If you are a representative of Anigame and have any concerns about this project, please reach out and it will be addressed promptly.
+If you represent Anigame and have any concerns about this project, please reach out and they will be addressed promptly.
