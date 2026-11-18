@@ -89,12 +89,12 @@ Assets/
 
 ## 🤝 Contributing
 
-Contributions, bug reports and suggestions are welcome. Please open an issue or pull request. By contributing, you agree that your contributions fall under this project's [License](LICENSE).
+Contributions, bug reports and suggestions are welcome. Please open an issue or pull request. By contributing, you agree that your contributions fall under this project's [License](LICENSE.md).
 
 ---
 
 ## 📬 Contact
 
-For questions, takedown requests or concerns: **[CONTACT]**
+For questions, takedown requests or concerns: Discord: thisisjuli174
 
 If you represent Anigame and have any concerns about this project, please reach out and they will be addressed promptly.
