@@ -10,7 +10,7 @@ The Game is a free, fan-made card game built with Unity **for entertainment only
 
 ## 2. License to play
 
-You may download and play the Game for personal, non-commercial use. Redistribution and modification of the source code are governed by the [License](LICENSE).
+You may download and play the Game for personal, non-commercial use. Redistribution and modification of the source code are governed by the [License](LICENSE.md).
 
 ## 3. No real-money transactions
 
