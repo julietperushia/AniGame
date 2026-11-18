@@ -83,7 +83,7 @@ Assets/
 - [Terms of Use](TERMS_OF_USE.md)
 - [Privacy Policy](PRIVACY_POLICY.md)
 - [Disclaimer](DISCLAIMER.md)
-- [License](LICENSE): non-commercial use only
+- [License](LICENSE.md): non-commercial use only
 
 ---
 
