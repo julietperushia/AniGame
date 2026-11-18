@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 11
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Arth
+  cardImg: {fileID: -1517849007080751162, guid: 2dfa215777c4fdb469f557980ccae442, type: 3}
+  element: 2
+  rarity: 6
+  talent: {fileID: 11400000, guid: 5a653a7976f212f45a25192a15f280d7, type: 2}
+  health: 1210
+  defense: 71
+  attack: 66
+  speed: 326
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 540
+  location: 45
+  floor: 11
+  floorCode: C3

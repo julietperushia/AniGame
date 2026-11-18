@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 36
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Yuki Tsukumo
+  cardImg: {fileID: 21300000, guid: af522c54f2000c141b4035541acd19d0, type: 3}
+  element: 6
+  rarity: 6
+  talent: {fileID: 11400000, guid: 43dbd674abfda9b4ea6d1f1e745f83db, type: 2}
+  health: 790
+  defense: 163
+  attack: 25
+  speed: 307
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 530
+  location: 44
+  floor: 36
+  floorCode: L3
+  anime: 'JUJUTSU KAISEN Season 3: The Culling Game Part 1'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b196502-aBvtPFr9lGm2.png
+  characterId: b196502-aBvtPFr9lGm2

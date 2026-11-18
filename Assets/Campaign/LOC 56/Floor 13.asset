@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 13
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Levi
+  cardImg: {fileID: 21300000, guid: 0a70cb36ba7ef194eb736daae4141a19, type: 3}
+  element: 8
+  rarity: 6
+  talent: {fileID: 11400000, guid: f75c369d7b2715d438d06542c95fee5c, type: 2}
+  health: 290
+  defense: 294
+  attack: 17
+  speed: 338
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 650
+  location: 56
+  floor: 13
+  floorCode: E2
+  anime: Attack on Titan Final Season
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b45627-CR68RyZmddGG.png
+  characterId: b45627-CR68RyZmddGG

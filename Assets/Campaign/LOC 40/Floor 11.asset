@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 11
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Hedoro
+  cardImg: {fileID: 21300000, guid: 91109f2078bcd9944a64c0188b75dac1, type: 3}
+  element: 2
+  rarity: 5
+  talent: {fileID: 11400000, guid: 0d2844ad920495245b0875653c174abc, type: 2}
+  health: 840
+  defense: 98
+  attack: 261
+  speed: 87
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 490
+  location: 40
+  floor: 11
+  floorCode: A3
+  anime: 'Gintama.: Silver Soul Arc'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/n7928-jIS5wwIWW1Yz.jpg
+  characterId: n7928-jIS5wwIWW1Yz

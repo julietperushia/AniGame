@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 16
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Arataka Reigen
+  cardImg: {fileID: 21300000, guid: 91dcd521f1ce4e64f8403e21ad5d9c47, type: 3}
+  element: 4
+  rarity: 5
+  talent: {fileID: 11400000, guid: c7e1f10c9f9cf6343a758cf7a88df84f, type: 2}
+  health: 2330
+  defense: 133
+  attack: 92
+  speed: 83
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 520
+  location: 43
+  floor: 16
+  floorCode: E2
+  anime: Mob Psycho 100 III
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b89334-OPj1hCzvrt7X.png
+  characterId: b89334-OPj1hCzvrt7X

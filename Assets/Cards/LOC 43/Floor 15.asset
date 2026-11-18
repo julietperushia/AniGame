@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 15
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Sawanoguchi Sae
+  cardImg: {fileID: -7340085204331545155, guid: 2e4357f827185fe46a2b1e6130cd62ac, type: 3}
+  element: 3
+  rarity: 5
+  talent: {fileID: 11400000, guid: ee59b57e9da74524d8b36d7f25a7c501, type: 2}
+  health: 710
+  defense: 85
+  attack: 103
+  speed: 282
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 520
+  location: 43
+  floor: 15
+  floorCode: D2

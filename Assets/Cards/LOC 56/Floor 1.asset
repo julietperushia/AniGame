@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 1
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Monou Fuuma
+  cardImg: {fileID: -5472742255246367681, guid: f4849a0847108234b89c5b0875ad3190, type: 3}
+  element: 3
+  rarity: 5
+  talent: {fileID: 11400000, guid: 79b2609231f563c47adbf168ead1b903, type: 2}
+  health: 550
+  defense: 74
+  attack: 414
+  speed: 107
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 650
+  location: 56
+  floor: 1
+  floorCode: A1

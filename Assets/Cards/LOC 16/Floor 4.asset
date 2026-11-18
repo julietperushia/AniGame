@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 4
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Tsujiwaki Miki
+  cardImg: {fileID: -7745149924363980860, guid: 7328f1bb6a805b041bc27756bd4d8aaf, type: 3}
+  element: 2
+  rarity: 1
+  talent: {fileID: 11400000, guid: 79b2609231f563c47adbf168ead1b903, type: 2}
+  health: 470
+  defense: 106
+  attack: 54
+  speed: 43
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 250
+  location: 16
+  floor: 4
+  floorCode: D1

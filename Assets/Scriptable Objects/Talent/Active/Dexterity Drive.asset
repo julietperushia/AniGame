@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 415089c7d30068748b6d83a2ceffa5dc, type: 3}
+  m_Name: Dexterity Drive
+  m_EditorClassIdentifier: Assembly-CSharp::DexterityDrive
+  talentName: Dexterity Drive
+  description: Deal damage equal to 5% of your SPD, and deal additional damage according
+    to the difference between your SPD and enemy's SPD.
+  manaCost: 100

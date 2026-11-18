@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 27
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Cube
+  cardImg: {fileID: 5752739366588724016, guid: 4e98f2717de38f0419ee40ac8f5c5e31, type: 3}
+  element: 4
+  rarity: 8
+  talent: {fileID: 11400000, guid: 87061fea3fa978b4fa1fe4efb28fcc84, type: 2}
+  health: 2710
+  defense: 34
+  attack: 293
+  speed: 294
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 820
+  location: 73
+  floor: 27
+  floorCode: I3

@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bb8a81ce443de64f85579c02924a2f9, type: 3}
+  m_Name: Balancing Strike
+  m_EditorClassIdentifier: Assembly-CSharp::BalancingStrike
+  talentName: Balancing Strike
+  description: If your HP % is lower than the enemy's HP %, deal 15% of your base
+    HP as True damage. Otherwise, this skill deals 5% of your base HP as True damage.
+  manaCost: 100

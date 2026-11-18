@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 22
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Fujii Kasumi
+  cardImg: {fileID: 7742980371504295216, guid: cac041a0f9a0f8d4e86f71c0a24202ed, type: 3}
+  element: 4
+  rarity: 8
+  talent: {fileID: 11400000, guid: c4baef21a8bc89c4c988e030b7552b97, type: 2}
+  health: 1740
+  defense: 607
+  attack: 71
+  speed: 288
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1090
+  location: 100
+  floor: 22
+  floorCode: J2

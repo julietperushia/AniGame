@@ -1,0 +1,947 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UI;
+
+/// <summary>
+/// "My Cards": a big showcase of the selected card or slot build, an upgrade panel (stats, element, talent, rerolls,
+/// fusion, auto merge, God Orb, dismantle) and the collection grid with dropdown filters and the 3 build slots.
+/// Rerolls never pop up: the new roll is shown on the card and stays unsaved until SAVE TO SLOT, so you can keep rolling.
+/// </summary>
+public class CollectionScreen : MonoBehaviour
+{
+    static readonly string[] StatNames = { "HP", "ATK", "DEF", "SPD" };
+
+    public Button backButton;
+    public Text titleText;
+
+    [Header("Showcase")]
+    public Text showcaseHeader;
+    public CardView showcaseView;
+    public Image showcaseGlow;
+    public GameObject newRollRibbon;
+    public Button[] saveSlotButtons = new Button[3];
+    public Button lockButton;
+    public Button makeMainButton;
+    public Text pendingText;
+    public Button discardButton;
+
+    [Header("Upgrade panel")]
+    public Text rarityLine;
+    public Text[] statValues = new Text[4];
+    public Image[] statFills = new Image[4];
+    public Text[] statRolls = new Text[4];
+    public TooltipTrigger[] statTips = new TooltipTrigger[4];
+    public Image elementIcon;
+    public RectTransform strongRow;
+    public GameObject elementNew;
+    public Image talentIcon;
+    public Text talentBonus;
+    public GameObject talentNew;
+    public Button rerollStatsButton, rerollElementButton, rerollTalentButton, fusionButton, autoMergeButton, godOrbButton, dismantleButton;
+    public Image rerollStatsIcon, rerollElementIcon, rerollTalentIcon, fusionIcon, godOrbIcon, dismantleIcon;
+    public Text rerollStatsCost, rerollElementCost, rerollTalentCost, fusionCost, godOrbCost, dismantleCost;
+    public Text messageText;
+
+    [Header("Collection")]
+    public Dropdown rarityFilter;
+    public Dropdown elementFilter;
+    public Dropdown sortDropdown;
+    public RectTransform grid;
+    public Text countText;
+    public RectTransform slotRow;
+
+    [Header("Fusion")]
+    public GameObject fusionPanel;
+    public RectTransform fusionMainHolder;
+    public RectTransform fodderGrid;
+    public Text fusionInfo;
+    public Button fuseButton;
+    public Button fusionCloseButton;
+    public Text fusionResult;
+
+    [Header("Auto merge")]
+    public GameObject mergePanel;
+    public Dropdown mergeTarget;
+    public InputField mergeOrbs;
+    public Button mergeOrbs10, mergeOrbs50, mergeOrbsAll;
+    public Text mergeInfo;
+    public Button mergeStartButton;
+    public Button mergeCloseButton;
+    public Text mergeResultText;
+    public RectTransform mergeResultGrid;
+
+    enum SortMode { Power, Rarity, Newest, Roll }
+
+    int rarityIndex = -1;
+    int elementIndex = -1;
+    SortMode sortMode = SortMode.Power;
+
+    CardInstance selected;
+    BuildData viewBuild;     // saved build being viewed (card's own build or a slot build)
+    BuildData pendingBuild;  // unsaved reroll result
+    int viewSlot = -1;
+    int unlockConfirmSlot = -1;
+    float unlockConfirmUntil;
+    int dismantleConfirmUid;
+    float dismantleConfirmUntil;
+    bool mergeConfirm;
+    float mergeConfirmUntil;
+    readonly List<CardInstance> fodderSelection = new List<CardInstance>();
+
+    BuildData ShownBuild => pendingBuild ?? viewBuild;
+
+    // ---------------------------------------------------------------- lifecycle
+
+    void Start()
+    {
+        backButton.onClick.AddListener(() => GameSession.LoadScene(SceneNames.MainMenu));
+        FillDropdowns();
+        rarityFilter.onValueChanged.AddListener(v => { rarityIndex = v - 1; RebuildGrid(); });
+        elementFilter.onValueChanged.AddListener(v => { elementIndex = v - 1; RebuildGrid(); });
+        sortDropdown.onValueChanged.AddListener(v => { sortMode = (SortMode)v; RebuildGrid(); });
+        for (int i = 0; i < saveSlotButtons.Length; i++)
+        {
+            int slotIndex = i;
+            saveSlotButtons[i].onClick.AddListener(() => SaveShownToSlot(slotIndex));
+        }
+        lockButton.onClick.AddListener(ToggleLock);
+        makeMainButton.onClick.AddListener(MakeMain);
+        discardButton.onClick.AddListener(() => { if (pendingBuild != null) { pendingBuild = null; Message("New roll discarded."); RefreshDetail(); } });
+        rerollStatsButton.onClick.AddListener(() => Reroll(0));
+        rerollElementButton.onClick.AddListener(() => Reroll(1));
+        rerollTalentButton.onClick.AddListener(() => Reroll(2));
+        fusionButton.onClick.AddListener(OpenFusion);
+        autoMergeButton.onClick.AddListener(OpenAutoMerge);
+        godOrbButton.onClick.AddListener(UseGodOrb);
+        dismantleButton.onClick.AddListener(DismantleSelected);
+        fuseButton.onClick.AddListener(DoFuse);
+        fusionCloseButton.onClick.AddListener(() => { fusionPanel.SetActive(false); RefreshAll(); });
+        mergeStartButton.onClick.AddListener(OnMergeStart);
+        mergeCloseButton.onClick.AddListener(() => { mergePanel.SetActive(false); RefreshAll(); });
+        mergeTarget.onValueChanged.AddListener(_ => { mergeConfirm = false; RefreshMergeInfo(); });
+        mergeOrbs.onValueChanged.AddListener(_ => { mergeConfirm = false; RefreshMergeInfo(); });
+        mergeOrbs10.onClick.AddListener(() => mergeOrbs.text = "10");
+        mergeOrbs50.onClick.AddListener(() => mergeOrbs.text = "50");
+        mergeOrbsAll.onClick.AddListener(() => mergeOrbs.text = PlayerProfile.Data.fusionOrbs.ToString());
+        fusionPanel.SetActive(false);
+        mergePanel.SetActive(false);
+        messageText.text = "";
+
+        int active = PlayerProfile.ActiveSlot;
+        var slot = PlayerProfile.GetSlot(active);
+        if (slot != null && slot.HasCard) ViewSlot(active);
+        else if (PlayerProfile.Data.cards.Count > 0) ViewCard(PlayerProfile.Data.cards[0]);
+        else RefreshAll();
+    }
+
+    void Update()
+    {
+        if (mergeConfirm && Time.unscaledTime > mergeConfirmUntil) { mergeConfirm = false; RefreshMergeInfo(); }
+        if (showcaseGlow != null && selected != null)
+        {
+            var c = CardStats.RarityColor(selected.rarity);
+            showcaseGlow.color = UIFactory.WithAlpha(c, 0.35f + 0.15f * Mathf.Sin(Time.unscaledTime * 2f));
+            showcaseGlow.rectTransform.localRotation = Quaternion.Euler(0, 0, Time.unscaledTime * 6f);
+        }
+    }
+
+    void Message(string text) => messageText.text = text;
+
+    void RefreshAll()
+    {
+        RebuildGrid();
+        RefreshSlots();
+        RefreshDetail();
+    }
+
+    // ---------------------------------------------------------------- collection grid
+
+    void FillDropdowns()
+    {
+        var theme = UITheme.Instance;
+        rarityFilter.ClearOptions();
+        var ro = new List<Dropdown.OptionData> { new Dropdown.OptionData("All rarities") };
+        for (int t = 0; t <= GameRules.MaxTier; t++)
+            ro.Add(new Dropdown.OptionData($"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor((CardRarity)t))}>{CardStats.RarityName((CardRarity)t)}</color>",
+                                           theme != null ? theme.Frame((CardRarity)t) : null));
+        rarityFilter.AddOptions(ro);
+        elementFilter.ClearOptions();
+        var eo = new List<Dropdown.OptionData> { new Dropdown.OptionData("All elements") };
+        foreach (var e in ElementSystem.All) eo.Add(new Dropdown.OptionData(ElementSystem.DisplayName(e), theme != null ? theme.ElementIcon(e) : null));
+        elementFilter.AddOptions(eo);
+        sortDropdown.ClearOptions();
+        sortDropdown.AddOptions(new List<string> { "Sort: Power", "Sort: Rarity", "Sort: Newest", "Sort: Best Roll" });
+        rarityFilter.SetValueWithoutNotify(0);
+        elementFilter.SetValueWithoutNotify(0);
+        sortDropdown.SetValueWithoutNotify(0);
+    }
+
+    IEnumerable<CardInstance> FilteredCards()
+    {
+        IEnumerable<CardInstance> cards = PlayerProfile.Data.cards;
+        if (rarityIndex >= 0) cards = cards.Where(c => c.Tier == rarityIndex);
+        if (elementIndex >= 0) cards = cards.Where(c => c.build.element == ElementSystem.All[elementIndex]);
+        switch (sortMode)
+        {
+            case SortMode.Rarity: return cards.OrderByDescending(c => c.Tier).ThenByDescending(c => CardStats.Power(c));
+            case SortMode.Newest: return cards.OrderByDescending(c => c.uid);
+            case SortMode.Roll: return cards.OrderByDescending(c => c.build.TotalRoll);
+            default: return cards.OrderByDescending(c => CardStats.Power(c));
+        }
+    }
+
+    void RebuildGrid()
+    {
+        UIFactory.Clear(grid);
+        var list = FilteredCards().ToList();
+        foreach (var c in list)
+        {
+            var card = c;
+            var tile = CardTile.Build(grid, $"Card {card.uid}", 150, 210, card.Tier >= 6);
+            tile.SetInstance(card);
+            var slots = Enumerable.Range(0, GameRules.SlotCount).Where(i => PlayerProfile.GetSlot(i).unlocked && PlayerProfile.GetSlot(i).cardUid == card.uid).Select(i => (i + 1).ToString()).ToList();
+            if (slots.Count > 0) tile.SetBadge("SLOT " + string.Join(",", slots), UIFactory.Accent);
+            tile.button.onClick.AddListener(() => ViewCard(card));
+            tile.SetSelected(card == selected && viewSlot < 0);
+        }
+        var counts = PlayerProfile.Data.cards.GroupBy(c => c.rarity).OrderByDescending(g => g.Key)
+            .Select(g => $"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor(g.Key))}>{g.Count()} {CardStats.RarityShort(g.Key)}</color>");
+        countText.text = $"{list.Count} shown / {PlayerProfile.Data.cards.Count} cards    " + string.Join("  ", counts);
+        titleText.text = "MY CARDS";
+    }
+
+    // ---------------------------------------------------------------- slots
+
+    void RefreshSlots()
+    {
+        UIFactory.Clear(slotRow);
+        int active = PlayerProfile.ActiveSlot;
+        for (int i = 0; i < GameRules.SlotCount; i++)
+        {
+            int index = i;
+            var slot = PlayerProfile.GetSlot(i);
+            var tile = CardTile.Build(slotRow, $"Slot {i + 1}", 112, 156, true);
+            var rt = (RectTransform)tile.transform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
+            rt.pivot = new Vector2(0f, 0.5f);
+            rt.anchoredPosition = new Vector2(250 + i * 150f, -6f);
+            tile.nameText.fontSize = 13;
+            if (!slot.unlocked)
+            {
+                tile.SetEmpty($"SLOT {i + 1}");
+                tile.SetLocked(true, $"{PlayerProfile.SlotUnlockPrice(i)} DIAMONDS");
+            }
+            else if (!slot.HasCard) tile.SetEmpty($"SLOT {i + 1}");
+            else
+            {
+                tile.SetInstance(PlayerProfile.FindCard(slot.cardUid), slot.build);
+                tile.SetLockIcon(false);
+                tile.SetBadge(i == active ? "MAIN" : $"SLOT {i + 1}", i == active ? UIFactory.Accent2 : UIFactory.Accent);
+            }
+            tile.SetSelected(viewSlot == i);
+            tile.button.onClick.AddListener(() => OnSlotClicked(index));
+        }
+    }
+
+    void OnSlotClicked(int index)
+    {
+        var slot = PlayerProfile.GetSlot(index);
+        if (!slot.unlocked)
+        {
+            if (unlockConfirmSlot == index && Time.unscaledTime < unlockConfirmUntil)
+            {
+                string err = PlayerProfile.UnlockSlot(index);
+                Message(err == null ? $"<color=#7CFC6A>Slot {index + 1} unlocked!</color>" : $"<color=#FF6B6B>{err}.</color>");
+                unlockConfirmSlot = -1;
+                RefreshAll();
+            }
+            else
+            {
+                unlockConfirmSlot = index;
+                unlockConfirmUntil = Time.unscaledTime + 3f;
+                Message($"Click slot {index + 1} again to unlock it for {PlayerProfile.SlotUnlockPrice(index)} diamonds (you have {PlayerProfile.Data.diamonds}).");
+            }
+            return;
+        }
+        if (slot.HasCard) ViewSlot(index);
+        else Message($"Slot {index + 1} is empty: pick a card and press SAVE TO S{index + 1}.");
+    }
+
+    // ---------------------------------------------------------------- selection
+
+    void DropPending()
+    {
+        if (pendingBuild != null) Message("Unsaved new roll discarded.");
+        pendingBuild = null;
+    }
+
+    void ViewCard(CardInstance card)
+    {
+        DropPending();
+        selected = card;
+        viewBuild = card != null ? card.build : null;
+        viewSlot = -1;
+        RefreshAll();
+    }
+
+    void ViewSlot(int index)
+    {
+        var slot = PlayerProfile.GetSlot(index);
+        var card = slot != null ? PlayerProfile.FindCard(slot.cardUid) : null;
+        if (card == null) return;
+        DropPending();
+        selected = card;
+        viewBuild = slot.build;
+        viewSlot = index;
+        RefreshAll();
+    }
+
+    // ---------------------------------------------------------------- detail
+
+    static void SetCost(Image icon, Text text, ItemKind? kind, string value)
+    {
+        icon.sprite = kind.HasValue ? ItemInfo.Icon(kind.Value) : null;
+        icon.enabled = icon.sprite != null;
+        text.text = value;
+        if (kind.HasValue) TooltipTrigger.Add(icon, ItemInfo.Describe(kind.Value));
+    }
+
+    void RefreshDetail()
+    {
+        bool has = selected != null && viewBuild != null;
+        foreach (var b in new[] { lockButton, makeMainButton, rerollStatsButton, rerollElementButton, rerollTalentButton, fusionButton, godOrbButton, dismantleButton })
+            b.interactable = has;
+        foreach (var b in saveSlotButtons) b.interactable = has;
+        showcaseView.gameObject.SetActive(has);
+        newRollRibbon.SetActive(has && pendingBuild != null);
+        discardButton.gameObject.SetActive(has && pendingBuild != null);
+        if (!has)
+        {
+            showcaseHeader.text = "Pick a card";
+            rarityLine.text = "";
+            pendingText.text = "";
+            return;
+        }
+
+        var shown = ShownBuild;
+        showcaseHeader.text = viewSlot >= 0
+            ? $"SLOT {viewSlot + 1} BUILD{(viewSlot == PlayerProfile.ActiveSlot ? "  <color=#FF6FA8>MAIN</color>" : "")}"
+            : $"CARD #{selected.uid}";
+        showcaseView.ShowInstance(selected, shown);
+
+        int tier = selected.Tier;
+        float mult = GameRules.RarityMultiplier(tier);
+        int max = GameRules.MaxDeviation(tier);
+        rarityLine.text = $"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor(selected.rarity))}><b>{CardStats.RarityName(selected.rarity).ToUpperInvariant()}</b></color>   " +
+                          $"+{(mult - 1f) * 100f:0}% stats   Roll ±{max}" + (selected.godBonus > 0 ? $"   <color=#FFE9A3>God +{selected.godBonus}%</color>" : "");
+
+        // Stat rows: value, Roll bar (centre = 0), and the change vs the saved build when a new roll is shown
+        int[] rolls = { shown.hp, shown.atk, shown.def, shown.spd };
+        int[] values = { CardStats.HpOf(selected.rarity, shown, selected.godBonus), CardStats.AtkOf(selected.rarity, shown, selected.godBonus),
+                         CardStats.DefOf(selected.rarity, shown, selected.godBonus), CardStats.SpdOf(selected.rarity, shown, selected.godBonus) };
+        int[] saved = { CardStats.HpOf(selected.rarity, viewBuild, selected.godBonus), CardStats.AtkOf(selected.rarity, viewBuild, selected.godBonus),
+                        CardStats.DefOf(selected.rarity, viewBuild, selected.godBonus), CardStats.SpdOf(selected.rarity, viewBuild, selected.godBonus) };
+        for (int i = 0; i < 4; i++)
+        {
+            int diff = values[i] - saved[i];
+            statValues[i].text = $"{values[i]:N0}" + (pendingBuild != null && diff != 0 ? (diff > 0 ? $" <color=#7CFC6A>+{diff}</color>" : $" <color=#FF6B6B>{diff}</color>") : "");
+            float k = max > 0 ? Mathf.Clamp(rolls[i] / (float)max, -1f, 1f) : 0f;
+            var frt = statFills[i].rectTransform;
+            frt.anchorMin = new Vector2(k >= 0 ? 0.5f : 0.5f + 0.5f * k, 0f);
+            frt.anchorMax = new Vector2(k >= 0 ? 0.5f + 0.5f * k : 0.5f, 1f);
+            frt.offsetMin = frt.offsetMax = Vector2.zero;
+            statFills[i].color = k >= 0 ? Color.Lerp(new Color(0.4f, 0.8f, 0.4f), new Color(0.45f, 1f, 0.35f), k) : Color.Lerp(new Color(0.9f, 0.5f, 0.4f), new Color(1f, 0.3f, 0.3f), -k);
+            statRolls[i].text = rolls[i] > 0 ? $"<color=#7CFC6A>+{rolls[i]}</color>" : rolls[i] < 0 ? $"<color=#FF6B6B>{rolls[i]}</color>" : "0";
+            statTips[i].text = $"<b>{StatNames[i]} {values[i]:N0}</b>\n= (100 {(rolls[i] >= 0 ? "+" : "-")} {Mathf.Abs(rolls[i])}) x {mult:0.00}" +
+                               (selected.godBonus > 0 ? $" x {1f + GameRules.GodOrbStatBonus * selected.godBonus:0.00}" : "") + (i == 0 ? " x 10" : "") +
+                               $"\nRoll range at this rarity: -{max} to +{max}";
+        }
+
+        // Element + what it beats, talent: pictures with tooltips
+        var theme = UITheme.Instance;
+        elementIcon.sprite = theme != null ? theme.ElementIcon(shown.element) : null;
+        elementIcon.enabled = elementIcon.sprite != null;
+        TooltipTrigger.Add(elementIcon, IconInfo.Element(shown.element));
+        elementNew.SetActive(pendingBuild != null && pendingBuild.element != viewBuild.element);
+        UIFactory.Clear(strongRow);
+        var strong = ElementSystem.StrongAgainst(shown.element);
+        if (strong.Count > 0)
+        {
+            var arrow = UIFactory.CreateImage(strongRow, "Beats", new Color(0.55f, 1f, 0.45f), theme != null ? theme.arrow : null);
+            arrow.preserveAspect = true;
+            UIFactory.Place(arrow.rectTransform, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(38, 20));
+            TooltipTrigger.Add(arrow, "Deals +25% (or +12.5%) damage to:");
+            float size = strong.Count > 5 ? 32f : 40f;
+            for (int i = 0; i < strong.Count; i++)
+            {
+                var icon = UIFactory.Icon(strongRow, "Strong", theme != null ? theme.ElementIcon(strong[i]) : null, ElementSystem.GetColor(strong[i]), size, new Vector2(46 + i * (size + 4), 0));
+                TooltipTrigger.Add(icon, IconInfo.Element(strong[i]));
+            }
+        }
+        var talent = CardDatabase.Instance != null ? CardDatabase.Instance.FindTalent(shown.talent) : null;
+        talentIcon.sprite = theme != null ? theme.TalentIcon(talent) : null;
+        talentIcon.enabled = talentIcon.sprite != null;
+        TooltipTrigger.Add(talentIcon, IconInfo.Talent(talent, selected.rarity));
+        int bonus = Mathf.RoundToInt((GameRules.TalentPower(tier) - 1f) * 100f);
+        talentBonus.text = talent == null ? "" : !talentIcon.enabled ? talent.DisplayName : bonus > 0 ? $"+{bonus}% talent power" : "base talent power";
+        talentNew.SetActive(pendingBuild != null && pendingBuild.talent != viewBuild.talent);
+
+        // Showcase buttons
+        UIFactory.ButtonLabel(lockButton).text = selected.locked ? "UNLOCK" : "LOCK";
+        makeMainButton.interactable = viewSlot >= 0 && viewSlot != PlayerProfile.ActiveSlot && pendingBuild == null;
+        for (int i = 0; i < saveSlotButtons.Length; i++)
+        {
+            var slot = PlayerProfile.GetSlot(i);
+            saveSlotButtons[i].interactable = slot.unlocked;
+            UIFactory.ButtonLabel(saveSlotButtons[i]).text = !slot.unlocked ? $"S{i + 1} LOCKED" : pendingBuild != null ? $"SAVE NEW > S{i + 1}" : $"SAVE TO S{i + 1}";
+            saveSlotButtons[i].image.color = pendingBuild != null && slot.unlocked ? UIFactory.Accent2 : UIFactory.Accent;
+        }
+        pendingText.text = pendingBuild != null
+            ? $"<b><color=#FF6FA8>NEW ROLL (not saved)</color></b>   Power {CardStats.Power(selected, viewBuild)} > <b>{CardStats.Power(selected, pendingBuild)}</b>\n" +
+              "<color=#C9C3D8>Keep rerolling as long as you like. Press SAVE NEW > S1/S2/S3 to keep this roll, or DISCARD.</color>"
+            : "<color=#9AA4B5>Reroll as many times as you want: the new roll shows on the card and nothing changes until you press SAVE TO SLOT.</color>";
+
+        // Upgrade buttons with their cost
+        var d = PlayerProfile.Data;
+        SetCost(rerollStatsIcon, rerollStatsCost, ItemKind.Gold, $"{PlayerProfile.StatRerollPrice(tier):N0}");
+        if (d.elementOrbs > 0) SetCost(rerollElementIcon, rerollElementCost, ItemKind.ElementOrb, $"1 / {d.elementOrbs}");
+        else SetCost(rerollElementIcon, rerollElementCost, ItemKind.Gold, $"{PlayerProfile.OrbRerollGoldPrice(OrbType.Element):N0}");
+        if (d.talentOrbs > 0) SetCost(rerollTalentIcon, rerollTalentCost, ItemKind.TalentOrb, $"1 / {d.talentOrbs}");
+        else SetCost(rerollTalentIcon, rerollTalentCost, ItemKind.Gold, $"{PlayerProfile.OrbRerollGoldPrice(OrbType.Talent):N0}");
+
+        bool godLocked = selected.rarity == CardRarity.Mythic && !PlayerProfile.GodUnlocked;
+        UIFactory.ButtonLabel(fusionButton).text = !GameRules.CanFuseFrom(tier) ? "FUSION  <size=16>max rarity</size>"
+            : godLocked ? "FUSION  <size=16>GOD locked</size>"
+            : $"FUSION  <size=16>{PlayerProfile.FusionRate(tier) * 100f:0}% > {CardStats.RarityName((CardRarity)(tier + 1))}</size>";
+        SetCost(fusionIcon, fusionCost, ItemKind.FusionOrb, GameRules.CanFuseFrom(tier) ? $"{GameRules.FusionOrbCost(tier)} / {d.fusionOrbs}" : "-");
+
+        godOrbButton.interactable = PlayerProfile.CanUseGodOrb(selected) == null;
+        SetCost(godOrbIcon, godOrbCost, ItemKind.GodOrb, $"1 / {d.godOrbs}");
+        UIFactory.ButtonLabel(godOrbButton).text = selected.rarity == CardRarity.God ? "GOD ORB" : "GOD ORB  <size=14>God only</size>";
+
+        bool salvage = PlayerProfile.Has(Buffs.SalvageExpert);
+        dismantleButton.interactable = salvage && !PlayerProfile.IsProtected(selected);
+        SetCost(dismantleIcon, dismantleCost, ItemKind.Gold, $"+{PlayerProfile.DismantleValue(selected):N0}");
+        UIFactory.ButtonLabel(dismantleButton).text = !salvage ? "DISMANTLE  <size=14>buff</size>"
+            : dismantleConfirmUid == selected.uid && Time.unscaledTime < dismantleConfirmUntil ? "CONFIRM?" : "DISMANTLE";
+    }
+
+    void SaveShownToSlot(int index)
+    {
+        if (selected == null || ShownBuild == null) return;
+        bool wasPending = pendingBuild != null;
+        string err = PlayerProfile.SaveToSlot(index, selected, ShownBuild);
+        if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
+        pendingBuild = null;
+        SfxSynth.Play("buff", 0.7f);
+        ViewSlot(index);
+        Message($"<color=#7CFC6A>{(wasPending ? "New roll" : "Build")} saved to slot {index + 1}.</color>");
+    }
+
+    void MakeMain()
+    {
+        if (viewSlot < 0) return;
+        PlayerProfile.ActiveSlot = viewSlot;
+        Message($"<color=#7CFC6A>Slot {viewSlot + 1} is now your main build.</color>");
+        RefreshAll();
+    }
+
+    void ToggleLock()
+    {
+        if (selected == null) return;
+        PlayerProfile.ToggleLock(selected);
+        Message(selected.locked ? "Locked: this card can't be fodder or dismantled." : (PlayerProfile.IsInSlot(selected.uid) ? "Unlocked, but it stays protected while it is in a slot." : "Unlocked."));
+        RefreshAll();
+    }
+
+    // ---------------------------------------------------------------- rerolls (inline, no pop-up)
+
+    void Reroll(int kind)
+    {
+        if (selected == null || ShownBuild == null) return;
+        BuildData result;
+        string err = kind == 0 ? PlayerProfile.RerollStats(selected, ShownBuild, out result)
+                   : kind == 1 ? PlayerProfile.RerollElement(selected, ShownBuild, out result)
+                   : PlayerProfile.RerollTalent(selected, ShownBuild, out result);
+        if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
+        SfxSynth.Play("skill", 0.6f, 1f + Random.Range(-0.05f, 0.1f));
+        pendingBuild = result;
+        showcaseView.Pulse(0.25f, 0.05f);
+        Message(kind == 0 ? "New stats rolled." : kind == 1 ? "New element rolled." : "New talent rolled.");
+        RefreshDetail();
+    }
+
+    // ---------------------------------------------------------------- fusion (manual)
+
+    void OpenFusion()
+    {
+        if (selected == null) return;
+        if (!GameRules.CanFuseFrom(selected.Tier)) { Message("God is the maximum rarity."); return; }
+        DropPending();
+        fodderSelection.Clear();
+        foreach (var c in PlayerProfile.FodderCandidates(selected).Take(GameRules.FusionFodderCount)) fodderSelection.Add(c);
+        fusionResult.text = "";
+        fusionPanel.SetActive(true);
+        RefreshFusion();
+    }
+
+    void RefreshFusion()
+    {
+        UIFactory.Clear(fusionMainHolder);
+        var mainTile = CardTile.Build(fusionMainHolder, "Main", 220, 308, true);
+        UIFactory.Place((RectTransform)mainTile.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(220, 308));
+        mainTile.SetInstance(selected, viewBuild);
+        mainTile.SetBadge("MAIN CARD", UIFactory.Accent2);
+        mainTile.button.interactable = false;
+
+        UIFactory.Clear(fodderGrid);
+        var candidates = PlayerProfile.FodderCandidates(selected);
+        foreach (var c in candidates)
+        {
+            var card = c;
+            var tile = CardTile.Build(fodderGrid, $"Fodder {card.uid}", 130, 182, false);
+            tile.SetInstance(card);
+            bool chosen = fodderSelection.Contains(card);
+            tile.SetSelected(chosen);
+            if (chosen) tile.SetBadge("FODDER", new Color(0.85f, 0.4f, 0.2f));
+            tile.button.onClick.AddListener(() =>
+            {
+                if (fodderSelection.Contains(card)) fodderSelection.Remove(card);
+                else if (fodderSelection.Count < GameRules.FusionFodderCount) fodderSelection.Add(card);
+                RefreshFusion();
+            });
+        }
+
+        int tier = selected.Tier;
+        int orbCost = GameRules.FusionOrbCost(tier);
+        float rate = PlayerProfile.FusionRate(tier);
+        string reason = PlayerProfile.CanFuse(selected, fodderSelection);
+        var next = (CardRarity)Mathf.Min(GameRules.MaxTier, tier + 1);
+        fusionInfo.text =
+            $"<b>{CardStats.RarityName(selected.rarity)} > <color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor(next))}>{CardStats.RarityName(next)}</color></b>\n\n" +
+            $"Success: <size=40><b>{rate * 100f:0}%</b></size>\n" +
+            $"Fusion Orbs: {orbCost}  <color=#9AA4B5>(have {PlayerProfile.Data.fusionOrbs})</color>\n" +
+            $"Fodder: {fodderSelection.Count}/{GameRules.FusionFodderCount}  <color=#9AA4B5>({candidates.Count} available)</color>\n\n" +
+            "<color=#C9C3D8>Success: +1 rarity, Roll/element/talent kept.\nFail: lose the fodder and the orbs; the main card stays.</color>" +
+            BuffNotes(tier, orbCost) +
+            (reason != null ? $"\n\n<color=#FF6B6B>{reason}</color>" : "");
+        fuseButton.interactable = reason == null;
+        UIFactory.ButtonLabel(fuseButton).text = $"FUSE  ({rate * 100f:0}%)";
+    }
+
+    static string BuffNotes(int tier, int orbCost)
+    {
+        var buffs = new List<string>();
+        if (PlayerProfile.Has(Buffs.FusionFortune)) buffs.Add("Fusion Fortune +3%");
+        if (PlayerProfile.Has(Buffs.FusionProtection)) buffs.Add("Protection: a fail costs 1 fodder");
+        if (PlayerProfile.Has(Buffs.FusionBlessing) && tier + 2 <= (int)CardRarity.Legendary) buffs.Add("Blessing: 3% for +2 rarities");
+        if (PlayerProfile.Has(Buffs.LuckyFusion)) buffs.Add($"Lucky Fusion: {PlayerProfile.LuckyFusionChance(orbCost) * 100f:0}% orb back");
+        return buffs.Count > 0 ? $"\n\n<color=#7CFC6A>{string.Join("\n", buffs)}</color>" : "";
+    }
+
+    void DoFuse()
+    {
+        var result = PlayerProfile.Fuse(selected, fodderSelection);
+        if (result == null) return;
+        fodderSelection.Clear();
+        string extra = (result.orbRefund ? "\n<color=#7CFC6A>Lucky Fusion: +1 Fusion Orb back!</color>" : "") +
+                       (result.fodderSaved > 0 ? $"\n<color=#7CFC6A>Fusion Protection saved {result.fodderSaved} card.</color>" : "");
+        if (result.success)
+        {
+            SfxSynth.Play("win");
+            fusionResult.text = $"<color=#FFD54F><b>{(result.blessed ? "BLESSED!" : "SUCCESS!")}</b> {CardStats.RarityName(result.from)} > {CardStats.RarityName(result.to)}</color>" + extra;
+        }
+        else
+        {
+            SfxSynth.Play("lose");
+            fusionResult.text = $"<color=#FF6B6B><b>FAILED</b> ({result.rate * 100f:0}%). Lost {result.fodderLost} fodder and {result.orbsSpent} orbs.</color>" + extra;
+        }
+        foreach (var c in PlayerProfile.FodderCandidates(selected).Take(GameRules.FusionFodderCount)) fodderSelection.Add(c);
+        RefreshFusion();
+    }
+
+    // ---------------------------------------------------------------- auto merge
+
+    void OpenAutoMerge()
+    {
+        DropPending();
+        var theme = UITheme.Instance;
+        mergeTarget.ClearOptions();
+        var opts = new List<Dropdown.OptionData>();
+        int top = PlayerProfile.GodUnlocked ? GameRules.MaxTier : GameRules.MaxTier - 1;
+        for (int t = 1; t <= top; t++)
+            opts.Add(new Dropdown.OptionData($"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor((CardRarity)t))}>{CardStats.RarityName((CardRarity)t)}</color>", theme != null ? theme.Frame((CardRarity)t) : null));
+        mergeTarget.AddOptions(opts);
+        mergeTarget.SetValueWithoutNotify(Mathf.Clamp(2 - 1, 0, opts.Count - 1)); // Rare
+        mergeOrbs.SetTextWithoutNotify(Mathf.Min(10, PlayerProfile.Data.fusionOrbs).ToString());
+        mergeConfirm = false;
+        mergeResultText.text = "";
+        UIFactory.Clear(mergeResultGrid);
+        mergePanel.SetActive(true);
+        RefreshMergeInfo();
+    }
+
+    CardRarity MergeTargetRarity => (CardRarity)(mergeTarget.value + 1);
+    int MergeOrbBudget => int.TryParse(mergeOrbs.text, out int n) ? Mathf.Max(0, n) : 0;
+
+    void RefreshMergeInfo()
+    {
+        var target = MergeTargetRarity;
+        int budget = MergeOrbBudget;
+        var est = PlayerProfile.AutoMergeEstimate(target, budget);
+        var counts = new List<string>();
+        for (int t = 0; t < (int)target; t++)
+        {
+            int free = PlayerProfile.Data.cards.Count(c => c.Tier == t && !PlayerProfile.IsProtected(c));
+            int guarded = PlayerProfile.Data.cards.Count(c => c.Tier == t && PlayerProfile.IsProtected(c));
+            if (free + guarded > 0)
+                counts.Add($"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor((CardRarity)t))}>{CardStats.RarityName((CardRarity)t)}</color> {free}" + (guarded > 0 ? $" <color=#9AA4B5>(+{guarded} locked)</color>" : ""));
+        }
+        mergeInfo.text =
+            $"Merge every card up to <b><color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor(target))}>{CardStats.RarityName(target)}</color></b>, lowest rarity first.\n" +
+            $"Cards: {(counts.Count > 0 ? string.Join("   ", counts) : "none below that rarity")}\n" +
+            $"Fusion Orbs: you have <b>{PlayerProfile.Data.fusionOrbs}</b>, budget <b>{budget}</b>\n" +
+            $"<color=#FFD54F>Up to {est.fusions} fusions, up to {est.orbs} Fusion Orbs and {est.cards} fodder cards (if every fusion succeeds).</color>\n" +
+            "<color=#9AA4B5>Locked and slotted cards are never used as fodder (they can be upgraded as the main card).</color>" +
+            BuffNotes(0, 1).Replace("\n\n", "\n");
+        mergeStartButton.interactable = est.fusions > 0;
+        UIFactory.ButtonLabel(mergeStartButton).text = mergeConfirm ? $"CONFIRM - SPEND UP TO {est.orbs} ORBS" : "START AUTO MERGE";
+        mergeStartButton.image.color = mergeConfirm ? UIFactory.Accent2 : new Color(0.55f, 0.3f, 0.95f);
+    }
+
+    void OnMergeStart()
+    {
+        if (!mergeConfirm)
+        {
+            mergeConfirm = true;
+            mergeConfirmUntil = Time.unscaledTime + 6f;
+            var est = PlayerProfile.AutoMergeEstimate(MergeTargetRarity, MergeOrbBudget);
+            mergeResultText.text = $"<color=#FFD54F>Price check: this can spend up to <b>{est.orbs} Fusion Orbs</b> (worth {est.orbs * GameRules.FusionOrbPrice:N0} gold) and use up to {est.cards} cards. Click CONFIRM to continue.</color>";
+            RefreshMergeInfo();
+            return;
+        }
+        mergeConfirm = false;
+        int before = PlayerProfile.Data.cards.Count;
+        var r = PlayerProfile.AutoMerge(MergeTargetRarity, MergeOrbBudget);
+        SfxSynth.Play(r.successes > 0 ? "win" : "lose", 0.8f);
+        mergeResultText.text =
+            $"<b>AUTO MERGE DONE</b>  <color=#9AA4B5>({r.stopReason})</color>\n" +
+            $"Fusions: <b>{r.attempts}</b>   <color=#7CFC6A>Success {r.successes}</color>   <color=#FF6B6B>Failed {r.fails}</color>" + (r.blessed > 0 ? $"   <color=#FFD54F>Blessed {r.blessed}</color>" : "") + "\n" +
+            $"Fusion Orbs spent: {r.orbsSpent}" + (r.orbsRefunded > 0 ? $"   <color=#7CFC6A>saved {r.orbsRefunded} (Lucky Fusion)</color>" : "") + "\n" +
+            $"Cards used: {r.fodderUsed}" + (r.fodderSaved > 0 ? $"   <color=#7CFC6A>saved {r.fodderSaved} (Fusion Protection)</color>" : "") +
+            $"   Cards: {before} > {PlayerProfile.Data.cards.Count}\n" +
+            (r.upgraded.Count > 0 ? "Cards you obtained:" : "<color=#9AA4B5>No card ranked up this time.</color>");
+        UIFactory.Clear(mergeResultGrid);
+        foreach (var kv in r.upgraded.OrderByDescending(k => (int)k.Value.to))
+        {
+            var card = PlayerProfile.FindCard(kv.Key);
+            if (card == null) continue;
+            var tile = CardTile.Build(mergeResultGrid, $"Up {card.uid}", 120, 168, card.Tier >= 6);
+            tile.SetInstance(card);
+            tile.SetBadge($"{CardStats.RarityShort(kv.Value.from)} > {CardStats.RarityShort(kv.Value.to)}", new Color(0.85f, 0.55f, 0.15f));
+            tile.button.interactable = false;
+        }
+        if (selected != null && PlayerProfile.FindCard(selected.uid) == null) { selected = null; viewBuild = null; }
+        RefreshMergeInfo();
+    }
+
+    // ---------------------------------------------------------------- God Orb + dismantle
+
+    void UseGodOrb()
+    {
+        if (selected == null) return;
+        string err = PlayerProfile.UseGodOrb(selected, out bool success);
+        if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
+        SfxSynth.Play(success ? "win" : "lose", 0.8f);
+        Message(success ? $"<color=#FFE9A3>GOD ORB WORKED! +{selected.godBonus}% to every stat.</color>" : "<color=#FF6B6B>The God Orb faded... no effect this time.</color>");
+        RefreshAll();
+    }
+
+    void DismantleSelected()
+    {
+        if (selected == null) return;
+        string err = PlayerProfile.CanDismantle(selected);
+        if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
+        if (dismantleConfirmUid != selected.uid || Time.unscaledTime > dismantleConfirmUntil)
+        {
+            dismantleConfirmUid = selected.uid;
+            dismantleConfirmUntil = Time.unscaledTime + 3f;
+            Message($"Click DISMANTLE again to turn this {CardStats.RarityName(selected.rarity)} card into {PlayerProfile.DismantleValue(selected):N0} gold.");
+            RefreshDetail();
+            return;
+        }
+        dismantleConfirmUid = 0;
+        err = PlayerProfile.Dismantle(selected, out int gold);
+        if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
+        SfxSynth.Play("buff", 0.8f);
+        selected = null;
+        viewBuild = null;
+        pendingBuild = null;
+        var slot = PlayerProfile.GetSlot(PlayerProfile.ActiveSlot);
+        if (slot != null && slot.HasCard) ViewSlot(PlayerProfile.ActiveSlot);
+        else RefreshAll();
+        Message($"<color=#7CFC6A>Dismantled for +{gold:N0} gold.</color>");
+    }
+
+    // ================================================================ layout
+
+    static Button ActionButton(Transform parent, string name, string label, Color color, float x, float y, float w, float h, out Image costIcon, out Text costText)
+    {
+        var b = UIFactory.CreateButton(parent, name, label, color, 20);
+        UIFactory.TopLeft((RectTransform)b.transform, x, y, w, h);
+        var lbl = UIFactory.ButtonLabel(b);
+        lbl.alignment = TextAnchor.MiddleLeft;
+        UIFactory.Stretch(lbl.rectTransform, 16, 4, w > 300 ? 150 : 104, 4);
+        var chip = UIFactory.CreateChip(b.transform, "Cost", new Color(0f, 0f, 0f, 0.38f));
+        float cw = w > 300 ? 140f : 96f;
+        UIFactory.Place(chip.rectTransform, new Vector2(1f, 0.5f), new Vector2(-7, 0), new Vector2(cw, h - 14));
+        costIcon = UIFactory.Icon(chip.transform, "Icon", null, Color.clear, h - 24, new Vector2(5, 0));
+        costText = UIFactory.CreateText(chip.transform, "Value", "", 18, UIFactory.TextMain, TextAnchor.MiddleRight, FontStyle.Bold);
+        UIFactory.Stretch(costText.rectTransform, h - 16, 0, 8, 0);
+        UIFactory.BestFit(costText, 10);
+        return b;
+    }
+
+    static Text Section(Transform parent, string text, float y, float width)
+    {
+        var t = UIFactory.CreateText(parent, "Section " + text, text, 22, UIFactory.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(t.rectTransform, 20, y, width - 40, 30);
+        UIFactory.AddShadow(t, UIFactory.ShadowColor, 2f);
+        var line = UIFactory.CreateImage(parent, "Line", UIFactory.WithAlpha(UIFactory.Gold, 0.35f));
+        UIFactory.TopLeft(line.rectTransform, 20, y + 30, width - 40, 2);
+        return t;
+    }
+
+    static GameObject NewBadge(Transform parent, Vector2 pos)
+    {
+        var chip = UIFactory.CreateChip(parent, "New", UIFactory.Accent2);
+        UIFactory.TopLeft(chip.rectTransform, pos.x, pos.y, 60, 26);
+        var t = UIFactory.CreateText(chip.transform, "Text", "NEW", 15, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.Stretch(t.rectTransform);
+        chip.gameObject.SetActive(false);
+        return chip.gameObject;
+    }
+
+    public static CollectionScreen BuildLayout(RectTransform canvas)
+    {
+        var screen = canvas.gameObject.AddComponent<CollectionScreen>();
+        var theme = UIFactory.Theme;
+        AnimeBackground.Build(canvas, "cards", new Color(0.95f, 0.4f, 0.7f, 0.7f), new Color(0.1f, 0.06f, 0.18f), out _);
+        UIFactory.CreateTopBarWithCurrency(canvas, "MY CARDS", out screen.backButton, out screen.titleText);
+        var panelColor = new Color(0.06f, 0.05f, 0.12f, 0.95f);
+
+        // ---------- showcase (left)
+        var show = UIFactory.CreatePanel(canvas, "Showcase", panelColor, true);
+        UIFactory.TopLeft(show.rectTransform, 24, 112, 560, 944);
+        show.rectTransform.anchorMin = show.rectTransform.anchorMax = new Vector2(0f, 1f);
+        UIFactory.AddOutline(show, UIFactory.WithAlpha(UIFactory.Accent2, 0.5f), 2f);
+        screen.showcaseHeader = UIFactory.CreateText(show.transform, "Header", "", 26, UIFactory.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopStrip(screen.showcaseHeader.rectTransform, 10, 40, 16, 16);
+        screen.showcaseGlow = UIFactory.CreateImage(show.transform, "Glow", new Color(1f, 1f, 1f, 0.4f), theme != null ? theme.lightRays : null);
+        UIFactory.Place(screen.showcaseGlow.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -320), new Vector2(760, 760));
+        screen.showcaseGlow.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+        screen.showcaseGlow.rectTransform.anchoredPosition = new Vector2(0, -320);
+        var softGlow = UIFactory.CreateImage(show.transform, "SoftGlow", new Color(1f, 0.6f, 0.85f, 0.25f), theme != null ? theme.glow : null);
+        UIFactory.Place(softGlow.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -60), new Vector2(560, 560));
+        screen.showcaseView = CardView.Build(show.transform, "ShowcaseCard");
+        var sv = (RectTransform)screen.showcaseView.transform;
+        UIFactory.Place(sv, new Vector2(0.5f, 1f), new Vector2(0, -58), new Vector2(CardView.Width, CardView.Height));
+        sv.localScale = Vector3.one * 0.86f;
+        var ribbon = UIFactory.CreateChip(show.transform, "NewRoll", UIFactory.Accent2);
+        UIFactory.Place(ribbon.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -46), new Vector2(300, 36));
+        UIFactory.AddOutline(ribbon, Color.white, 2f);
+        var rt = UIFactory.CreateText(ribbon.transform, "Text", "NEW ROLL  -  NOT SAVED", 19, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.Stretch(rt.rectTransform);
+        screen.newRollRibbon = ribbon.gameObject;
+        ribbon.gameObject.SetActive(false);
+
+        float third = (560 - 40 - 16) / 3f;
+        for (int i = 0; i < 3; i++)
+        {
+            var b = UIFactory.CreateButton(show.transform, $"SaveSlot{i + 1}", $"SAVE TO S{i + 1}", UIFactory.Accent, 18);
+            UIFactory.TopLeft((RectTransform)b.transform, 20 + i * (third + 8), 606, third, 58);
+            screen.saveSlotButtons[i] = b;
+        }
+        screen.lockButton = UIFactory.CreateButton(show.transform, "Lock", "LOCK", UIFactory.PanelLight, 20);
+        UIFactory.TopLeft((RectTransform)screen.lockButton.transform, 20, 674, 254, 52);
+        screen.makeMainButton = UIFactory.CreateButton(show.transform, "MakeMain", "USE AS MAIN", new Color(0.85f, 0.3f, 0.55f), 20);
+        UIFactory.TopLeft((RectTransform)screen.makeMainButton.transform, 286, 674, 254, 52);
+        var pending = UIFactory.CreatePanel(show.transform, "PendingBox", new Color(0.02f, 0.02f, 0.06f, 0.85f), false);
+        UIFactory.TopLeft(pending.rectTransform, 20, 740, 520, 186);
+        screen.pendingText = UIFactory.CreateText(pending.transform, "Text", "", 20, UIFactory.TextMain, TextAnchor.UpperLeft);
+        UIFactory.Stretch(screen.pendingText.rectTransform, 16, 12, 16, 70);
+        UIFactory.BestFit(screen.pendingText, 12);
+        screen.discardButton = UIFactory.CreateButton(pending.transform, "Discard", "DISCARD NEW ROLL", UIFactory.PanelLight, 20);
+        UIFactory.Place((RectTransform)screen.discardButton.transform, new Vector2(0.5f, 0f), new Vector2(0, 12), new Vector2(300, 50));
+
+        // ---------- upgrade panel (middle)
+        const float uw = 520f;
+        var up = UIFactory.CreatePanel(canvas, "Upgrade", panelColor, true);
+        UIFactory.TopLeft(up.rectTransform, 600, 112, uw, 944);
+        UIFactory.AddOutline(up, UIFactory.WithAlpha(UIFactory.Accent, 0.5f), 2f);
+        Section(up.transform, "BUILD", 12, uw);
+        screen.rarityLine = UIFactory.CreateText(up.transform, "Rarity", "", 21, UIFactory.TextMain, TextAnchor.MiddleLeft);
+        UIFactory.TopLeft(screen.rarityLine.rectTransform, 20, 50, uw - 40, 30);
+        UIFactory.BestFit(screen.rarityLine, 12);
+        for (int i = 0; i < 4; i++)
+        {
+            float y = 88 + i * 50;
+            var row = UIFactory.CreateImage(up.transform, $"Stat {StatNames[i]}", new Color(1f, 1f, 1f, i % 2 == 0 ? 0.04f : 0.02f), theme != null ? theme.roundedSmall : null, true, true);
+            UIFactory.TopLeft(row.rectTransform, 16, y, uw - 32, 44);
+            screen.statTips[i] = TooltipTrigger.Add(row, StatNames[i]);
+            var label = UIFactory.CreateText(row.transform, "Label", StatNames[i], 20, UIFactory.TextDim, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.TopLeft(label.rectTransform, 12, 0, 56, 44);
+            screen.statValues[i] = UIFactory.CreateText(row.transform, "Value", "", 22, UIFactory.TextMain, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.TopLeft(screen.statValues[i].rectTransform, 68, 0, 140, 44);
+            var barBg = UIFactory.CreateImage(row.transform, "RollBar", new Color(0f, 0f, 0f, 0.5f), theme != null ? theme.roundedSmall : null, true);
+            UIFactory.TopLeft(barBg.rectTransform, 214, 13, 190, 18);
+            screen.statFills[i] = UIFactory.CreateImage(barBg.transform, "Fill", UIFactory.Good, theme != null ? theme.roundedSmall : null, true);
+            var center = UIFactory.CreateImage(barBg.transform, "Zero", new Color(1f, 1f, 1f, 0.7f));
+            UIFactory.Place(center.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(2, 24));
+            screen.statRolls[i] = UIFactory.CreateText(row.transform, "Roll", "", 20, UIFactory.TextMain, TextAnchor.MiddleRight, FontStyle.Bold);
+            UIFactory.TopLeft(screen.statRolls[i].rectTransform, 408, 0, 64, 44);
+        }
+        screen.elementIcon = UIFactory.CreateImage(up.transform, "ElementIcon", Color.white);
+        screen.elementIcon.preserveAspect = true;
+        UIFactory.TopLeft(screen.elementIcon.rectTransform, 20, 292, 60, 60);
+        screen.strongRow = UIFactory.CreateRect("StrongVs", up.transform);
+        UIFactory.TopLeft(screen.strongRow, 90, 302, 360, 40);
+        screen.elementNew = NewBadge(up.transform, new Vector2(440, 308));
+        screen.talentIcon = UIFactory.CreateImage(up.transform, "TalentIcon", Color.white);
+        screen.talentIcon.preserveAspect = true;
+        UIFactory.TopLeft(screen.talentIcon.rectTransform, 20, 360, 60, 60);
+        screen.talentBonus = UIFactory.CreateText(up.transform, "TalentBonus", "", 21, new Color(0.55f, 1f, 0.45f), TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(screen.talentBonus.rectTransform, 92, 370, 330, 40);
+        screen.talentNew = NewBadge(up.transform, new Vector2(440, 376));
+
+        Section(up.transform, "UPGRADE  (keep rolling, save when you like it)", 430, uw);
+        screen.rerollStatsButton = ActionButton(up.transform, "RerollStats", "REROLL STATS", new Color(0.85f, 0.55f, 0.15f), 20, 468, uw - 40, 56, out screen.rerollStatsIcon, out screen.rerollStatsCost);
+        screen.rerollElementButton = ActionButton(up.transform, "RerollElement", "REROLL ELEMENT", new Color(0.2f, 0.6f, 0.45f), 20, 530, uw - 40, 56, out screen.rerollElementIcon, out screen.rerollElementCost);
+        screen.rerollTalentButton = ActionButton(up.transform, "RerollTalent", "REROLL TALENT", new Color(0.75f, 0.55f, 0.15f), 20, 592, uw - 40, 56, out screen.rerollTalentIcon, out screen.rerollTalentCost);
+        Section(up.transform, "RANK UP", 662, uw);
+        screen.fusionButton = ActionButton(up.transform, "Fusion", "FUSION", new Color(0.55f, 0.3f, 0.95f), 20, 700, uw - 40, 56, out screen.fusionIcon, out screen.fusionCost);
+        screen.autoMergeButton = UIFactory.CreateButton(up.transform, "AutoMerge", "AUTO MERGE  <size=16>fuse everything up to a rarity</size>", new Color(0.35f, 0.25f, 0.75f), 20);
+        UIFactory.TopLeft((RectTransform)screen.autoMergeButton.transform, 20, 762, uw - 40, 52);
+        screen.godOrbButton = ActionButton(up.transform, "GodOrb", "GOD ORB", new Color(0.75f, 0.62f, 0.25f), 20, 822, 234, 52, out screen.godOrbIcon, out screen.godOrbCost);
+        screen.dismantleButton = ActionButton(up.transform, "Dismantle", "DISMANTLE", new Color(0.5f, 0.32f, 0.24f), 266, 822, 234, 52, out screen.dismantleIcon, out screen.dismantleCost);
+        screen.messageText = UIFactory.CreateText(up.transform, "Message", "", 20, UIFactory.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopLeft(screen.messageText.rectTransform, 16, 882, uw - 32, 54);
+        UIFactory.BestFit(screen.messageText, 12);
+
+        // ---------- collection (right)
+        var col = UIFactory.CreatePanel(canvas, "Collection", panelColor, true);
+        UIFactory.TopLeft(col.rectTransform, 1136, 112, 760, 944);
+        UIFactory.AddOutline(col, UIFactory.WithAlpha(UIFactory.Gold, 0.4f), 2f);
+        screen.rarityFilter = UIFactory.CreateDropdown(col.transform, "RarityFilter", 20);
+        UIFactory.TopLeft((RectTransform)screen.rarityFilter.transform, 16, 14, 250, 52);
+        screen.elementFilter = UIFactory.CreateDropdown(col.transform, "ElementFilter", 20);
+        UIFactory.TopLeft((RectTransform)screen.elementFilter.transform, 276, 14, 250, 52);
+        screen.sortDropdown = UIFactory.CreateDropdown(col.transform, "Sort", 20, 230f);
+        UIFactory.TopLeft((RectTransform)screen.sortDropdown.transform, 536, 14, 208, 52);
+        screen.countText = UIFactory.CreateText(col.transform, "Count", "", 18, UIFactory.TextDim, TextAnchor.MiddleLeft);
+        UIFactory.TopLeft(screen.countText.rectTransform, 20, 70, 720, 26);
+        UIFactory.BestFit(screen.countText, 11);
+        var scroll = UIFactory.CreateScroll(col.transform, "GridScroll", true, out RectTransform gridContent);
+        UIFactory.Stretch((RectTransform)scroll.transform, 8, 100, 8, 214);
+        UIFactory.AddGrid(gridContent, new Vector2(150, 210), new Vector2(22, 34), 18);
+        screen.grid = gridContent;
+        var slotBar = UIFactory.CreatePanel(col.transform, "SlotBar", new Color(0.03f, 0.02f, 0.08f, 0.9f), false);
+        UIFactory.Region(slotBar.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), 8, 0, 8, 8);
+        slotBar.rectTransform.sizeDelta = new Vector2(slotBar.rectTransform.sizeDelta.x, 196);
+        slotBar.rectTransform.anchoredPosition = new Vector2(slotBar.rectTransform.anchoredPosition.x, 106);
+        var slotLabel = UIFactory.CreateText(slotBar.transform, "Label", "BUILD SLOTS\n<size=16><color=#C9C3D8>Choose one on the map\nbefore a fight. Slotted\ncards are auto-locked.</color></size>", 24, UIFactory.TextMain, TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.Place(slotLabel.rectTransform, new Vector2(0f, 0.5f), new Vector2(18, 0), new Vector2(230, 170));
+        screen.slotRow = UIFactory.CreateRect("SlotRow", slotBar.transform);
+        UIFactory.Stretch(screen.slotRow);
+
+        BuildFusion(canvas, screen);
+        BuildAutoMerge(canvas, screen);
+        return screen;
+    }
+
+    static void BuildFusion(RectTransform canvas, CollectionScreen screen)
+    {
+        var dim = UIFactory.CreateImage(canvas, "FusionPanel", new Color(0, 0, 0, 0.8f), null, false, true);
+        UIFactory.Stretch(dim.rectTransform);
+        screen.fusionPanel = dim.gameObject;
+        var panel = UIFactory.CreatePanel(dim.transform, "Panel", new Color(0.09f, 0.07f, 0.17f, 1f), true);
+        UIFactory.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1500, 820));
+        var title = UIFactory.CreateText(panel.transform, "Title", "FUSION", 48, new Color(0.8f, 0.6f, 1f), TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopStrip(title.rectTransform, 16, 64, 20, 20);
+        UIFactory.AddShadow(title, UIFactory.ShadowColor, 3f);
+        screen.fusionMainHolder = UIFactory.CreateRect("MainHolder", panel.transform);
+        UIFactory.TopLeft(screen.fusionMainHolder, 40, 110, 260, 360);
+        var fodderLabel = UIFactory.CreateText(panel.transform, "FodderLabel", "PICK 2 FODDER CARDS (same rarity, not locked)", 20, UIFactory.TextDim, TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(fodderLabel.rectTransform, 330, 90, 700, 30);
+        var scroll = UIFactory.CreateScroll(panel.transform, "FodderScroll", true, out RectTransform content);
+        UIFactory.TopLeft((RectTransform)scroll.transform, 320, 124, 720, 670);
+        UIFactory.AddGrid(content, new Vector2(130, 182), new Vector2(14, 30), 14);
+        screen.fodderGrid = content;
+        screen.fusionInfo = UIFactory.CreateText(panel.transform, "Info", "", 22, UIFactory.TextMain, TextAnchor.UpperLeft);
+        UIFactory.TopLeft(screen.fusionInfo.rectTransform, 1070, 110, 400, 530);
+        UIFactory.BestFit(screen.fusionInfo, 12);
+        screen.fuseButton = UIFactory.CreateButton(panel.transform, "Fuse", "FUSE", new Color(0.55f, 0.3f, 0.95f), 30);
+        UIFactory.TopLeft((RectTransform)screen.fuseButton.transform, 1070, 660, 400, 84);
+        screen.fusionResult = UIFactory.CreateText(panel.transform, "Result", "", 22, UIFactory.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopLeft(screen.fusionResult.rectTransform, 20, 490, 300, 220);
+        UIFactory.BestFit(screen.fusionResult, 12);
+        screen.fusionCloseButton = UIFactory.CreateButton(panel.transform, "Close", "CLOSE", UIFactory.PanelLight, 22);
+        UIFactory.TopLeft((RectTransform)screen.fusionCloseButton.transform, 60, 720, 220, 64);
+        dim.gameObject.SetActive(false);
+    }
+
+    static void BuildAutoMerge(RectTransform canvas, CollectionScreen screen)
+    {
+        var dim = UIFactory.CreateImage(canvas, "AutoMergePanel", new Color(0, 0, 0, 0.8f), null, false, true);
+        UIFactory.Stretch(dim.rectTransform);
+        screen.mergePanel = dim.gameObject;
+        var panel = UIFactory.CreatePanel(dim.transform, "Panel", new Color(0.08f, 0.06f, 0.16f, 1f), true);
+        UIFactory.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1400, 900));
+        UIFactory.AddOutline(panel, UIFactory.WithAlpha(new Color(0.7f, 0.5f, 1f), 0.8f), 3f);
+        var title = UIFactory.CreateText(panel.transform, "Title", "AUTO MERGE", 50, new Color(0.8f, 0.6f, 1f), TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(title.rectTransform, 40, 20, 600, 64);
+        UIFactory.AddShadow(title, UIFactory.ShadowColor, 3f);
+        var sub = UIFactory.CreateText(panel.transform, "Sub", "Fuses your cards automatically so you don't have to do it one by one.", 21, UIFactory.TextDim, TextAnchor.MiddleLeft);
+        UIFactory.TopLeft(sub.rectTransform, 40, 84, 1000, 30);
+
+        var t1 = UIFactory.CreateText(panel.transform, "TargetLabel", "MAX RARITY", 22, UIFactory.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(t1.rectTransform, 40, 130, 300, 30);
+        screen.mergeTarget = UIFactory.CreateDropdown(panel.transform, "Target", 22, 400f);
+        UIFactory.TopLeft((RectTransform)screen.mergeTarget.transform, 40, 164, 320, 58);
+        var t2 = UIFactory.CreateText(panel.transform, "OrbLabel", "MAX FUSION ORBS TO SPEND", 22, UIFactory.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(t2.rectTransform, 400, 130, 500, 30);
+        screen.mergeOrbs = UIFactory.CreateInputField(panel.transform, "Orbs", "10", 26);
+        screen.mergeOrbs.contentType = InputField.ContentType.IntegerNumber;
+        UIFactory.TopLeft((RectTransform)screen.mergeOrbs.transform, 400, 164, 200, 58);
+        var orbIcon = UIFactory.Icon(screen.mergeOrbs.transform, "OrbIcon", UIFactory.Theme != null ? UIFactory.Theme.fusionOrbIcon : null, Color.clear, 40, Vector2.zero);
+        var ort = orbIcon.rectTransform; ort.anchorMin = ort.anchorMax = new Vector2(1f, 0.5f); ort.pivot = new Vector2(1f, 0.5f); ort.anchoredPosition = new Vector2(-8, 0);
+        TooltipTrigger.Add(orbIcon, ItemInfo.Describe(ItemKind.FusionOrb));
+        screen.mergeOrbs10 = UIFactory.CreateButton(panel.transform, "Orbs10", "10", UIFactory.PanelLight, 22);
+        UIFactory.TopLeft((RectTransform)screen.mergeOrbs10.transform, 616, 164, 110, 58);
+        screen.mergeOrbs50 = UIFactory.CreateButton(panel.transform, "Orbs50", "50", UIFactory.PanelLight, 22);
+        UIFactory.TopLeft((RectTransform)screen.mergeOrbs50.transform, 736, 164, 110, 58);
+        screen.mergeOrbsAll = UIFactory.CreateButton(panel.transform, "OrbsAll", "ALL", UIFactory.PanelLight, 22);
+        UIFactory.TopLeft((RectTransform)screen.mergeOrbsAll.transform, 856, 164, 110, 58);
+
+        screen.mergeInfo = UIFactory.CreateText(panel.transform, "Info", "", 21, UIFactory.TextMain, TextAnchor.UpperLeft);
+        UIFactory.TopLeft(screen.mergeInfo.rectTransform, 40, 240, 1320, 190);
+        UIFactory.BestFit(screen.mergeInfo, 12);
+        screen.mergeStartButton = UIFactory.CreateButton(panel.transform, "Start", "START AUTO MERGE", new Color(0.55f, 0.3f, 0.95f), 26);
+        UIFactory.TopLeft((RectTransform)screen.mergeStartButton.transform, 1000, 150, 360, 80);
+
+        screen.mergeResultText = UIFactory.CreateText(panel.transform, "Result", "", 22, UIFactory.TextMain, TextAnchor.UpperLeft);
+        UIFactory.TopLeft(screen.mergeResultText.rectTransform, 40, 440, 1320, 150);
+        UIFactory.BestFit(screen.mergeResultText, 12);
+        var scroll = UIFactory.CreateScroll(panel.transform, "Obtained", false, out RectTransform content);
+        UIFactory.TopLeft((RectTransform)scroll.transform, 40, 596, 1320, 196);
+        var h = content.gameObject.AddComponent<HorizontalLayoutGroup>();
+        h.spacing = 14; h.padding = new RectOffset(4, 4, 14, 4);
+        h.childControlWidth = h.childControlHeight = false;
+        h.childForceExpandWidth = h.childForceExpandHeight = false;
+        screen.mergeResultGrid = content;
+        screen.mergeCloseButton = UIFactory.CreateButton(panel.transform, "Close", "CLOSE", UIFactory.PanelLight, 24);
+        UIFactory.Place((RectTransform)screen.mergeCloseButton.transform, new Vector2(1f, 0f), new Vector2(-40, 28), new Vector2(240, 66));
+        dim.gameObject.SetActive(false);
+    }
+}

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 6
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Meryl
+  cardImg: {fileID: 21300000, guid: 27973e05df2b1ce4e8a03c2a49bb2ed8, type: 3}
+  element: 7
+  rarity: 5
+  talent: {fileID: 11400000, guid: ba0bfcf142e6da54e8f39fc276e685de, type: 2}
+  health: 1080
+  defense: 54
+  attack: 155
+  speed: 293
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 610
+  location: 52
+  floor: 6
+  floorCode: F1
+  anime: My Hero Academia FINAL SEASON
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b344470-awKtoM9SIO0K.png
+  characterId: b344470-awKtoM9SIO0K

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 21
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Miharu
+  cardImg: {fileID: 21300000, guid: 5a7979d5f9e267c46a1d132e12ea77cd, type: 3}
+  element: 4
+  rarity: 5
+  talent: {fileID: 11400000, guid: ba51a4a6e7705d54f914342a0b8b4887, type: 2}
+  health: 2080
+  defense: 143
+  attack: 104
+  speed: 19
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 440
+  location: 35
+  floor: 21
+  floorCode: E3
+  anime: The Ramparts of Ice
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b396043-0YDlU6eeZACJ.jpg
+  characterId: b396043-0YDlU6eeZACJ

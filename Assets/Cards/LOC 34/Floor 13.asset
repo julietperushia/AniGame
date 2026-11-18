@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 13
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Ayase Yue
+  cardImg: {fileID: -3736672730495650625, guid: 5cb8b540025599e48a6f44b2f4e55666, type: 3}
+  element: 3
+  rarity: 4
+  talent: {fileID: 11400000, guid: 3d3f55b334c2bfc46929c43c713271d9, type: 2}
+  health: 1830
+  defense: 59
+  attack: 52
+  speed: 153
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 430
+  location: 34
+  floor: 13
+  floorCode: A2

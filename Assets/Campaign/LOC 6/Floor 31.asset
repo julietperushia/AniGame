@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 31
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Scar
+  cardImg: {fileID: 21300000, guid: 043aba8d4a5be0548bcc28757a53228a, type: 3}
+  element: 2
+  rarity: 2
+  talent: {fileID: 11400000, guid: 2a077a1e9b7320244a76c3d71e841a03, type: 2}
+  health: 570
+  defense: 6
+  attack: 20
+  speed: 73
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 150
+  location: 6
+  floor: 31
+  floorCode: G3
+  anime: 'Fullmetal Alchemist: Brotherhood'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b66-bLbGWXrmDqfV.png
+  characterId: b66-bLbGWXrmDqfV

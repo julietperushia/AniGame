@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 8
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Furyouushi
+  cardImg: {fileID: -4542270037572091391, guid: f5181e1460aac8d489e02fae62a1dccf, type: 3}
+  element: 2
+  rarity: 6
+  talent: {fileID: 11400000, guid: 50615731e2803ec4fadcf6fe583a2663, type: 2}
+  health: 800
+  defense: 305
+  attack: 195
+  speed: 140
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 720
+  location: 63
+  floor: 8
+  floorCode: H1

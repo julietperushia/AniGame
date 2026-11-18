@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 5
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Akakabuto
+  cardImg: {fileID: -2517753463508290965, guid: c49e5a0dea256ea41a905df07c9a9c7b, type: 3}
+  element: 0
+  rarity: 0
+  talent: {fileID: 11400000, guid: c7e1f10c9f9cf6343a758cf7a88df84f, type: 2}
+  health: 60
+  defense: 65
+  attack: 22
+  speed: 7
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 100
+  location: 1
+  floor: 5
+  floorCode: E1

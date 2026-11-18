@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 12
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Assassin
+  cardImg: {fileID: 7863553717130063180, guid: e34302008b6968f4b9ae37e73787b4e9, type: 3}
+  element: 2
+  rarity: 8
+  talent: {fileID: 11400000, guid: 3d3f55b334c2bfc46929c43c713271d9, type: 2}
+  health: 2470
+  defense: 423
+  attack: 41
+  speed: 303
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 970
+  location: 88
+  floor: 12
+  floorCode: E2

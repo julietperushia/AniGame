@@ -1,0 +1,16 @@
+Section,Area,Name,HP,ATK,DEF,SPEED,CritRate,CritDmg,Evasion,Element,Talent
+Section1,Area1,Weak Goblin,500,40,30,50,5,135,5,Fire,Berserker
+Section1,Area2,Forest Wolf,600,50,35,60,5,135,5,Earth,Bloodthirster
+Section1,Area3,Fire Imp,550,55,30,65,8,135,5,Fire,Blaze
+Section1,Area4,Water Sprite,700,45,50,55,5,135,5,Water,DivineShield
+Section1,Area5,Rock Golem,900,60,80,30,5,135,5,Earth,Protector
+Section2,Area1,Dark Warrior,1000,80,60,70,10,135,5,Dark,Berserker
+Section2,Area2,Lightning Mage,850,90,50,85,15,150,10,Air,ElementalStrike
+Section2,Area3,Ice Guardian,1200,70,90,45,5,135,5,Water,Endurance
+Section2,Area4,Flame Knight,1100,95,70,65,12,150,8,Fire,DoubleEdgedStrike
+Section2,Area5,Earth Titan,1500,85,120,40,5,135,5,Earth,TrickRoom_DEF
+Section3,Area1,Shadow Assassin,1300,120,70,100,20,160,15,Dark,Paralysis
+Section3,Area2,Holy Paladin,1600,100,110,60,10,140,8,Light,CelestialBlessing
+Section3,Area3,Storm Dragon,1800,140,90,95,18,170,12,Air,DexterityDrive
+Section3,Area4,Inferno Demon,1700,150,85,80,15,165,10,Fire,Blaze
+Section3,Area5,Ocean Leviathan,2000,110,130,50,8,140,5,Water,Regeneration

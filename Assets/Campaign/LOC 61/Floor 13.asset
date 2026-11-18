@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 13
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Saki Shima
+  cardImg: {fileID: 21300000, guid: be134a17d21aee24681c486dfff5854b, type: 3}
+  element: 0
+  rarity: 7
+  talent: {fileID: 11400000, guid: c4baef21a8bc89c4c988e030b7552b97, type: 2}
+  health: 3090
+  defense: 118
+  attack: 280
+  speed: 23
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 700
+  location: 61
+  floor: 13
+  floorCode: A2
+  anime: Laid-Back Camp The Movie
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/125022-X0RYxEibpwlu.png
+  characterId: 125022-X0RYxEibpwlu

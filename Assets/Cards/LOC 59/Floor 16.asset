@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 16
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Shirogane Souju
+  cardImg: {fileID: 5639115948534515232, guid: f7558e4c2e21b924f8a1059f1173c725, type: 3}
+  element: 1
+  rarity: 7
+  talent: {fileID: 11400000, guid: abd97bb440db1d344a09a8986e9dbbe8, type: 2}
+  health: 990
+  defense: 42
+  attack: 417
+  speed: 180
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 680
+  location: 59
+  floor: 16
+  floorCode: B3

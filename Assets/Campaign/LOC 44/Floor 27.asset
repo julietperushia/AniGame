@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 27
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Panda
+  cardImg: {fileID: 21300000, guid: e122552513fb2f546b7bbb7b663822ae, type: 3}
+  element: 6
+  rarity: 6
+  talent: {fileID: 11400000, guid: a32bbbaad4635fb4aa7e4e7835a0f780, type: 2}
+  health: 1670
+  defense: 66
+  attack: 309
+  speed: 32
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 530
+  location: 44
+  floor: 27
+  floorCode: C3
+  anime: 'JUJUTSU KAISEN Season 3: The Culling Game Part 1'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b137974-9qnK3DPrvLKh.jpg
+  characterId: b137974-9qnK3DPrvLKh

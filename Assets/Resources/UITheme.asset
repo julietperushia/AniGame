@@ -1,0 +1,196 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53671209147c8554d96018557e12f676, type: 3}
+  m_Name: UITheme
+  m_EditorClassIdentifier: Assembly-CSharp::UITheme
+  rounded: {fileID: 21300000, guid: 85226501444b7444f8ae19ab4055581d, type: 3}
+  roundedSmall: {fileID: 21300000, guid: 9610d786496f1644283c8c7ff61757d2, type: 3}
+  circle: {fileID: 21300000, guid: d6591652ad553334a8c8f1fa90648c37, type: 3}
+  glow: {fileID: 21300000, guid: b3976b0ab720db543a9eb897cb20fadb, type: 3}
+  gradient: {fileID: 21300000, guid: d87c53cae015d6c45ba55de66c10f37d, type: 3}
+  vignette: {fileID: 21300000, guid: 7ed25deef35376d47af6659e5170416d, type: 3}
+  sakuraPetal: {fileID: 21300000, guid: 9dbf26bafded02b47ab6e1b8a95f1219, type: 3}
+  sparkle: {fileID: 21300000, guid: 46a04db713526f043a35fa31e73caaf3, type: 3}
+  halftone: {fileID: 21300000, guid: 9aeb4f2e31e071f40a28bbf1273cf2e8, type: 3}
+  lightRays: {fileID: 21300000, guid: 3e1ec2ab3c3c8604598ff030fe407e4d, type: 3}
+  speedLines: {fileID: 21300000, guid: ce41113ee45bb314e87fcda3e4a020f4, type: 3}
+  rarityFrames:
+  - {fileID: 21300000, guid: 2f9afe41aa2294e4f98c320b9be535d5, type: 3}
+  - {fileID: 21300000, guid: 5c8d41932882a5341864f5337a577802, type: 3}
+  - {fileID: 21300000, guid: 3284c05fb4b53fe4ca37514e017526ed, type: 3}
+  - {fileID: 21300000, guid: 94e57cb754841f74a9766943bab51371, type: 3}
+  - {fileID: 21300000, guid: e5e80cc0ef1c2484a9a3b78edcf30c90, type: 3}
+  - {fileID: 21300000, guid: 598b465b68cc6dd46b051dce63caa2d7, type: 3}
+  - {fileID: 21300000, guid: b18926282fa681f47b66102f754ff48d, type: 3}
+  - {fileID: 21300000, guid: 642c544a4e4e1cf459fed935ccc45fac, type: 3}
+  - {fileID: 21300000, guid: ff3d0d19a638b1d4cb7db3ec97867739, type: 3}
+  frameShine: {fileID: 21300000, guid: 8ed1f6c058ed23746baa208b5c606433, type: 3}
+  elementIcons:
+  - {fileID: 21300000, guid: a5da1287012c0c54d96ddf4ed6277a8b, type: 3}
+  - {fileID: 21300000, guid: 5aff4df0abe35ff408f4ce6e46cc7c81, type: 3}
+  - {fileID: 21300000, guid: c24d000517d90b84abcfc22685da8260, type: 3}
+  - {fileID: 21300000, guid: 6eb57468bc80ce841945de743bb3ea84, type: 3}
+  - {fileID: 21300000, guid: 566065dddff676545a916faaa4dd6900, type: 3}
+  - {fileID: 21300000, guid: 87195ad64046d38429baf8148bc0f091, type: 3}
+  - {fileID: 21300000, guid: 9e611a6ce25fbd249b4eddb9ef4aa56d, type: 3}
+  - {fileID: 21300000, guid: 9c56006a511f8b548b3954ee95e7dac6, type: 3}
+  - {fileID: 21300000, guid: 575cca0a84db1d848b400c61ba80ea68, type: 3}
+  goldIcon: {fileID: 21300000, guid: 5e1f792d01b80ce479b8ffb8ea152368, type: 3}
+  diamondIcon: {fileID: 21300000, guid: 7ab5bcc0a90d55e41b8b423d05147b5e, type: 3}
+  fusionOrbIcon: {fileID: 21300000, guid: 5eb308115d05b88488317a88e6f279df, type: 3}
+  elementOrbIcon: {fileID: 21300000, guid: d049cc97da71dca4190254c154e29ad0, type: 3}
+  talentOrbIcon: {fileID: 21300000, guid: b13cb6b0d28192c478df79e73ab2cdf6, type: 3}
+  godOrbIcon: {fileID: 21300000, guid: 5c7c29620dc361043888e297f6165ea3, type: 3}
+  arrow: {fileID: 21300000, guid: 056450ae5c505ee42aa4596f0d8eeb8b, type: 3}
+  talentIconNames:
+  - amplifieratk
+  - amplifierdef
+  - balancingstrike
+  - berserkstrike
+  - berserker
+  - blaze
+  - bloodsurge
+  - bloodthirster
+  - breakeratk
+  - breakerdef
+  - celestialblessing
+  - celestialinfluence
+  - dexteritydrive
+  - divineblessing
+  - dominance
+  - doubleedgedstrike
+  - elementalstrike
+  - endurance
+  - evasion
+  - grievouslimiter
+  - lethalclarity
+  - lifesap
+  - luckycoin
+  - manareaver
+  - overloadatk
+  - overloaddef
+  - paralysis
+  - poison
+  - precision
+  - protector
+  - regeneration
+  - restrictedinstinct
+  - reversion
+  - trickroomatk
+  - trickroomdef
+  - unluckycoin
+  - vengeanceatk
+  - vengeancedef
+  talentIcons:
+  - {fileID: 21300000, guid: 7217d27a0d45ede41b0423f8b1cb2bcd, type: 3}
+  - {fileID: 21300000, guid: 37dd2881d5a28a24da080764d9399c73, type: 3}
+  - {fileID: 21300000, guid: 08d936ee0d7e62140a275b2b4b425349, type: 3}
+  - {fileID: 21300000, guid: 2a40d2e0fe388bd4c83ffad9837515cf, type: 3}
+  - {fileID: 21300000, guid: 9c1a7015d4826814cbd86b9f3592792f, type: 3}
+  - {fileID: 21300000, guid: f06e8922d4bfe03408f470e86bf70e40, type: 3}
+  - {fileID: 21300000, guid: ba563ada9b5d6344eb8db25ab7c14e39, type: 3}
+  - {fileID: 21300000, guid: 4eb51b7076f6cd847b872db99dec4853, type: 3}
+  - {fileID: 21300000, guid: 23ac9224d56f7124bb58049b37d46a1f, type: 3}
+  - {fileID: 21300000, guid: 2d2c72973e34ffd4fbf3cbb035e143d6, type: 3}
+  - {fileID: 21300000, guid: cbeac31f9e6765b44a3eb4078fec49af, type: 3}
+  - {fileID: 21300000, guid: e82431606035c624dbea702c3e62b7a2, type: 3}
+  - {fileID: 21300000, guid: 26c2c7fcfc900c141b9eef2d69725c9a, type: 3}
+  - {fileID: 21300000, guid: be3d7099c37e1b349ba2c74beb86e6b3, type: 3}
+  - {fileID: 21300000, guid: aff2fc1c03f067248b74ac2cbaa1affb, type: 3}
+  - {fileID: 21300000, guid: 02fa9346150c28b49aa612fdd6562cd9, type: 3}
+  - {fileID: 21300000, guid: 52f9063df523da740bf26e485b853b42, type: 3}
+  - {fileID: 21300000, guid: 6363500d7086e3f46a76358747ebb7ef, type: 3}
+  - {fileID: 21300000, guid: fc9f229c9b5bbde4eab0f4c9d9797eb2, type: 3}
+  - {fileID: 21300000, guid: 2645989c803af9f49a3c535773f31b5e, type: 3}
+  - {fileID: 21300000, guid: de35a02763d386f4489afde68041616c, type: 3}
+  - {fileID: 21300000, guid: 744dd11ad824d8348bcfa0b6fefc6bdd, type: 3}
+  - {fileID: 21300000, guid: 7fe94468e44cdd045adfc3718cc0752e, type: 3}
+  - {fileID: 21300000, guid: 6849ccb2a12ed6a45940f608db4f5ace, type: 3}
+  - {fileID: 21300000, guid: dc762a4c94867af4b93bb1b3d0cc04dd, type: 3}
+  - {fileID: 21300000, guid: f7c553fdeea18e84685ccd98ebdc4e5b, type: 3}
+  - {fileID: 21300000, guid: 496f9ec4609776e49940613ca7ee2836, type: 3}
+  - {fileID: 21300000, guid: 2c68f01781c61c242af91edcf6a8578e, type: 3}
+  - {fileID: 21300000, guid: a266e77bfe4779d46ab393fab48d2fb9, type: 3}
+  - {fileID: 21300000, guid: 39e367baf38ae08469d6bda5a256b4d7, type: 3}
+  - {fileID: 21300000, guid: 5ad9ba3fbb617a247bd6d88a07feffd4, type: 3}
+  - {fileID: 21300000, guid: feb0f9939b6de424fb7564a755e7530b, type: 3}
+  - {fileID: 21300000, guid: 7c1a7e61dc02b324e91788274e38cb43, type: 3}
+  - {fileID: 21300000, guid: 7e64c05ad5ceabb4e9ec9dab42ebd2c7, type: 3}
+  - {fileID: 21300000, guid: 3d58cddcfdceae44d8e9b0cee8eb4b80, type: 3}
+  - {fileID: 21300000, guid: 0961cd78254a10d46bd74686d688e462, type: 3}
+  - {fileID: 21300000, guid: e19ab6013bbf1b64c83a2f22ee8d3487, type: 3}
+  - {fileID: 21300000, guid: 662d5acbe7965dd45976bdbe15af3638, type: 3}
+  buffIconIds:
+  - fusion_protection
+  - fusion_blessing
+  - fusion_fortune
+  - lucky_fusion
+  - hunters_instinct
+  - rare_encounter
+  - treasure_hunter
+  - berserker
+  - gold_cashback
+  - golden_touch
+  - merchants_favor
+  - efficient_upgrader
+  - salvage_expert
+  - the_flash
+  - head_hunter
+  - strongest_hero
+  - second_wind
+  - stamina_master
+  - elixir
+  - potion_of_stamina
+  - returning_heroes
+  - new_generation
+  buffIcons:
+  - {fileID: 21300000, guid: 3ee87e91d36c0a944b1991db82d459cd, type: 3}
+  - {fileID: 21300000, guid: 3a33979ff53334e4ab424d72854f7f4b, type: 3}
+  - {fileID: 21300000, guid: 3bd8cf79e92e6f14aa1928e7e85be581, type: 3}
+  - {fileID: 21300000, guid: 3b073e97e73717b488ddaa22f78f3ab1, type: 3}
+  - {fileID: 21300000, guid: 0ed6fc37d1edb1c41ac6dcc342e80fed, type: 3}
+  - {fileID: 21300000, guid: 7953424595ed2024580d659592eaf768, type: 3}
+  - {fileID: 21300000, guid: 1790be53284586e43b236c8347e1b908, type: 3}
+  - {fileID: 21300000, guid: 0ce8b4582fcaab04787e7ee2d657cf59, type: 3}
+  - {fileID: 21300000, guid: 409401aa151218841b56f3a03d0a7512, type: 3}
+  - {fileID: 21300000, guid: c38cfd6a4b4b5ec479d582413724c23b, type: 3}
+  - {fileID: 21300000, guid: cc0e3363ff593eb4b90b7e4bac3b5743, type: 3}
+  - {fileID: 21300000, guid: 63216b4b12bad8b4e86466d7ec0cc3d9, type: 3}
+  - {fileID: 21300000, guid: df92a959a972ab341ac41ce626b3020a, type: 3}
+  - {fileID: 21300000, guid: 375cacd4e3652854b9dafd1486926da1, type: 3}
+  - {fileID: 21300000, guid: 85502a47e72bcc3499e3e5fa97a26570, type: 3}
+  - {fileID: 21300000, guid: 32cf0971fb17c954b86390f552fca0ff, type: 3}
+  - {fileID: 21300000, guid: 0be22c0082aecf74296d10b0725e73ec, type: 3}
+  - {fileID: 21300000, guid: 67362a13186b2014590851cf3b26ed26, type: 3}
+  - {fileID: 21300000, guid: 17c4e1fe66374274da734acccd8c7031, type: 3}
+  - {fileID: 21300000, guid: b236d37d2f727774ba438addbe316969, type: 3}
+  - {fileID: 21300000, guid: b65aa081f36397a46b5cd70b2074ee24, type: 3}
+  - {fileID: 21300000, guid: a3627477e08d6d54d88d4d7e6fc45330, type: 3}
+  staminaIcon: {fileID: 21300000, guid: ae4e8a0aa4475ef40ba64c8dacdcd5ec, type: 3}
+  lockIcon: {fileID: 21300000, guid: c093c4bb559e6354b9923d538fa272bc, type: 3}
+  menuBackground: {fileID: 21300000, guid: 36a9bc7659a29f64ca1bf80e9a29ebf8, type: 3}
+  mapBackground: {fileID: 21300000, guid: 1a4006a2935d3e5499384d9c4e46eb98, type: 3}
+  battleBackground: {fileID: 21300000, guid: cead7162358a6d0408e4536147ea9aa2, type: 3}
+  cardsBackground: {fileID: 21300000, guid: a57969818efab2a45a8244304f0a55de, type: 3}
+  gachaBackground: {fileID: 21300000, guid: 9d237bcdc6fc5bd4d91e02ce48492cd8, type: 3}
+  shopBackground: {fileID: 21300000, guid: db860da137a912f469e54dbd26fc9e29, type: 3}
+  logo: {fileID: 0}
+  packArt:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  menuMusic: {fileID: 0}
+  battleMusic: {fileID: 0}
+  gachaMusic: {fileID: 0}

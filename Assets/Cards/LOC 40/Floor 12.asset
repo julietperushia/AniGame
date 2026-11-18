@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 12
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Jounouchi Katsuya
+  cardImg: {fileID: 7172026855423448343, guid: d52e5fdcdfeb34b4e80e8485206732a0, type: 3}
+  element: 1
+  rarity: 4
+  talent: {fileID: 11400000, guid: 3cc0e599e9bbcb74f831b91bd92de210, type: 2}
+  health: 1340
+  defense: 119
+  attack: 87
+  speed: 170
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 490
+  location: 40
+  floor: 12
+  floorCode: C2

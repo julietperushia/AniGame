@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 10
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Shoujo
+  cardImg: {fileID: 21300000, guid: 0943cc416b7fae242b7bf89451f6f56f, type: 3}
+  element: 6
+  rarity: 8
+  talent: {fileID: 11400000, guid: 363dd06ad3480d3409043e2260f4901a, type: 2}
+  health: 3630
+  defense: 245
+  attack: 61
+  speed: 387
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1010
+  location: 92
+  floor: 10
+  floorCode: A2
+  anime: ONE PIECE FAN LETTER
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b347754-Ut8PcCFIjg5I.png
+  characterId: b347754-Ut8PcCFIjg5I

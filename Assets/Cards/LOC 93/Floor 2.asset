@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 2
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Sakakino Lisa
+  cardImg: {fileID: 873860163782874460, guid: c174fe135eafaea45b339b0ccb7f5b45, type: 3}
+  element: 3
+  rarity: 8
+  talent: {fileID: 11400000, guid: 1d0ec6e18878f7e409301c5636d4e286, type: 2}
+  health: 1740
+  defense: 92
+  attack: 288
+  speed: 466
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1020
+  location: 93
+  floor: 2
+  floorCode: B1

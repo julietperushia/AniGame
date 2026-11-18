@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 14
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Luculia Marlborough
+  cardImg: {fileID: 21300000, guid: ef8240035e0651c4bbc7166c4a130a95, type: 3}
+  element: 1
+  rarity: 8
+  talent: {fileID: 11400000, guid: 43dbd674abfda9b4ea6d1f1e745f83db, type: 2}
+  health: 2260
+  defense: 369
+  attack: 70
+  speed: 317
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 940
+  location: 85
+  floor: 14
+  floorCode: G2
+  anime: Violet Evergarden
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b124810-CuoTUTc7U08r.jpg
+  characterId: b124810-CuoTUTc7U08r

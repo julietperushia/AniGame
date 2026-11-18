@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 9
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Nakata
+  cardImg: {fileID: 21300000, guid: 1aea908f81d8f274c910018f659f50e1, type: 3}
+  element: 5
+  rarity: 1
+  talent: {fileID: 11400000, guid: abd97bb440db1d344a09a8986e9dbbe8, type: 2}
+  health: 150
+  defense: 77
+  attack: 23
+  speed: 125
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 240
+  location: 15
+  floor: 9
+  floorCode: I1
+  anime: Girls Band Cry
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b339451-IkNTbhe3CnLQ.png
+  characterId: b339451-IkNTbhe3CnLQ

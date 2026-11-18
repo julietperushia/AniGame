@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 32
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Brian
+  cardImg: {fileID: 8263594449041901638, guid: 9c13a28f8cec14741b3adcb7656bc305, type: 3}
+  element: 3
+  rarity: 3
+  talent: {fileID: 11400000, guid: e6f4fb386b39d4a43b0bc1568a98da0a, type: 2}
+  health: 550
+  defense: 96
+  attack: 37
+  speed: 110
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 280
+  location: 19
+  floor: 32
+  floorCode: H3

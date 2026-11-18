@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 7
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Amasawa Seiji
+  cardImg: {fileID: -5067348680824671666, guid: 58ce00676fc3ba741b547bec705aa2e9, type: 3}
+  element: 4
+  rarity: 6
+  talent: {fileID: 11400000, guid: 3d3f55b334c2bfc46929c43c713271d9, type: 2}
+  health: 450
+  defense: 63
+  attack: 180
+  speed: 400
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 660
+  location: 57
+  floor: 7
+  floorCode: A2

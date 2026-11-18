@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 16
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Yukari Tenkawa
+  cardImg: {fileID: 21300000, guid: 11e8685bc7fc4ae4f8c62f5fd3d1859f, type: 3}
+  element: 8
+  rarity: 5
+  talent: {fileID: 11400000, guid: abd97bb440db1d344a09a8986e9dbbe8, type: 2}
+  health: 1050
+  defense: 90
+  attack: 277
+  speed: 122
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 570
+  location: 48
+  floor: 16
+  floorCode: E2
+  anime: 'Teasing Master Takagi-san: The Movie'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b128614-4E0vL5Z3Tg4z.jpg
+  characterId: b128614-4E0vL5Z3Tg4z

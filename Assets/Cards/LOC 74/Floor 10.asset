@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 10
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Boro
+  cardImg: {fileID: 7203338126045922378, guid: 415c387324e0d304395c274132b0bbee, type: 3}
+  element: 1
+  rarity: 7
+  talent: {fileID: 11400000, guid: 3cc0e599e9bbcb74f831b91bd92de210, type: 2}
+  health: 3680
+  defense: 103
+  attack: 54
+  speed: 305
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 830
+  location: 74
+  floor: 10
+  floorCode: J1

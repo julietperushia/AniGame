@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 9
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Atsumi Daisuke
+  cardImg: {fileID: -6131057655194085319, guid: 9996bc2b6c9cf2d42a5b6e1b43a36b03, type: 3}
+  element: 0
+  rarity: 2
+  talent: {fileID: 11400000, guid: ee59b57e9da74524d8b36d7f25a7c501, type: 2}
+  health: 1140
+  defense: 20
+  attack: 251
+  speed: 5
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 390
+  location: 30
+  floor: 9
+  floorCode: I1

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 12
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Makihatayama Hana
+  cardImg: {fileID: -6747230278292546590, guid: a9eed4e4da594cc459f423fc71a01a20, type: 3}
+  element: 3
+  rarity: 7
+  talent: {fileID: 11400000, guid: 3d3f55b334c2bfc46929c43c713271d9, type: 2}
+  health: 440
+  defense: 216
+  attack: 79
+  speed: 402
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 710
+  location: 62
+  floor: 12
+  floorCode: E2

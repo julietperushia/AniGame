@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 8
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Iriki Azuma
+  cardImg: {fileID: 4151008346742989597, guid: e3175ddb47f4c5841974cd39c934ddec, type: 3}
+  element: 1
+  rarity: 7
+  talent: {fileID: 11400000, guid: 3cc0e599e9bbcb74f831b91bd92de210, type: 2}
+  health: 2220
+  defense: 211
+  attack: 353
+  speed: 84
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 870
+  location: 78
+  floor: 8
+  floorCode: H1

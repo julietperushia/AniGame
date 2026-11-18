@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 18
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Nagisa Shiota
+  cardImg: {fileID: 21300000, guid: 166e0ea914be5264eae3ad2517ed688e, type: 3}
+  element: 3
+  rarity: 6
+  talent: {fileID: 11400000, guid: 5fd120b2dcae75140a501e447fec5b51, type: 2}
+  health: 370
+  defense: 101
+  attack: 169
+  speed: 277
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 540
+  location: 45
+  floor: 18
+  floorCode: F3
+  anime: Assassination Classroom Second Season
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b65645-nWH4mBMW5lYw.png
+  characterId: b65645-nWH4mBMW5lYw

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 9
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Tachibana Maria
+  cardImg: {fileID: -2808002099379976583, guid: 3fd7520acf5e2e24bb36abead6dba83c, type: 3}
+  element: 0
+  rarity: 1
+  talent: {fileID: 11400000, guid: d3872f5988c7194449d06417a6b014b3, type: 2}
+  health: 1170
+  defense: 19
+  attack: 39
+  speed: 45
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 220
+  location: 13
+  floor: 9
+  floorCode: I1

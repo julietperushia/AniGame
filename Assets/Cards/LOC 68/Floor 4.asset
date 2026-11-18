@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 4
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Apollon
+  cardImg: {fileID: 5477694255237679607, guid: ca98d48c01baaf042ac07f9a4d32dfe8, type: 3}
+  element: 0
+  rarity: 6
+  talent: {fileID: 11400000, guid: 21ee3b026cfd9854ba1dd561a9f0acc3, type: 2}
+  health: 3490
+  defense: 74
+  attack: 147
+  speed: 200
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 770
+  location: 68
+  floor: 4
+  floorCode: D1

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 6
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Gustav Dedoldia
+  cardImg: {fileID: 21300000, guid: ac9e24a4985383f4c81b0686489d58a4, type: 3}
+  element: 1
+  rarity: 3
+  talent: {fileID: 11400000, guid: ba51a4a6e7705d54f914342a0b8b4887, type: 2}
+  health: 600
+  defense: 55
+  attack: 125
+  speed: 180
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 420
+  location: 33
+  floor: 6
+  floorCode: F1
+  anime: 'Mushoku Tensei: Jobless Reincarnation Cour 2'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b251606-EIVKCEiLICqw.png
+  characterId: b251606-EIVKCEiLICqw

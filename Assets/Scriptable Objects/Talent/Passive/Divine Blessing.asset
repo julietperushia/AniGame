@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b288bf2e777127643a6cdc552d9bb772, type: 3}
+  m_Name: Divine Blessing
+  m_EditorClassIdentifier: Assembly-CSharp::DivineBlessing
+  talentName: Divine Blessing
+  description: Start off the battle with a stack of Divine Blessing, increasing your
+    ATK and DEF by 30% for 5 turns.
+  atkBonus: 30
+  defBonus: 30
+  duration: 5

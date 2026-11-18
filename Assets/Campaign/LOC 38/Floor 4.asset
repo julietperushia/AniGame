@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 4
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Madara
+  cardImg: {fileID: 21300000, guid: bb2d64338487bca45a27ae00cf87e65b, type: 3}
+  element: 6
+  rarity: 3
+  talent: {fileID: 11400000, guid: 34e40149a749c454fa8e9cd6eac968f5, type: 2}
+  health: 480
+  defense: 76
+  attack: 265
+  speed: 81
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 470
+  location: 38
+  floor: 4
+  floorCode: D1
+  anime: Natsume's Book of Friends Season 5
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/13784.jpg
+  characterId: 13784

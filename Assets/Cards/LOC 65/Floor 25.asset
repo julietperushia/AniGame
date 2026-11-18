@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 25
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Hattori Makojiro
+  cardImg: {fileID: -2446036125101841710, guid: fd85c0ca44530c746bae7cc95b842627, type: 3}
+  element: 0
+  rarity: 8
+  talent: {fileID: 11400000, guid: 867c5627cf5762b49ad8a319f715b76a, type: 2}
+  health: 3030
+  defense: 44
+  attack: 429
+  speed: 28
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 740
+  location: 65
+  floor: 25
+  floorCode: E3

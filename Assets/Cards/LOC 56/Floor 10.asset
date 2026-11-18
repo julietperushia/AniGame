@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 10
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Arisugawa Sorata
+  cardImg: {fileID: -1908568282143432448, guid: 1b7442f414fb29e429c7770dd9b9c744, type: 3}
+  element: 3
+  rarity: 6
+  talent: {fileID: 11400000, guid: 867c5627cf5762b49ad8a319f715b76a, type: 2}
+  health: 190
+  defense: 150
+  attack: 419
+  speed: 90
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 650
+  location: 56
+  floor: 10
+  floorCode: D2

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 31
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Barry the Chopper
+  cardImg: {fileID: -516705263363363754, guid: 264a414ba9e70144b9d6814d00ae0b1c, type: 3}
+  element: 5
+  rarity: 2
+  talent: {fileID: 11400000, guid: 4c40a765e5f629b49b84839e08c0bf12, type: 2}
+  health: 510
+  defense: 12
+  attack: 30
+  speed: 19
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 110
+  location: 2
+  floor: 31
+  floorCode: I3

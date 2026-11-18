@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 14
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Kagurazaka Asuna
+  cardImg: {fileID: 7898703304740542001, guid: fbe09fc32b3abd14c9a360eb33c1f51e, type: 3}
+  element: 5
+  rarity: 4
+  talent: {fileID: 11400000, guid: 87061fea3fa978b4fa1fe4efb28fcc84, type: 2}
+  health: 2690
+  defense: 101
+  attack: 57
+  speed: 20
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 430
+  location: 34
+  floor: 14
+  floorCode: B2

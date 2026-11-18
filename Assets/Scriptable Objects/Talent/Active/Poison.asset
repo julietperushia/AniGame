@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e520f7bdee218da4194bd37a54d36bb7, type: 3}
+  m_Name: Poison
+  m_EditorClassIdentifier: Assembly-CSharp::Poison
+  talentName: Poison
+  description: Inflict a stack of Poison to enemy familiars, dealing 5 + 5% true
+    damage every turn it persists. (The Poison have 10% chance to miss, plus 5% chance
+    after each turn it damaged)
+  manaCost: 100

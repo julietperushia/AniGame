@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 1
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Endou Lorna
+  cardImg: {fileID: -2738024299818330610, guid: 268eb08811a0e8b4b898224349fc8d91, type: 3}
+  element: 0
+  rarity: 8
+  talent: {fileID: 11400000, guid: 3cc0e599e9bbcb74f831b91bd92de210, type: 2}
+  health: 2890
+  defense: 53
+  attack: 84
+  speed: 594
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1020
+  location: 93
+  floor: 1
+  floorCode: A1

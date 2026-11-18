@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 4
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Harada Yuuko
+  cardImg: {fileID: -5400253196605146764, guid: 4e989ef79785580458dda09bc81e5f20, type: 3}
+  element: 5
+  rarity: 5
+  talent: {fileID: 11400000, guid: 5a653a7976f212f45a25192a15f280d7, type: 2}
+  health: 1870
+  defense: 73
+  attack: 155
+  speed: 245
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 660
+  location: 57
+  floor: 4
+  floorCode: D1

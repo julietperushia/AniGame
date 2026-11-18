@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 23
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Chono Harumi
+  cardImg: {fileID: 7974565442732195490, guid: ee6cbfcb4a8677b43aff45b1a8598e33, type: 3}
+  element: 0
+  rarity: 8
+  talent: {fileID: 11400000, guid: 4c40a765e5f629b49b84839e08c0bf12, type: 2}
+  health: 4740
+  defense: 232
+  attack: 73
+  speed: 179
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 880
+  location: 79
+  floor: 23
+  floorCode: G3

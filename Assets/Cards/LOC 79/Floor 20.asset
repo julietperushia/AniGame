@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 20
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Shounen Bat
+  cardImg: {fileID: -3487587168815367733, guid: d68565ebf81fbad4d93819d3c4c7d038, type: 3}
+  element: 0
+  rarity: 8
+  talent: {fileID: 11400000, guid: f75c369d7b2715d438d06542c95fee5c, type: 2}
+  health: 3970
+  defense: 184
+  attack: 205
+  speed: 172
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 880
+  location: 79
+  floor: 20
+  floorCode: D3

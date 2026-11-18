@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 13
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Villetta Nu
+  cardImg: {fileID: 21300000, guid: a46aaa68a4662bb4090718873f222d5b, type: 3}
+  element: 1
+  rarity: 8
+  talent: {fileID: 11400000, guid: 9e5badc47ad033747a49fcf5d904d314, type: 2}
+  health: 1530
+  defense: 538
+  attack: 222
+  speed: 233
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1050
+  location: 96
+  floor: 13
+  floorCode: A3
+  anime: 'Code Geass: Lelouch of the Rebellion R2'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b1117-Zc6IwzGMj4Qy.png
+  characterId: b1117-Zc6IwzGMj4Qy

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 6
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Gilbert Bougainvillea
+  cardImg: {fileID: 21300000, guid: 3c5115d52e6a1804db15bb67b153e656, type: 3}
+  element: 4
+  rarity: 8
+  talent: {fileID: 11400000, guid: 79b2609231f563c47adbf168ead1b903, type: 2}
+  health: 2120
+  defense: 543
+  attack: 116
+  speed: 69
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 940
+  location: 85
+  floor: 6
+  floorCode: F1
+  anime: Violet Evergarden
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b124790-QR7zyemTK0zq.png
+  characterId: b124790-QR7zyemTK0zq

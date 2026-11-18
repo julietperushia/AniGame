@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 4
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Yotsugi Ononoki
+  cardImg: {fileID: 21300000, guid: 52a8b1146339ce642b5bce4b45829c78, type: 3}
+  element: 2
+  rarity: 3
+  talent: {fileID: 11400000, guid: f75c369d7b2715d438d06542c95fee5c, type: 2}
+  health: 1300
+  defense: 59
+  attack: 66
+  speed: 155
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 410
+  location: 32
+  floor: 4
+  floorCode: D1
+  anime: Owarimonogatari Second Season
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b57499-6cjBq1SlPRpq.png
+  characterId: b57499-6cjBq1SlPRpq

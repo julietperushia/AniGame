@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 11
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Shidou Kirisaki
+  cardImg: {fileID: 21300000, guid: 2e30feb5874be13419b2dec08614908e, type: 3}
+  element: 1
+  rarity: 8
+  talent: {fileID: 11400000, guid: 1d0ec6e18878f7e409301c5636d4e286, type: 2}
+  health: 6460
+  defense: 98
+  attack: 248
+  speed: 74
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1020
+  location: 93
+  floor: 11
+  floorCode: D2
+  anime: MILGRAM The Second Trial
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b205427-XMtZ2Ya9ahF5.jpg
+  characterId: b205427-XMtZ2Ya9ahF5

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 11
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Bouryoku no Majin
+  cardImg: {fileID: 21300000, guid: 38fc5c570232a27428c59e5c0878f590, type: 3}
+  element: 1
+  rarity: 3
+  talent: {fileID: 11400000, guid: 8eeb5124909b5004ebd188cbc47691d3, type: 2}
+  health: 290
+  defense: 42
+  attack: 150
+  speed: 11
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 220
+  location: 13
+  floor: 11
+  floorCode: A3
+  anime: Chainsaw Man
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b157231-hV81SwGqxl2R.jpg
+  characterId: b157231-hV81SwGqxl2R

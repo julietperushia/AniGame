@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 15
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Blancmanche Mint
+  cardImg: {fileID: -7978551854769631782, guid: 8be81df04e50d1e46a172ff0b983456a, type: 3}
+  element: 1
+  rarity: 8
+  talent: {fileID: 11400000, guid: 3cc0e599e9bbcb74f831b91bd92de210, type: 2}
+  health: 1940
+  defense: 301
+  attack: 476
+  speed: 97
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 980
+  location: 89
+  floor: 15
+  floorCode: A3

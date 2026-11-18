@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 24
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Zoro Roronoa
+  cardImg: {fileID: 21300000, guid: 59afbc29956170d4d8ba77de4debb482, type: 3}
+  element: 3
+  rarity: 8
+  talent: {fileID: 11400000, guid: 8eeb5124909b5004ebd188cbc47691d3, type: 2}
+  health: 2700
+  defense: 447
+  attack: 281
+  speed: 104
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1010
+  location: 92
+  floor: 24
+  floorCode: F3
+  anime: ONE PIECE FAN LETTER
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b62-S7oAeA9WInjV.png
+  characterId: b62-S7oAeA9WInjV

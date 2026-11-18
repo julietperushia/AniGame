@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 29
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Kiwi
+  cardImg: {fileID: 21300000, guid: cbe86ee6567f8344495af7900d9f7048, type: 3}
+  element: 4
+  rarity: 7
+  talent: {fileID: 11400000, guid: e6f4fb386b39d4a43b0bc1568a98da0a, type: 2}
+  health: 1640
+  defense: 152
+  attack: 342
+  speed: 70
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 670
+  location: 58
+  floor: 29
+  floorCode: I3
+  anime: 'Cyberpunk: Edgerunners'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b284161-QlVuoXKKONLM.jpg
+  characterId: b284161-QlVuoXKKONLM

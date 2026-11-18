@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 8
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Adolph Haas
+  cardImg: {fileID: 21300000, guid: 4f6b7659fb1c59849b5908985d5d3552, type: 3}
+  element: 1
+  rarity: 2
+  talent: {fileID: 11400000, guid: 363dd06ad3480d3409043e2260f4901a, type: 2}
+  health: 350
+  defense: 48
+  attack: 55
+  speed: 99
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 230
+  location: 14
+  floor: 8
+  floorCode: B2
+  anime: PLUTO
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b309184-t113Q34sDvLH.png
+  characterId: b309184-t113Q34sDvLH

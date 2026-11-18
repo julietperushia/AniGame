@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 2
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Yotarou
+  cardImg: {fileID: 21300000, guid: 9427b672b61cca1458da4f60197de6af, type: 3}
+  element: 3
+  rarity: 1
+  talent: {fileID: 11400000, guid: d3872f5988c7194449d06417a6b014b3, type: 2}
+  health: 770
+  defense: 10
+  attack: 41
+  speed: 72
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 200
+  location: 11
+  floor: 2
+  floorCode: B1
+  anime: 'Descending Stories: Showa Genroku Rakugo Shinju'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b89343-uhGYuy5LWMjP.png
+  characterId: b89343-uhGYuy5LWMjP

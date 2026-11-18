@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 20
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Zen Seito Kaichou
+  cardImg: {fileID: 21300000, guid: eb9cc7122344a434bb96bd9ef0029c0a, type: 3}
+  element: 1
+  rarity: 8
+  talent: {fileID: 11400000, guid: 50615731e2803ec4fadcf6fe583a2663, type: 2}
+  health: 1620
+  defense: 133
+  attack: 247
+  speed: 335
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 840
+  location: 75
+  floor: 20
+  floorCode: I2
+  anime: 'Kaguya-sama: Love is War -Ultra Romantic-'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b212389-M0QAzDPJvn7Z.jpg
+  characterId: b212389-M0QAzDPJvn7Z

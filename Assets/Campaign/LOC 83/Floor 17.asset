@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 17
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Gilgamesh
+  cardImg: {fileID: 21300000, guid: d0e12997b9e44f447bb23efb368878c7, type: 3}
+  element: 1
+  rarity: 8
+  talent: {fileID: 11400000, guid: 21ee3b026cfd9854ba1dd561a9f0acc3, type: 2}
+  health: 1270
+  defense: 257
+  attack: 227
+  speed: 350
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 920
+  location: 83
+  floor: 17
+  floorCode: F2
+  anime: Fate/stay night [Heaven's Feel] II. lost butterfly
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b2514-hnE6LEdqm7Su.png
+  characterId: b2514-hnE6LEdqm7Su

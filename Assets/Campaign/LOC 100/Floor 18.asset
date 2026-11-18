@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 18
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Yui
+  cardImg: {fileID: 21300000, guid: 4ec00db61684eaa4a85a72821758948c, type: 3}
+  element: 2
+  rarity: 8
+  talent: {fileID: 11400000, guid: 10990fcd6a40498448940fa47c0b667d, type: 2}
+  health: 2320
+  defense: 277
+  attack: 164
+  speed: 517
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1090
+  location: 100
+  floor: 18
+  floorCode: F3
+  anime: MUSHI-SHI The Next Passage 2
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b185482-D7snhm8tiY3b.png
+  characterId: b185482-D7snhm8tiY3b

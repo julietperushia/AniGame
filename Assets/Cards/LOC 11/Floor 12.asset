@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 12
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Kirara
+  cardImg: {fileID: -1834275375660670924, guid: 458d406af4dd5e040acdc494c1b0dcd5, type: 3}
+  element: 5
+  rarity: 1
+  talent: {fileID: 11400000, guid: abd97bb440db1d344a09a8986e9dbbe8, type: 2}
+  health: 350
+  defense: 50
+  attack: 55
+  speed: 60
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 200
+  location: 11
+  floor: 12
+  floorCode: L1

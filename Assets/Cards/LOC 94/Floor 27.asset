@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 27
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Tsukasa
+  cardImg: {fileID: -410815459865794338, guid: 2b3b50d3a5e8c7a4093f1d182517d3a8, type: 3}
+  element: 3
+  rarity: 8
+  talent: {fileID: 11400000, guid: ee59b57e9da74524d8b36d7f25a7c501, type: 2}
+  health: 2080
+  defense: 116
+  attack: 355
+  speed: 445
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1030
+  location: 94
+  floor: 27
+  floorCode: C3

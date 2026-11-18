@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 7
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Nagata
+  cardImg: {fileID: 21300000, guid: 74ad571a68e5b7d49a8636ed3fe6066f, type: 3}
+  element: 7
+  rarity: 3
+  talent: {fileID: 11400000, guid: 20f0d8a99e2a02041a579e5ab4f66759, type: 2}
+  health: 530
+  defense: 158
+  attack: 137
+  speed: 57
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 390
+  location: 30
+  floor: 7
+  floorCode: C2
+  anime: 'Code Geass: Lelouch of the Rebellion'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b1127-1FFCqRX4JaES.png
+  characterId: b1127-1FFCqRX4JaES

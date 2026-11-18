@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 19
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Fuchuuya Shinnosuke
+  cardImg: {fileID: 1565192942364661795, guid: 9133c56df0484d1488aed44708451f46, type: 3}
+  element: 4
+  rarity: 8
+  talent: {fileID: 11400000, guid: 50615731e2803ec4fadcf6fe583a2663, type: 2}
+  health: 1340
+  defense: 116
+  attack: 377
+  speed: 343
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 890
+  location: 80
+  floor: 19
+  floorCode: A3

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 3
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Shirou Emiya
+  cardImg: {fileID: 21300000, guid: 21dbd27f48ec22245a3a624e758e3540, type: 3}
+  element: 3
+  rarity: 0
+  talent: {fileID: 11400000, guid: 8eeb5124909b5004ebd188cbc47691d3, type: 2}
+  health: 400
+  defense: 85
+  attack: 26
+  speed: 39
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 190
+  location: 10
+  floor: 3
+  floorCode: C1
+  anime: Fate/Zero Season 2
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b496-GI0waavDjyk3.png
+  characterId: b496-GI0waavDjyk3

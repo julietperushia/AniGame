@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 29
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Kuraka Junpei
+  cardImg: {fileID: 912159600483118574, guid: a0fe0ee29ee821b428549b76a7613f45, type: 3}
+  element: 5
+  rarity: 8
+  talent: {fileID: 11400000, guid: c7e1f10c9f9cf6343a758cf7a88df84f, type: 2}
+  health: 2160
+  defense: 404
+  attack: 73
+  speed: 155
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 780
+  location: 69
+  floor: 29
+  floorCode: E3

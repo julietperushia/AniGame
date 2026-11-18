@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 1
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Asuka Yayoi
+  cardImg: {fileID: -6873081840648419631, guid: c72b6005cf385fc4881d2de431522f1b, type: 3}
+  element: 1
+  rarity: 6
+  talent: {fileID: 11400000, guid: 3d3f55b334c2bfc46929c43c713271d9, type: 2}
+  health: 1950
+  defense: 7
+  attack: 124
+  speed: 464
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 790
+  location: 70
+  floor: 1
+  floorCode: A1

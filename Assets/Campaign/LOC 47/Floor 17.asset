@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 17
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Keishin Ukai
+  cardImg: {fileID: 21300000, guid: dc6f499d84bf79a4eb91705632c1c68f, type: 3}
+  element: 2
+  rarity: 6
+  talent: {fileID: 11400000, guid: 43dbd674abfda9b4ea6d1f1e745f83db, type: 2}
+  health: 1620
+  defense: 139
+  attack: 33
+  speed: 272
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 560
+  location: 47
+  floor: 17
+  floorCode: C3
+  anime: HAIKYU!! The Dumpster Battle
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b70861-mW9IE5G9Ov8J.jpg
+  characterId: b70861-mW9IE5G9Ov8J

@@ -1,0 +1,2236 @@
+fileFormatVersion: 2
+guid: ce41113ee45bb314e87fcda3e4a020f4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4328612245840775183
+    second: fx_speed_lines_0
+  - first:
+      213: -6019233715756572098
+    second: fx_speed_lines_1
+  - first:
+      213: 5149147145867868988
+    second: fx_speed_lines_2
+  - first:
+      213: -7582856559440544617
+    second: fx_speed_lines_3
+  - first:
+      213: -1133274437542413860
+    second: fx_speed_lines_4
+  - first:
+      213: 3942887171373515716
+    second: fx_speed_lines_5
+  - first:
+      213: 2126595513368834744
+    second: fx_speed_lines_6
+  - first:
+      213: 1663753350630994407
+    second: fx_speed_lines_7
+  - first:
+      213: -4164862311757584106
+    second: fx_speed_lines_8
+  - first:
+      213: -8741284161360554134
+    second: fx_speed_lines_9
+  - first:
+      213: -1512947938144242655
+    second: fx_speed_lines_10
+  - first:
+      213: -4156605813073376783
+    second: fx_speed_lines_11
+  - first:
+      213: -8327061144373600534
+    second: fx_speed_lines_12
+  - first:
+      213: 811295584386949660
+    second: fx_speed_lines_13
+  - first:
+      213: -612455136383354864
+    second: fx_speed_lines_14
+  - first:
+      213: -7074458983829722850
+    second: fx_speed_lines_15
+  - first:
+      213: 6324240661553135686
+    second: fx_speed_lines_16
+  - first:
+      213: 9118483784524463822
+    second: fx_speed_lines_17
+  - first:
+      213: -4367118695201194030
+    second: fx_speed_lines_18
+  - first:
+      213: 6384104067395467678
+    second: fx_speed_lines_19
+  - first:
+      213: 685984101456421035
+    second: fx_speed_lines_20
+  - first:
+      213: -7496394226547560646
+    second: fx_speed_lines_21
+  - first:
+      213: 8123348695999534034
+    second: fx_speed_lines_22
+  - first:
+      213: 1473445946448780523
+    second: fx_speed_lines_23
+  - first:
+      213: 5493687813323805273
+    second: fx_speed_lines_24
+  - first:
+      213: -146818410219152263
+    second: fx_speed_lines_25
+  - first:
+      213: -1519852384777560597
+    second: fx_speed_lines_26
+  - first:
+      213: 759019992228328909
+    second: fx_speed_lines_27
+  - first:
+      213: 3141718138262153459
+    second: fx_speed_lines_28
+  - first:
+      213: 7759041105125718749
+    second: fx_speed_lines_29
+  - first:
+      213: -5118501664953426500
+    second: fx_speed_lines_30
+  - first:
+      213: 8642745832477201230
+    second: fx_speed_lines_31
+  - first:
+      213: 130199600033074101
+    second: fx_speed_lines_32
+  - first:
+      213: 4599712578806828509
+    second: fx_speed_lines_33
+  - first:
+      213: 3323872590388674450
+    second: fx_speed_lines_34
+  - first:
+      213: -1184698769267599023
+    second: fx_speed_lines_35
+  - first:
+      213: 5919037428922086068
+    second: fx_speed_lines_36
+  - first:
+      213: -6008026862408323673
+    second: fx_speed_lines_37
+  - first:
+      213: 6887473359772939068
+    second: fx_speed_lines_38
+  - first:
+      213: 4058729544087344562
+    second: fx_speed_lines_39
+  - first:
+      213: 3648757367793815820
+    second: fx_speed_lines_40
+  - first:
+      213: -5585541254417365502
+    second: fx_speed_lines_41
+  - first:
+      213: -6485676380619832084
+    second: fx_speed_lines_42
+  - first:
+      213: 2151397796573902157
+    second: fx_speed_lines_43
+  - first:
+      213: 3655546095377068816
+    second: fx_speed_lines_44
+  - first:
+      213: -688858532461468663
+    second: fx_speed_lines_45
+  - first:
+      213: -5689560984478961713
+    second: fx_speed_lines_46
+  - first:
+      213: 301140985484093676
+    second: fx_speed_lines_47
+  - first:
+      213: -8577004246620104454
+    second: fx_speed_lines_48
+  - first:
+      213: -6615316561630181191
+    second: fx_speed_lines_49
+  - first:
+      213: 5838152779389304410
+    second: fx_speed_lines_50
+  - first:
+      213: -2077706362748146295
+    second: fx_speed_lines_51
+  - first:
+      213: -1933296908781899678
+    second: fx_speed_lines_52
+  - first:
+      213: 7601496823403509165
+    second: fx_speed_lines_53
+  - first:
+      213: -5298259634790189984
+    second: fx_speed_lines_54
+  - first:
+      213: 1303297422474665859
+    second: fx_speed_lines_55
+  - first:
+      213: 8457205090664693992
+    second: fx_speed_lines_56
+  - first:
+      213: 3101797288297409280
+    second: fx_speed_lines_57
+  - first:
+      213: 4492327969593689236
+    second: fx_speed_lines_58
+  - first:
+      213: 1442736882574544815
+    second: fx_speed_lines_59
+  - first:
+      213: 5825149125845412482
+    second: fx_speed_lines_60
+  - first:
+      213: 2680209041813075167
+    second: fx_speed_lines_61
+  - first:
+      213: -6887066659385024173
+    second: fx_speed_lines_62
+  - first:
+      213: -8161848502599814490
+    second: fx_speed_lines_63
+  - first:
+      213: -6101957402456425338
+    second: fx_speed_lines_64
+  - first:
+      213: -1215023692170100908
+    second: fx_speed_lines_65
+  - first:
+      213: -3469732016359171309
+    second: fx_speed_lines_66
+  - first:
+      213: 4566238815368714843
+    second: fx_speed_lines_67
+  - first:
+      213: 7184482699386188183
+    second: fx_speed_lines_68
+  - first:
+      213: -6228871853552628822
+    second: fx_speed_lines_69
+  - first:
+      213: 1349734939309621335
+    second: fx_speed_lines_70
+  - first:
+      213: -119449333691595911
+    second: fx_speed_lines_71
+  - first:
+      213: 8935084394020029620
+    second: fx_speed_lines_72
+  - first:
+      213: 8639213413310152798
+    second: fx_speed_lines_73
+  - first:
+      213: -82893076083079978
+    second: fx_speed_lines_74
+  - first:
+      213: -7805698034076672822
+    second: fx_speed_lines_75
+  - first:
+      213: 70772661388390322
+    second: fx_speed_lines_76
+  - first:
+      213: -5265056842730543724
+    second: fx_speed_lines_77
+  - first:
+      213: -5101963368354808970
+    second: fx_speed_lines_78
+  - first:
+      213: 4633636187328604400
+    second: fx_speed_lines_79
+  - first:
+      213: -1182313634405913796
+    second: fx_speed_lines_80
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: fx_speed_lines_0
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 647
+        width: 111
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f08ceb357e1521c30800000000000000
+      internalID: 4328612245840775183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_1
+      rect:
+        serializedVersion: 2
+        x: 77
+        y: 629
+        width: 113
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e326648a3d2677ca0800000000000000
+      internalID: -6019233715756572098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_2
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 572
+        width: 128
+        height: 196
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3bbbad3c02757740800000000000000
+      internalID: 5149147145867868988
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_3
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 647
+        width: 61
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 79c3ec7822844c690800000000000000
+      internalID: -7582856559440544617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_4
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 562
+        width: 81
+        height: 206
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd9f04547ecc540f0800000000000000
+      internalID: -1133274437542413860
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_5
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 720
+        width: 14
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c3c927fdf2f7b630800000000000000
+      internalID: 3942887171373515716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_6
+      rect:
+        serializedVersion: 2
+        x: 321
+        y: 693
+        width: 15
+        height: 75
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b2f94b2a5f238d10800000000000000
+      internalID: 2126595513368834744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_7
+      rect:
+        serializedVersion: 2
+        x: 332
+        y: 588
+        width: 60
+        height: 180
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e1f9328bd6d61710800000000000000
+      internalID: 1663753350630994407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_8
+      rect:
+        serializedVersion: 2
+        x: 402
+        y: 654
+        width: 12
+        height: 114
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 619e6493bcf6336c0800000000000000
+      internalID: -4164862311757584106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_9
+      rect:
+        serializedVersion: 2
+        x: 416
+        y: 594
+        width: 31
+        height: 174
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a671b595e58b0b680800000000000000
+      internalID: -8741284161360554134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_10
+      rect:
+        serializedVersion: 2
+        x: 451
+        y: 566
+        width: 80
+        height: 202
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 124b04fbddde00be0800000000000000
+      internalID: -1512947938144242655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_11
+      rect:
+        serializedVersion: 2
+        x: 498
+        y: 626
+        width: 72
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f900702905c056c0800000000000000
+      internalID: -4156605813073376783
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_12
+      rect:
+        serializedVersion: 2
+        x: 508
+        y: 503
+        width: 168
+        height: 265
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aee57a20206507c80800000000000000
+      internalID: -8327061144373600534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_13
+      rect:
+        serializedVersion: 2
+        x: 511
+        y: 618
+        width: 86
+        height: 150
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c122a3b190d424b00800000000000000
+      internalID: 811295584386949660
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_14
+      rect:
+        serializedVersion: 2
+        x: 586
+        y: 639
+        width: 108
+        height: 129
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 018b1036c4f1087f0800000000000000
+      internalID: -612455136383354864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 609
+        width: 116
+        height: 101
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1922ca490972dd90800000000000000
+      internalID: -7074458983829722850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 574
+        width: 145
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 640c4f9df5734c750800000000000000
+      internalID: 6324240661553135686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_17
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 572
+        width: 81
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ece7db2b0bc5b8e70800000000000000
+      internalID: 9118483784524463822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_18
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 544
+        width: 126
+        height: 81
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2dfb0984fa0e463c0800000000000000
+      internalID: -4367118695201194030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_19
+      rect:
+        serializedVersion: 2
+        x: 643
+        y: 589
+        width: 125
+        height: 105
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e99bb3a23d4e89850800000000000000
+      internalID: 6384104067395467678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_20
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 581
+        width: 120
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba020e0e7ea158900800000000000000
+      internalID: 685984101456421035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_21
+      rect:
+        serializedVersion: 2
+        x: 665
+        y: 620
+        width: 103
+        height: 90
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a3fe7562b2577f790800000000000000
+      internalID: -7496394226547560646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_22
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 535
+        width: 106
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d35fa3899eebb070800000000000000
+      internalID: 8123348695999534034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_23
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 497
+        width: 144
+        height: 73
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bec91d9184bb27410800000000000000
+      internalID: 1473445946448780523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_24
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 564
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 952de0c95ff7d3c40800000000000000
+      internalID: 5493687813323805273
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_25
+      rect:
+        serializedVersion: 2
+        x: 679
+        y: 522
+        width: 89
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 97c566c0f6566fdf0800000000000000
+      internalID: -146818410219152263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_26
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 201
+        width: 216
+        height: 317
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bed9d4efe4668eae0800000000000000
+      internalID: -1519852384777560597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_27
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 485
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dc5703659a4988a00800000000000000
+      internalID: 759019992228328909
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_28
+      rect:
+        serializedVersion: 2
+        x: 575
+        y: 433
+        width: 193
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f8648f4000a99b20800000000000000
+      internalID: 3141718138262153459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_29
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 446
+        width: 49
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dda3ca4a6c6adab60800000000000000
+      internalID: 7759041105125718749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_30
+      rect:
+        serializedVersion: 2
+        x: 587
+        y: 387
+        width: 181
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cbd943ecadd67f8b0800000000000000
+      internalID: -5118501664953426500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_31
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 438
+        width: 126
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e439acc1b8331f770800000000000000
+      internalID: 8642745832477201230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_32
+      rect:
+        serializedVersion: 2
+        x: 718
+        y: 436
+        width: 50
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bb8edda8df8ec100800000000000000
+      internalID: 130199600033074101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_33
+      rect:
+        serializedVersion: 2
+        x: 615
+        y: 405
+        width: 153
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddd4da8583675df30800000000000000
+      internalID: 4599712578806828509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_34
+      rect:
+        serializedVersion: 2
+        x: 706
+        y: 406
+        width: 62
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29f36c4a284c02e20800000000000000
+      internalID: 3323872590388674450
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_35
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 305
+        width: 125
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15956f30fba1f8fe0800000000000000
+      internalID: -1184698769267599023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_36
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 332
+        width: 44
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b274236e25a42250800000000000000
+      internalID: 5919037428922086068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_37
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 322
+        width: 31
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ada52986633f9ca0800000000000000
+      internalID: -6008026862408323673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_38
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 310
+        width: 44
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c337b318788359f50800000000000000
+      internalID: 6887473359772939068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_39
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 262
+        width: 130
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2b595ba2401835830800000000000000
+      internalID: 4058729544087344562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_40
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 237
+        width: 127
+        height: 52
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0190fa7e7df2a230800000000000000
+      internalID: 3648757367793815820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_41
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 199
+        width: 83
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 206c92492db2c72b0800000000000000
+      internalID: -5585541254417365502
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_42
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 172
+        width: 117
+        height: 67
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce48305c1bf3ef5a0800000000000000
+      internalID: -6485676380619832084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_43
+      rect:
+        serializedVersion: 2
+        x: 118
+        y: 238
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d45785bb5ec4bdd10800000000000000
+      internalID: 2151397796573902157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_44
+      rect:
+        serializedVersion: 2
+        x: 516
+        y: 204
+        width: 20
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 013340b4ecb1bb230800000000000000
+      internalID: 3655546095377068816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_45
+      rect:
+        serializedVersion: 2
+        x: 572
+        y: 222
+        width: 196
+        height: 160
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 904232080dea076f0800000000000000
+      internalID: -688858532461468663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_46
+      rect:
+        serializedVersion: 2
+        x: 609
+        y: 256
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fcfa530ed6e9a01b0800000000000000
+      internalID: -5689560984478961713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_47
+      rect:
+        serializedVersion: 2
+        x: 612
+        y: 109
+        width: 156
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ce8271b712edd2400800000000000000
+      internalID: 301140985484093676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_48
+      rect:
+        serializedVersion: 2
+        x: 615
+        y: 171
+        width: 153
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af81133a41c58f880800000000000000
+      internalID: -8577004246620104454
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_49
+      rect:
+        serializedVersion: 2
+        x: 630
+        y: 237
+        width: 138
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9b8464bf2aca134a0800000000000000
+      internalID: -6615316561630181191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_50
+      rect:
+        serializedVersion: 2
+        x: 634
+        y: 142
+        width: 134
+        height: 87
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5e75ff5509450150800000000000000
+      internalID: 5838152779389304410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_51
+      rect:
+        serializedVersion: 2
+        x: 635
+        y: 225
+        width: 133
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98de3dc32118a23e0800000000000000
+      internalID: -2077706362748146295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_52
+      rect:
+        serializedVersion: 2
+        x: 642
+        y: 297
+        width: 126
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 260b1ba54bc8b25e0800000000000000
+      internalID: -1933296908781899678
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_53
+      rect:
+        serializedVersion: 2
+        x: 652
+        y: 263
+        width: 116
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: da5f9302611fd7960800000000000000
+      internalID: 7601496823403509165
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_54
+      rect:
+        serializedVersion: 2
+        x: 654
+        y: 332
+        width: 114
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0643a8cfeecc876b0800000000000000
+      internalID: -5298259634790189984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_55
+      rect:
+        serializedVersion: 2
+        x: 713
+        y: 344
+        width: 55
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38fd84fb91e361210800000000000000
+      internalID: 1303297422474665859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_56
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 108
+        width: 142
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e0c1b5c8370e5570800000000000000
+      internalID: 8457205090664693992
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_57
+      rect:
+        serializedVersion: 2
+        x: 141
+        y: 212
+        width: 11
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00bac3e133ccb0b20800000000000000
+      internalID: 3101797288297409280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_58
+      rect:
+        serializedVersion: 2
+        x: 165
+        y: 199
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4940f2aac74f75e30800000000000000
+      internalID: 4492327969593689236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_59
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 205
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fafc53efc81a50410800000000000000
+      internalID: 1442736882574544815
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_60
+      rect:
+        serializedVersion: 2
+        x: 585
+        y: 199
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 28a61b9544617d050800000000000000
+      internalID: 5825149125845412482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_61
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 57
+        width: 166
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd4fe055ce3023520800000000000000
+      internalID: 2680209041813075167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_62
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 35
+        width: 130
+        height: 123
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3516beecc593c60a0800000000000000
+      internalID: -6887066659385024173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_63
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 0
+        width: 176
+        height: 176
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a2fbfbb70a4bbe80800000000000000
+      internalID: -8161848502599814490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_64
+      rect:
+        serializedVersion: 2
+        x: 141
+        y: 0
+        width: 93
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 68cf400721e715ba0800000000000000
+      internalID: -6101957402456425338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_65
+      rect:
+        serializedVersion: 2
+        x: 190
+        y: 179
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 45f7482b36e532fe0800000000000000
+      internalID: -1215023692170100908
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_66
+      rect:
+        serializedVersion: 2
+        x: 198
+        y: 0
+        width: 77
+        height: 163
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 31b9c135d1909dfc0800000000000000
+      internalID: -3469732016359171309
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_67
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 0
+        width: 96
+        height: 181
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5a17a5720a8e5f30800000000000000
+      internalID: 4566238815368714843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_68
+      rect:
+        serializedVersion: 2
+        x: 398
+        y: 0
+        width: 61
+        height: 129
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7917ad733f864b360800000000000000
+      internalID: 7184482699386188183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_69
+      rect:
+        serializedVersion: 2
+        x: 422
+        y: 125
+        width: 120
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aab01991d0a9e89a0800000000000000
+      internalID: -6228871853552628822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_70
+      rect:
+        serializedVersion: 2
+        x: 475
+        y: 0
+        width: 67
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 750cb7ea6c83bb210800000000000000
+      internalID: 1349734939309621335
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_71
+      rect:
+        serializedVersion: 2
+        x: 529
+        y: 141
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 973c7a0c671a75ef0800000000000000
+      internalID: -119449333691595911
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_72
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 0
+        width: 93
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b443bf8aebcffb70800000000000000
+      internalID: 8935084394020029620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_73
+      rect:
+        serializedVersion: 2
+        x: 535
+        y: 0
+        width: 178
+        height: 198
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e50442fa3d6a4e770800000000000000
+      internalID: 8639213413310152798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_74
+      rect:
+        serializedVersion: 2
+        x: 537
+        y: 0
+        width: 123
+        height: 167
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d48abdbf2189def0800000000000000
+      internalID: -82893076083079978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_75
+      rect:
+        serializedVersion: 2
+        x: 592
+        y: 34
+        width: 176
+        height: 165
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: acc15ee8ef69ca390800000000000000
+      internalID: -7805698034076672822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_76
+      rect:
+        serializedVersion: 2
+        x: 594
+        y: 0
+        width: 137
+        height: 148
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bf2ddd4c5f6bf000800000000000000
+      internalID: 70772661388390322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_77
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 0
+        width: 168
+        height: 168
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4956ece62b2cee6b0800000000000000
+      internalID: -5265056842730543724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_78
+      rect:
+        serializedVersion: 2
+        x: 430
+        y: 0
+        width: 17
+        height: 88
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67bf72c095f2239b0800000000000000
+      internalID: -5101963368354808970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_79
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 0
+        width: 9
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f8ed14ff8bfd4040800000000000000
+      internalID: 4633636187328604400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: fx_speed_lines_80
+      rect:
+        serializedVersion: 2
+        x: 523
+        y: 0
+        width: 59
+        height: 110
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c3b62208304979fe0800000000000000
+      internalID: -1182313634405913796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      fx_speed_lines_0: 4328612245840775183
+      fx_speed_lines_1: -6019233715756572098
+      fx_speed_lines_10: -1512947938144242655
+      fx_speed_lines_11: -4156605813073376783
+      fx_speed_lines_12: -8327061144373600534
+      fx_speed_lines_13: 811295584386949660
+      fx_speed_lines_14: -612455136383354864
+      fx_speed_lines_15: -7074458983829722850
+      fx_speed_lines_16: 6324240661553135686
+      fx_speed_lines_17: 9118483784524463822
+      fx_speed_lines_18: -4367118695201194030
+      fx_speed_lines_19: 6384104067395467678
+      fx_speed_lines_2: 5149147145867868988
+      fx_speed_lines_20: 685984101456421035
+      fx_speed_lines_21: -7496394226547560646
+      fx_speed_lines_22: 8123348695999534034
+      fx_speed_lines_23: 1473445946448780523
+      fx_speed_lines_24: 5493687813323805273
+      fx_speed_lines_25: -146818410219152263
+      fx_speed_lines_26: -1519852384777560597
+      fx_speed_lines_27: 759019992228328909
+      fx_speed_lines_28: 3141718138262153459
+      fx_speed_lines_29: 7759041105125718749
+      fx_speed_lines_3: -7582856559440544617
+      fx_speed_lines_30: -5118501664953426500
+      fx_speed_lines_31: 8642745832477201230
+      fx_speed_lines_32: 130199600033074101
+      fx_speed_lines_33: 4599712578806828509
+      fx_speed_lines_34: 3323872590388674450
+      fx_speed_lines_35: -1184698769267599023
+      fx_speed_lines_36: 5919037428922086068
+      fx_speed_lines_37: -6008026862408323673
+      fx_speed_lines_38: 6887473359772939068
+      fx_speed_lines_39: 4058729544087344562
+      fx_speed_lines_4: -1133274437542413860
+      fx_speed_lines_40: 3648757367793815820
+      fx_speed_lines_41: -5585541254417365502
+      fx_speed_lines_42: -6485676380619832084
+      fx_speed_lines_43: 2151397796573902157
+      fx_speed_lines_44: 3655546095377068816
+      fx_speed_lines_45: -688858532461468663
+      fx_speed_lines_46: -5689560984478961713
+      fx_speed_lines_47: 301140985484093676
+      fx_speed_lines_48: -8577004246620104454
+      fx_speed_lines_49: -6615316561630181191
+      fx_speed_lines_5: 3942887171373515716
+      fx_speed_lines_50: 5838152779389304410
+      fx_speed_lines_51: -2077706362748146295
+      fx_speed_lines_52: -1933296908781899678
+      fx_speed_lines_53: 7601496823403509165
+      fx_speed_lines_54: -5298259634790189984
+      fx_speed_lines_55: 1303297422474665859
+      fx_speed_lines_56: 8457205090664693992
+      fx_speed_lines_57: 3101797288297409280
+      fx_speed_lines_58: 4492327969593689236
+      fx_speed_lines_59: 1442736882574544815
+      fx_speed_lines_6: 2126595513368834744
+      fx_speed_lines_60: 5825149125845412482
+      fx_speed_lines_61: 2680209041813075167
+      fx_speed_lines_62: -6887066659385024173
+      fx_speed_lines_63: -8161848502599814490
+      fx_speed_lines_64: -6101957402456425338
+      fx_speed_lines_65: -1215023692170100908
+      fx_speed_lines_66: -3469732016359171309
+      fx_speed_lines_67: 4566238815368714843
+      fx_speed_lines_68: 7184482699386188183
+      fx_speed_lines_69: -6228871853552628822
+      fx_speed_lines_7: 1663753350630994407
+      fx_speed_lines_70: 1349734939309621335
+      fx_speed_lines_71: -119449333691595911
+      fx_speed_lines_72: 8935084394020029620
+      fx_speed_lines_73: 8639213413310152798
+      fx_speed_lines_74: -82893076083079978
+      fx_speed_lines_75: -7805698034076672822
+      fx_speed_lines_76: 70772661388390322
+      fx_speed_lines_77: -5265056842730543724
+      fx_speed_lines_78: -5101963368354808970
+      fx_speed_lines_79: 4633636187328604400
+      fx_speed_lines_8: -4164862311757584106
+      fx_speed_lines_80: -1182313634405913796
+      fx_speed_lines_9: -8741284161360554134
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 14
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Subaru
+  cardImg: {fileID: -1387337428110498500, guid: cf7bc528b411fb747b33ff71d69812a6, type: 3}
+  element: 3
+  rarity: 8
+  talent: {fileID: 11400000, guid: e3656e06e93e5684ba3bc50c2bb8190e, type: 2}
+  health: 800
+  defense: 236
+  attack: 481
+  speed: 280
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 1030
+  location: 94
+  floor: 14
+  floorCode: B2

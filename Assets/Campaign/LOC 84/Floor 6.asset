@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 6
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Karina Braun
+  cardImg: {fileID: 21300000, guid: 2e75606725dd85849ad72a31a0b596fb, type: 3}
+  element: 7
+  rarity: 8
+  talent: {fileID: 11400000, guid: abd97bb440db1d344a09a8986e9dbbe8, type: 2}
+  health: 880
+  defense: 178
+  attack: 132
+  speed: 532
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 930
+  location: 84
+  floor: 6
+  floorCode: F1
+  anime: Attack on Titan Final Season THE FINAL CHAPTERS Special 1
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b199712-YOV8LXBcQT1R.png
+  characterId: b199712-YOV8LXBcQT1R

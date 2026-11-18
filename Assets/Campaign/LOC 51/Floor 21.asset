@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 21
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Yoko Kayabuki
+  cardImg: {fileID: 21300000, guid: 434f31e25b67ae34db8db7ce42c57cd6, type: 3}
+  element: 0
+  rarity: 7
+  talent: {fileID: 11400000, guid: 1d0ec6e18878f7e409301c5636d4e286, type: 2}
+  health: 180
+  defense: 160
+  attack: 83
+  speed: 389
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 600
+  location: 51
+  floor: 21
+  floorCode: C3
+  anime: 'Ghost in the Shell: Stand Alone Complex 2nd GIG'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b23753-9hIfMkNUBUxz.png
+  characterId: b23753-9hIfMkNUBUxz

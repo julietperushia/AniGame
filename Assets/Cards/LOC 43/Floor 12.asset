@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 12
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Aburatsubo Ayanojou
+  cardImg: {fileID: 5740341000907458296, guid: ee71d154eab05e948b184cff9bb30ac8, type: 3}
+  element: 5
+  rarity: 5
+  talent: {fileID: 11400000, guid: 363dd06ad3480d3409043e2260f4901a, type: 2}
+  health: 440
+  defense: 246
+  attack: 194
+  speed: 57
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 520
+  location: 43
+  floor: 12
+  floorCode: A2

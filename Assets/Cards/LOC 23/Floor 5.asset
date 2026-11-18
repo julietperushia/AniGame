@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 5
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Isawa Tae
+  cardImg: {fileID: 6222404488451203896, guid: 40ba18cea4028c448856653db382a70d, type: 3}
+  element: 2
+  rarity: 2
+  talent: {fileID: 11400000, guid: 10990fcd6a40498448940fa47c0b667d, type: 2}
+  health: 160
+  defense: 7
+  attack: 131
+  speed: 166
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 320
+  location: 23
+  floor: 5
+  floorCode: E1

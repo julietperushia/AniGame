@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: Floor 3
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Grisha no Chichi Yeager
+  cardImg: {fileID: 21300000, guid: 3fdc247c603408f4d8e27002f42bf0b6, type: 3}
+  element: 7
+  rarity: 5
+  talent: {fileID: 11400000, guid: 8db71f7e5ce7dc244ba36f23618ffe8f, type: 2}
+  health: 2180
+  defense: 77
+  attack: 130
+  speed: 215
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 640
+  location: 55
+  floor: 3
+  floorCode: C1
+  anime: Attack on Titan Final Season THE FINAL CHAPTERS Special 1
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b140765-zkWt0zw1App6.png
+  characterId: b140765-zkWt0zw1App6
