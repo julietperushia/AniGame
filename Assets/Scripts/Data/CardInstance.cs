@@ -10,6 +10,8 @@ public class BuildData
     public int spd;
     public CardElement element;
     public string talent;
+    /// <summary>God cards only: the passive talent (talent is then the active one).</summary>
+    public string talent2;
 
     public BuildData Clone() => (BuildData)MemberwiseClone();
 

@@ -418,11 +418,53 @@ public static class CampaignGenerator
         return null;
     }
 
+    // ------------------------------------------------------------------ talents by character name
+
+    /// <summary>Every talent asset, one per name, in a stable order (sorted by class name).</summary>
+    static List<Talent> TalentPool()
+    {
+        var seen = new HashSet<string>();
+        var list = new List<Talent>();
+        foreach (string guid in AssetDatabase.FindAssets("t:Talent"))
+        {
+            var t = AssetDatabase.LoadAssetAtPath<Talent>(AssetDatabase.GUIDToAssetPath(guid));
+            if (t != null && seen.Add(t.GetType().Name)) list.Add(t);
+        }
+        list.Sort((a, b) => string.CompareOrdinal(a.GetType().Name, b.GetType().Name));
+        return list;
+    }
+
+    /// <summary>FNV-1a hash: stable across runs and machines (string.GetHashCode is not).</summary>
+    static uint StableHash(string text)
+    {
+        uint h = 2166136261;
+        foreach (char c in (text ?? "").Trim().ToLowerInvariant()) { h ^= c; h *= 16777619; }
+        return h;
+    }
+
+    /// <summary>Same name = same talent. God: that talent plus one of the other kind (active + passive).</summary>
+    static void AssignTalents(Card card, string name, List<Talent> pool)
+    {
+        card.talent = null;
+        card.talent2 = null;
+        if (pool == null || pool.Count == 0) return;
+        uint h = StableHash(name);
+        var main = pool[(int)(h % (uint)pool.Count)];
+        card.talent = main;
+        if (card.rarity != CardRarity.God) return;
+        var other = pool.Where(t => t.IsActive != main.IsActive).ToList();
+        if (other.Count == 0) return;
+        var second = other[(int)(StableHash(name + "#2") % (uint)other.Count)];
+        if (main.IsActive) card.talent2 = second;
+        else { card.talent = second; card.talent2 = main; }
+    }
+
     // ------------------------------------------------------------------ 4. card assets
 
     static List<Card> CreateCardAssets(List<Row> rows, bool removeStale, Report report)
     {
         var talents = CardImporter.BuildTalentCache();
+        var talentPool = TalentPool();
         var result = new List<Card>();
         var byLoc = rows.GroupBy(r => r.loc).OrderBy(g => g.Key).ToList();
         CardImporter.CreateFolderRecursive(CampaignFolder);
@@ -471,7 +513,9 @@ public static class CampaignGenerator
                 if (parsedElement.HasValue) card.element = parsedElement.Value;
                 else card.element = ElementSystem.FromName(row.card); // no ELEMENT column: deterministic roll with the Element Orb odds
 
-                card.talent = string.IsNullOrEmpty(row.talent) ? null : CardImporter.FindTalent(talents, row.talent);
+                // Talents: random from every talent (old + new), but the same character name always gets the same
+                // talent(s). God cards get an active + a passive talent. (The sheet's TALENT column is ignored.)
+                AssignTalents(card, row.card, talentPool);
                 if (card.talent == null) report.cardsWithoutTalent++;
 
                 card.imageUrl = row.image;

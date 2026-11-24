@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Precision
   m_EditorClassIdentifier: Assembly-CSharp::Precision
   talentName: Precision
-  description: Increase the CRIT of ally familiars by 20%, and increase CRIT DMG
-    by 20%.
+  description: 'Increase your CRIT by 16% and your CRIT DMG by 25% (stacks every cast). Once active, your critical hits ignore the enemy''s evasion.'
   manaCost: 100
-  critRateBonus: 20
-  critDamageBonus: 20
+  critRateBonus: 16
+  critDamageBonus: 25

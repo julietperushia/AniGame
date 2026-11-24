@@ -63,6 +63,7 @@ public class PackItem
     public int amount;
     public CardRarity rarity;
     public CardInstance card; // set when type == Card (already added to the collection)
+    public bool exchanged;    // auto exchange turned the card into a material (card kept for the reveal only)
 }
 
 /// <summary>Gacha tables from the design doc, section 7. Slot 1 is always a card of the pack's rarity; slots 2-5 roll these tables. No pity.</summary>

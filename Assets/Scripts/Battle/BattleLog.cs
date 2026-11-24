@@ -32,6 +32,8 @@ public class BattleEvent
     public DamageKind kind;
     public bool crit;
     public float elementMultiplier = 1f;
+    public Talent skill;   // SkillActivated: the talent that was cast
+    public bool miss;      // Evaded: a miss (Blind) rather than a dodge
     public string text;
     public int round;
 
@@ -144,6 +146,14 @@ public static class BattleRandom
     }
 
     public static float Value => (float)rng.NextDouble();
+
+    /// <summary>True with the given percent chance (0-100), fractional percents allowed.</summary>
+    public static bool Chance(float percent)
+    {
+        if (percent <= 0f) return false;
+        if (percent >= 100f) return true;
+        return rng.NextDouble() * 100.0 < percent;
+    }
 
     /// <summary>True with the given percent chance (0-100).</summary>
     public static bool Chance(int percent)

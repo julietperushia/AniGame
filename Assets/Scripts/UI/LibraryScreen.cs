@@ -30,7 +30,16 @@ public class LibraryScreen : MonoBehaviour
         public float visualHeight;
         public string search;
         public GameObject go;
+        public int talentType = -1; // 0 active, 1 passive (talent entries only)
+        public int talentCat = -1;  // (int)TalentCategory
     }
+
+    // Talent filter (shown on the TALENTS page)
+    int typeFilter = -1;      // -1 all, 0 active, 1 passive
+    int categoryFilter = -1;  // -1 all, else (int)TalentCategory
+    RectTransform talentFilterBar;
+    readonly List<Button> typeButtons = new List<Button>();
+    Dropdown categoryDropdown;
 
     readonly List<Entry> entries = new List<Entry>();
     readonly List<Button> categoryButtons = new List<Button>();
@@ -49,7 +58,16 @@ public class LibraryScreen : MonoBehaviour
             categoryButtons.Add(b);
         }
         BuildEntries();
+        BuildTalentFilter();
         foreach (var e in entries) e.go = BuildEntry(e);
+        ApplyFilter();
+    }
+
+    /// <summary>Opens a category page (also used by the editor bridge for testing).</summary>
+    public void ShowCategory(string name)
+    {
+        if (Array.IndexOf(Categories, name) < 0) return;
+        category = name;
         ApplyFilter();
     }
 
@@ -60,16 +78,48 @@ public class LibraryScreen : MonoBehaviour
         foreach (var e in entries)
         {
             bool show = (category == "All" || e.category == category) && (q.Length == 0 || e.search.Contains(q));
+            if (show && category == "Talents" && e.talentType >= 0)
+                show = (typeFilter < 0 || e.talentType == typeFilter) && (categoryFilter < 0 || e.talentCat == categoryFilter);
             e.go.SetActive(show);
             if (show) shown++;
         }
         for (int i = 0; i < categoryButtons.Count; i++)
             categoryButtons[i].image.color = Categories[i] == category ? UIFactory.Accent : UIFactory.PanelLight;
+        if (talentFilterBar != null)
+        {
+            talentFilterBar.gameObject.SetActive(category == "Talents");
+            for (int i = 0; i < typeButtons.Count; i++)
+                typeButtons[i].image.color = typeFilter == i - 1 ? UIFactory.Accent : UIFactory.PanelLight;
+        }
         countText.text = shown == 0 ? "Nothing found. Try another word (e.g. fire, orb, fusion, poison)." : $"{shown} topic{(shown == 1 ? "" : "s")}";
         scroll.verticalNormalizedPosition = 1f;
     }
 
     // ---------------------------------------------------------------- content
+
+    /// <summary>Filter row at the top of the TALENTS page: type (all / active / passive) and group.</summary>
+    void BuildTalentFilter()
+    {
+        talentFilterBar = UIFactory.CreateRect("TalentFilter", content);
+        talentFilterBar.SetAsFirstSibling();
+        UIFactory.SetLayoutSize(talentFilterBar, -1, 64f);
+        string[] types = { "ALL TYPES", "ACTIVE", "PASSIVE" };
+        for (int i = 0; i < types.Length; i++)
+        {
+            int value = i - 1;
+            var b = UIFactory.CreateButton(talentFilterBar, types[i], types[i], UIFactory.PanelLight, 19);
+            UIFactory.TopLeft((RectTransform)b.transform, 8 + i * 168, 6, 160, 52);
+            b.onClick.AddListener(() => { typeFilter = value; ApplyFilter(); });
+            typeButtons.Add(b);
+        }
+        categoryDropdown = UIFactory.CreateDropdown(talentFilterBar, "Group", 20, 420f);
+        UIFactory.TopLeft((RectTransform)categoryDropdown.transform, 530, 6, 300, 52);
+        var opts = new List<Dropdown.OptionData> { new Dropdown.OptionData("All groups") };
+        foreach (TalentCategory c in Enum.GetValues(typeof(TalentCategory))) opts.Add(new Dropdown.OptionData(TalentCatalog.Name(c)));
+        categoryDropdown.ClearOptions();
+        categoryDropdown.AddOptions(opts);
+        categoryDropdown.onValueChanged.AddListener(v => { categoryFilter = v - 1; ApplyFilter(); });
+    }
 
     void Add(string cat, string title, Sprite icon, string body, Action<RectTransform> visual = null, float visualHeight = 0f, string keywords = "")
     {
@@ -124,7 +174,7 @@ public class LibraryScreen : MonoBehaviour
             rows.Add(new[] { CardStats.RarityName(r), $"x{GameRules.RarityMultiplier(t):0.00}", $"±{GameRules.MaxDeviation(t)}", $"+{(GameRules.TalentPower(t) - 1f) * 100f:0}%", CardStats.Power(r, zero).ToString(), t == GameRules.MaxTier ? "-" : Pct(GameRules.CardDropChance(r)) });
         }
         Add("Stats & Rarity", "Card stats", theme != null ? theme.Frame(CardRarity.Legendary) : null,
-            "Every card is your character, so cards only differ by rarity and build. Each stat = (100 + Roll) x rarity multiplier. HP is shown x10. Power = HP/10 + ATK + DEF + SPD.",
+            $"Every card is your character, so cards only differ by rarity and build. Each stat = (100 + Roll) x rarity multiplier. HP = HP stat x {GameRules.HpMultiplier} (the HP multiplier, set in GameBalance or Test Mode). Power = HP stat + ATK + DEF + SPD.",
             rt => Table(rt, new[] { "Rarity", "Stats", "Roll", "Talent", "Power (Roll 0)", "Floor drop" }, rows, new[] { 210f, 130f, 110f, 120f, 200f, 160f }, true), 46f * 10 + 10f, "power hp atk def spd roll multiplier rarity tier");
         Add("Stats & Rarity", "Rarity order", theme != null ? theme.Frame(CardRarity.God) : null,
             string.Join("  >  ", Enumerable.Range(0, GameRules.MaxTier + 1).Select(t => $"<color=#{RColor((CardRarity)t)}>{CardStats.RarityName((CardRarity)t)}</color>")) +
@@ -154,16 +204,31 @@ public class LibraryScreen : MonoBehaviour
             rt => Table(rt, new[] { "Rarity", "Stat reroll (gold)", "Dismantle (gold)" }, rrows, new[] { 260f, 300f, 300f }, true), 46f * 10 + 10f, "roll cost gold dismantle salvage");
         Add("Rerolls", "Element and talent rerolls", theme != null ? theme.talentOrbIcon : null,
             $"No pop-up: the new roll shows on the card, so you can keep rerolling, then press SAVE TO SLOT. Uses 1 Element / Talent Orb if you have one (no gold). With no orb, it costs the orb's price in gold ({GameRules.ElementOrbPrice:N0} / {GameRules.TalentOrbPrice:N0}). Preview, then save to a slot or discard.", null, 0f, "orb element talent");
+        Add("Fusion", "Card materials", theme != null ? theme.diamondIcon : null,
+            "My Cards > MATERIALS / EXCHANGE turns cards you don't need into materials: 1 card = 1 material of its rarity (Common Material, SR Material...). Materials take no space and count as fodder cards of their rarity: fusion and auto merge use them first. Exchange the selected card, every unlocked card up to a rarity, or switch on AUTO EXCHANGE so new cards from packs and drops become materials right away (also on the Gacha screen).",
+            null, 0f, "material exchange space fodder auto exchange common sr");
+        Add("Battle", "HP multiplier", null,
+            $"HP = HP stat x the HP multiplier (now x{GameRules.HpMultiplier}). Damage doesn't change, so a higher multiplier makes battles longer; the round limit ({GameRules.MaxRounds}) and enrage start (round {GameRules.EnrageStartRound}) grow with it. Change it in Assets/Resources/GameBalance.asset, or with Test Mode on the main menu.",
+            null, 0f, "hp health multiplier long battle rounds enrage balance");
         Add("Rerolls", "Dismantling", theme != null ? theme.BuffIcon(Buffs.SalvageExpert) : null,
             "Unlocked by the Salvage Expert buff. Turns a card that is not locked or slotted into gold: half the stat reroll cost of its rarity (table above).", null, 0f, "salvage gold");
 
         // ---- Talents
         var db = CardDatabase.Instance;
         if (db != null)
+        {
+            Add("Talents", "God cards: two talents", theme != null ? theme.Frame(CardRarity.God) : null,
+                "A God card has two talents: one ACTIVE and one PASSIVE. A card that reaches God by fusion keeps its talent and gets one of the other kind. On a God card, REROLL TALENT rerolls both at once (one Talent Orb). God floor enemies also have two talents.",
+                null, 0f, "god two talents active passive reroll");
             foreach (var t in db.talents.Where(x => x != null).OrderBy(x => x.DisplayName))
+            {
                 Add("Talents", t.DisplayName, theme != null ? theme.TalentIcon(t) : null,
-                    $"{(t.IsActive ? "<color=#6FD3FF>ACTIVE</color> - fires when the mana bar is full, then the card still attacks." : "<color=#FFB23D>PASSIVE</color> - always on.")}\n{t.Description}\n<color=#9AA4B5>Any rarity can have it; rarity makes it stronger (+2.5% per tier, +20% at God).</color>",
-                    null, 0f, t.IsActive ? "active" : "passive");
+                    $"{(t.IsActive ? "<color=#6FD3FF>ACTIVE</color> - fires when the mana bar is full, then the card still attacks." : "<color=#FFB23D>PASSIVE</color> - always on.")}  <color=#9AA4B5>Group: {TalentCatalog.Name(t.Category)}</color>\n{t.Description}\n<color=#9AA4B5>Any rarity can have it; rarity makes it stronger (+2.5% per tier, +20% at God).</color>",
+                    null, 0f, (t.IsActive ? "active" : "passive") + " " + TalentCatalog.Name(t.Category));
+                entries[entries.Count - 1].talentType = t.IsActive ? 0 : 1;
+                entries[entries.Count - 1].talentCat = (int)t.Category;
+            }
+        }
 
         // ---- Buffs
         foreach (var b in Buffs.All)
@@ -190,7 +255,7 @@ public class LibraryScreen : MonoBehaviour
 
         // ---- Battle
         Add("Battle", "How a battle works", theme != null ? theme.Frame(CardRarity.Epic) : null,
-            "One card against one enemy. The faster card acts first each round. Damage = (100 x ATK x current ATK + 638,000) / (87 x DEF) x element bonus. Base crit 5% (x1.35 damage), base evasion 5%. Mana fills every turn; an active talent fires when it is full. From round 20 both fighters get +10% ATK per round (enrage). After 50 rounds the battle is a draw.",
+            "One card against one enemy. The faster card acts first each round. Damage = (100 x ATK x current ATK + 638,000) / (87 x DEF) x element bonus. Base crit 5% (x1.35 damage), base evasion rating 5 (4.8% evade chance). Mana fills every turn; an active talent fires when it is full. From round 20 both fighters get +10% ATK per round (enrage). After 50 rounds the battle is a draw.",
             null, 0f, "damage crit evasion mana enrage round formula");
         Add("Save Data", "Move your save to another PC", null,
             $"Main menu > SAVE DATA > EXPORT SAVE FILE writes one .{SaveTransfer.Extension} file with everything: cards and builds, slots, buffs, currencies, orbs, stamina, LOC progress, stats, settings and your character's name and picture. Copy it to the other PC (USB, cloud drive, email), then SAVE DATA > IMPORT SAVE FILE there. Your old save on that PC is backed up first. Stamina keeps regenerating for the time in between.",
@@ -198,8 +263,16 @@ public class LibraryScreen : MonoBehaviour
         Add("Save Data", "Save protection", theme != null ? theme.lockIcon : null,
             "Saves and exported files are signed. If a save file is edited outside the game, it is refused: the last valid save is restored (or a new game starts) and the edited file is kept as a backup. Edited .anisave files can't be imported.",
             null, 0f, "cheat hash tamper edit security");
+        Add("Battle", "Evasion rating", theme != null ? theme.BuffIcon(Buffs.TheFlash) : null,
+            "Evasion is a rating with no limit. Your real chance to evade a normal attack = 75% x (1 - e^(-rating / 75)), so each extra point is worth a bit less and the chance never passes 75%.\n" +
+            "Rating 10 = 9.4%   20 = 17.6%   50 = 36.5%   100 = 55%   200 = 70%   300 = 73.6%   1000 = 75%.\n" +
+            "Talents and skills can't be evaded, only normal attacks. A card that has cast Precision can't have its critical hits evaded.",
+            null, 0f, "evasion evade dodge rating chance cap diminishing returns precision");
+        Add("Battle", "Reading the animations", theme != null ? theme.sparkle : null,
+            "Normal hit: the attacker winds up, dashes in with afterimages and a white slash hits. CRITICAL: a longer golden wind-up, a double gold slash, light burst, screen flash, a short slow-motion and a CRITICAL! slam. EVADE: the defender hops aside leaving a blue afterimage and wind streaks. Talents light up the card with rays; heals rise in green, burn in orange sparks, poison in green bubbles. SPEED x1/x2/x4 speeds everything up, SKIP jumps to the result.",
+            null, 0f, "animation crit critical evade dodge attack effect speed skip");
         Add("Battle", "Combat buffs", theme != null ? theme.BuffIcon(Buffs.StrongestHero) : null,
-            "The Flash: +2% evasion. Head Hunter: +2% crit. Strongest Hero: 1% chance the enemy starts at half HP. Second Wind: 1% chance to survive a lethal hit with 1 HP (once per battle).");
+            "The Flash: +2 evasion rating. Head Hunter: +2% crit. Strongest Hero: 1% chance the enemy starts at half HP. Second Wind: 1% chance to survive a lethal hit with 1 HP (once per battle).");
     }
 
     // ---------------------------------------------------------------- entry UI

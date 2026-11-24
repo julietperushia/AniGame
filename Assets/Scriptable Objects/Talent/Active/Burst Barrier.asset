@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14f691083738a72469f840174e1aea93, type: 3}
+  m_Name: Burst Barrier
+  m_EditorClassIdentifier: Assembly-CSharp::BurstBarrier
+  talentName: Burst Barrier
+  description: Raises a barrier worth 15% of your max HP for 3 turns; it absorbs
+    all damage first. If it breaks, it explodes for true damage of 50% of your ATK.
+  manaCost: 100
+  shieldPercent: 0.15
+  turns: 3
+  burstAtkPercent: 0.5

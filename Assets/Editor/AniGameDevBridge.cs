@@ -80,10 +80,15 @@ public static class AniGameDevBridge
         }
     }
 
+    // Multi-line command files run line by line; "wait:0.3" pauses the queue (seconds, real time).
+    static readonly System.Collections.Generic.Queue<string> queue = new System.Collections.Generic.Queue<string>();
+    static double queueReadyAt;
+
     static void Poll()
     {
         // While Unity is in the background Play mode does not advance frames; "tick:on" pumps them.
         if (ticking && EditorApplication.isPlaying) EditorApplication.QueuePlayerLoopUpdate();
+        RunQueue();
         if (EditorApplication.timeSinceStartup < nextPoll) return;
         nextPoll = EditorApplication.timeSinceStartup + 2.0;
         if (!File.Exists(CommandPath)) return;
@@ -101,7 +106,28 @@ public static class AniGameDevBridge
             return;
         }
         if (string.IsNullOrEmpty(command)) return;
+        foreach (var line in command.Split('\n'))
+            if (line.Trim().Length > 0) queue.Enqueue(line.Trim());
+        RunQueue();
+    }
 
+    static void RunQueue()
+    {
+        while (queue.Count > 0 && EditorApplication.timeSinceStartup >= queueReadyAt)
+        {
+            string line = queue.Dequeue();
+            if (line.StartsWith("wait:"))
+            {
+                double.TryParse(line.Substring(5), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double secs);
+                queueReadyAt = EditorApplication.timeSinceStartup + secs;
+                continue;
+            }
+            Execute(line);
+        }
+    }
+
+    static void Execute(string command)
+    {
         Append($"Command: {command}");
         try
         {
@@ -114,11 +140,14 @@ public static class AniGameDevBridge
         }
     }
 
-    /// <summary>Renders the scene's main Canvas offscreen (works while Unity is in the background).</summary>
+    /// <summary>Renders every root Canvas (scene + effect overlays, in sort order) offscreen
+    /// (works while Unity is in the background).</summary>
     static void RenderCanvas(string file)
     {
-        var canvas = UnityEngine.Object.FindFirstObjectByType<Canvas>();
-        if (canvas == null) { Append("render: no Canvas in scene"); return; }
+        var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
+            .Where(c => c != null && c.isRootCanvas && c.isActiveAndEnabled)
+            .OrderBy(c => c.sortingOrder).ToList();
+        if (canvases.Count == 0) { Append("render: no Canvas in scene"); return; }
         const int w = 1920, h = 1080;
         var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32);
         var camGo = new GameObject("BridgeRenderCamera");
@@ -129,13 +158,15 @@ public static class AniGameDevBridge
         cam.targetTexture = rt;
         camGo.transform.position = new Vector3(0, 0, -100);
 
-        var oldMode = canvas.renderMode;
-        var oldCam = canvas.worldCamera;
+        var old = canvases.Select(c => (c, c.renderMode, c.worldCamera, c.planeDistance)).ToList();
         try
         {
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = cam;
-            canvas.planeDistance = 50;
+            for (int i = 0; i < canvases.Count; i++)
+            {
+                canvases[i].renderMode = RenderMode.ScreenSpaceCamera;
+                canvases[i].worldCamera = cam;
+                canvases[i].planeDistance = 50 - i * 5;
+            }
             Canvas.ForceUpdateCanvases();
             cam.Render();
             var prev = RenderTexture.active;
@@ -146,12 +177,17 @@ public static class AniGameDevBridge
             RenderTexture.active = prev;
             File.WriteAllBytes(file, tex.EncodeToPNG());
             UnityEngine.Object.DestroyImmediate(tex);
-            Append($"render: wrote {file}");
+            Append($"render: wrote {file} ({canvases.Count} canvas)");
         }
         finally
         {
-            canvas.renderMode = oldMode;
-            canvas.worldCamera = oldCam;
+            foreach (var o in old)
+            {
+                if (o.c == null) continue;
+                o.c.renderMode = o.renderMode;
+                o.c.worldCamera = o.worldCamera;
+                o.c.planeDistance = o.planeDistance;
+            }
             cam.targetTexture = null;
             UnityEngine.Object.DestroyImmediate(camGo);
             rt.Release();

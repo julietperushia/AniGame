@@ -50,6 +50,12 @@ public class SaveData
     public int battleSpeed = 1;
     public float sfxVolume = 0.7f;
 
+    /// <summary>Card materials per rarity tier (Common .. God). Used as fusion fodder.</summary>
+    public int[] materials = new int[9];
+    /// <summary>Exchange new cards (packs and drops) up to this rarity for materials automatically.</summary>
+    public bool autoExchange;
+    public int autoExchangeMaxTier = 1;
+
     /// <summary>HMAC of everything above: a save edited outside the game is detected and rejected.</summary>
     public string integrity = "";
 }
@@ -212,6 +218,19 @@ public static class PlayerProfile
         return JsonUtility.ToJson(save, true);
     }
 
+    /// <summary>
+    /// Checks a signed JSON text exactly as it was written: the hash was taken over the same text with the hash
+    /// field empty. Unlike re-serializing the loaded object, this still works after new fields are added to the
+    /// save format in an update (old saves keep verifying).
+    /// </summary>
+    public static bool IsValidText(string json, string field, string stored)
+    {
+        if (string.IsNullOrEmpty(json) || string.IsNullOrEmpty(stored)) return false;
+        string signedPart = $"\"{field}\": \"{stored}\"";
+        if (!json.Contains(signedPart)) return false;
+        return Hash(json.Replace(signedPart, $"\"{field}\": \"\"")) == stored;
+    }
+
     public static bool IsValid(SaveData save)
     {
         if (save == null || string.IsNullOrEmpty(save.integrity)) return false;
@@ -227,7 +246,8 @@ public static class PlayerProfile
     {
         tampered = false;
         SaveData save;
-        try { save = JsonUtility.FromJson<SaveData>(File.ReadAllText(path)); }
+        string text = null;
+        try { text = File.ReadAllText(path); save = JsonUtility.FromJson<SaveData>(text); }
         catch (Exception ex)
         {
             Debug.LogWarning($"[AniGame] Could not read {Path.GetFileName(path)}: {ex.Message}");
@@ -241,7 +261,7 @@ public static class PlayerProfile
             tampered = PlayerPrefs.HasKey(SignedPrefKey);
             return tampered ? null : save;
         }
-        tampered = !IsValid(save);
+        tampered = !(IsValidText(text, "integrity", save.integrity) || IsValid(save));
         return tampered ? null : save;
     }
 
@@ -334,6 +354,21 @@ public static class PlayerProfile
         }
         data.activeSlot = ValidActiveSlot(data.activeSlot);
         if (data.stamina > MaxStamina) data.stamina = MaxStamina;
+        if (data.materials == null || data.materials.Length != GameRules.MaxTier + 1)
+        {
+            var m = new int[GameRules.MaxTier + 1];
+            if (data.materials != null) System.Array.Copy(data.materials, m, Mathf.Min(m.Length, data.materials.Length));
+            data.materials = m;
+        }
+        data.autoExchangeMaxTier = Mathf.Clamp(data.autoExchangeMaxTier, 0, GameRules.MaxTier);
+        // God cards carry two talents (one active, one passive)
+        foreach (var c in data.cards)
+            if (c.Tier >= GameRules.MaxTier) EnsureGodTalents(c.build);
+        foreach (var s in data.slots)
+        {
+            var c = s.HasCard ? FindCard(s.cardUid) : null;
+            if (c != null && c.Tier >= GameRules.MaxTier && s.build != null) EnsureGodTalents(s.build);
+        }
     }
 
     // ================================================================== the player's character
@@ -521,7 +556,7 @@ public static class PlayerProfile
     }
 
     /// <summary>A fresh build: each stat rolled within +-MaxDeviation, element by Element Orb odds, a random talent.</summary>
-    public static BuildData RandomBuild(CardRarity rarity, string talent = null, CardElement? element = null)
+    public static BuildData RandomBuild(CardRarity rarity, string talent = null, CardElement? element = null, string talent2 = null)
     {
         int tier = GameRules.Tier(rarity);
         var db = CardDatabase.Instance;
@@ -530,15 +565,33 @@ public static class PlayerProfile
             var t = db != null ? db.RandomTalent() : null;
             talent = t != null ? t.DisplayName : "";
         }
-        return new BuildData
+        var build = new BuildData
         {
             hp = RandomRoll(tier),
             atk = RandomRoll(tier),
             def = RandomRoll(tier),
             spd = RandomRoll(tier),
             element = element ?? ElementSystem.RollRandom(),
-            talent = talent
+            talent = talent,
+            talent2 = talent2 ?? ""
         };
+        if (tier >= GameRules.MaxTier) EnsureGodTalents(build);
+        else build.talent2 = "";
+        return build;
+    }
+
+    /// <summary>God builds: talent = an active talent, talent2 = a passive one (keeps whatever already fits).</summary>
+    public static void EnsureGodTalents(BuildData b)
+    {
+        var db = CardDatabase.Instance;
+        if (b == null || db == null) return;
+        var t1 = db.FindTalent(b.talent);
+        var t2 = db.FindTalent(b.talent2);
+        if (t1 != null && !t1.IsActive && (t2 == null || t2.IsActive)) { var tmp = t1; t1 = t2; t2 = tmp; }
+        if (t1 == null || !t1.IsActive) t1 = db.RandomActive();
+        if (t2 == null || t2.IsActive) t2 = db.RandomPassive();
+        b.talent = t1 != null ? t1.DisplayName : b.talent;
+        b.talent2 = t2 != null ? t2.DisplayName : "";
     }
 
     public static CardInstance AddCard(CardRarity rarity, BuildData build)
@@ -777,7 +830,13 @@ public static class PlayerProfile
         string err = PayOrbOrGold(OrbType.Talent);
         if (err != null) return err;
         result = from.Clone();
-        result.talent = CardDatabase.Instance.RandomTalent().DisplayName;
+        if (card.Tier >= GameRules.MaxTier)
+        {
+            // God: one reroll gives a new active AND a new passive
+            result.talent = CardDatabase.Instance.RandomActive()?.DisplayName ?? result.talent;
+            result.talent2 = CardDatabase.Instance.RandomPassive()?.DisplayName ?? result.talent2;
+        }
+        else result.talent = CardDatabase.Instance.RandomTalent().DisplayName;
         Save();
         return null;
     }
@@ -797,12 +856,14 @@ public static class PlayerProfile
                          .OrderBy(c => c.build.TotalRoll).ToList();
     }
 
-    public static string CanFuse(CardInstance main, IList<CardInstance> fodder)
+    public static string CanFuse(CardInstance main, IList<CardInstance> fodder, int materials = 0)
     {
         if (main == null) return "Pick a main card";
         if (!GameRules.CanFuseFrom(main.Tier)) return "God is the maximum rarity";
         if (main.rarity == CardRarity.Mythic && !GodUnlocked) return "GOD rarity is locked: buy the New Generation buff";
-        if (fodder == null || fodder.Count != GameRules.FusionFodderCount) return $"Needs {GameRules.FusionFodderCount} fodder cards of the same rarity";
+        fodder = fodder ?? new List<CardInstance>();
+        if (materials < 0 || Materials(main.Tier) < materials) return $"Not enough {MaterialName(main.Tier)}s";
+        if (fodder.Count + materials != GameRules.FusionFodderCount) return $"Needs {GameRules.FusionFodderCount} fodder (cards or {MaterialName(main.Tier)}s)";
         if (fodder.Distinct().Count() != fodder.Count) return "Pick two different fodder cards";
         foreach (var f in fodder)
         {
@@ -817,9 +878,11 @@ public static class PlayerProfile
 
     /// <summary>Success: main card +1 rarity (Fusion Blessing: 3% for +2, never into Mythic/God); Roll, element, talent kept.
     /// Failure: both fodder and the orbs are lost (Fusion Protection: only 1 fodder). Lucky Fusion may refund 1 orb.</summary>
-    public static FusionResult Fuse(CardInstance main, IList<CardInstance> fodder)
+    public static FusionResult Fuse(CardInstance main, IList<CardInstance> fodder, int materials = 0)
     {
-        if (CanFuse(main, fodder) != null) return null;
+        fodder = fodder ?? new List<CardInstance>();
+        if (CanFuse(main, fodder, materials) != null) return null;
+        int tier = main.Tier;
         var result = new FusionResult
         {
             from = main.rarity,
@@ -832,7 +895,8 @@ public static class PlayerProfile
         if (result.success)
         {
             foreach (var f in ordered) RemoveCard(f);
-            result.fodderLost = ordered.Count;
+            Data.materials[tier] -= materials;
+            result.fodderLost = ordered.Count + materials;
             int target = main.Tier + 1;
             if (Has(Buffs.FusionBlessing) && target + 1 <= (int)CardRarity.Legendary && UnityEngine.Random.value < Buffs.FusionBlessingChance)
             {
@@ -840,14 +904,24 @@ public static class PlayerProfile
                 result.blessed = true;
             }
             main.rarity = (CardRarity)Mathf.Min(GameRules.MaxTier, target);
+            if (main.Tier >= GameRules.MaxTier)
+            {
+                EnsureGodTalents(main.build);
+                foreach (var s in Data.slots)
+                    if (s.cardUid == main.uid && s.build != null) EnsureGodTalents(s.build);
+            }
             Data.fusionsSucceeded++;
         }
         else
         {
-            int lose = Has(Buffs.FusionProtection) ? 1 : ordered.Count;
-            for (int i = 0; i < lose; i++) RemoveCard(ordered[i]);
+            int total = ordered.Count + materials;
+            int lose = Has(Buffs.FusionProtection) ? 1 : total;
+            // Materials are lost first, then the weakest cards
+            int matLost = Mathf.Min(materials, lose);
+            Data.materials[tier] -= matLost;
+            for (int i = 0; i < lose - matLost && i < ordered.Count; i++) RemoveCard(ordered[i]);
             result.fodderLost = lose;
-            result.fodderSaved = ordered.Count - lose;
+            result.fodderSaved = total - lose;
             Data.fusionsFailed++;
         }
         if (UnityEngine.Random.value < LuckyFusionChance(result.orbsSpent))
@@ -874,15 +948,23 @@ public static class PlayerProfile
         var free = new int[GameRules.MaxTier + 1];
         var guarded = new int[GameRules.MaxTier + 1];
         foreach (var c in Data.cards) { if (IsProtected(c)) guarded[c.Tier]++; else free[c.Tier]++; }
+        var mats = (int[])Data.materials.Clone();
         int budget = Mathf.Min(Mathf.Max(0, maxOrbs), Data.fusionOrbs);
         int fusions = 0, orbs = 0, cards = 0;
         for (int t = 0; t < top; t++)
         {
             int cost = GameRules.FusionOrbCost(t);
-            while (free[t] >= 2 && (guarded[t] >= 1 || free[t] >= 3) && budget >= cost)
+            while (budget >= cost)
             {
-                if (guarded[t] >= 1) { guarded[t]--; guarded[t + 1]++; } else { free[t]--; free[t + 1]++; }
-                free[t] -= 2;
+                bool guardedMain = guarded[t] >= 1;
+                int mainCost = guardedMain ? 0 : 1;
+                if (free[t] - mainCost < 0) break;
+                int fromMats = Mathf.Min(2, mats[t]);
+                int fromCards = 2 - fromMats;
+                if (free[t] - mainCost < fromCards) break;
+                if (guardedMain) { guarded[t]--; guarded[t + 1]++; } else { free[t]--; free[t + 1]++; }
+                free[t] -= fromCards;
+                mats[t] -= fromMats;
                 budget -= cost; orbs += cost; fusions++; cards += 2;
             }
         }
@@ -910,10 +992,11 @@ public static class PlayerProfile
                     if (Data.fusionOrbs < cost) { r.stopReason = "out of Fusion Orbs"; break; }
                     var main = PickMain(t);
                     if (main == null) break;
-                    var fodder = FodderCandidates(main).Take(GameRules.FusionFodderCount).ToList();
-                    if (fodder.Count < GameRules.FusionFodderCount) break;
+                    int mats = Mathf.Min(GameRules.FusionFodderCount, Materials(t)); // materials first, then cards
+                    var fodder = FodderCandidates(main).Take(GameRules.FusionFodderCount - mats).ToList();
+                    if (fodder.Count + mats < GameRules.FusionFodderCount) break;
                     var startRarity = main.rarity;
-                    var res = Fuse(main, fodder);
+                    var res = Fuse(main, fodder, mats);
                     if (res == null) break;
                     r.attempts++;
                     r.orbsSpent += res.orbsSpent;
@@ -977,7 +1060,9 @@ public static class PlayerProfile
     {
         rarity = ObtainedRarity(rarity, out _);
         var card = AddCard(rarity, RandomBuild(rarity));
-        return new PackItem { type = RewardType.Card, amount = 1, rarity = rarity, card = card };
+        var item = new PackItem { type = RewardType.Card, amount = 1, rarity = rarity, card = card };
+        if (ShouldAutoExchange(card)) { ExchangeCard(card, false); item.exchanged = true; }
+        return item;
     }
 
     static int GiveCurrency(RewardType type, int amount)
@@ -1066,6 +1151,105 @@ public static class PlayerProfile
         Save();
     }
 
+    // ================================================================== materials (card exchange)
+
+    static readonly string[] materialShort = { "Common", "Uncommon", "Rare", "SR", "UR", "Epic", "Legendary", "Mythic", "God" };
+
+    public static string MaterialName(int tier) => $"{materialShort[Mathf.Clamp(tier, 0, materialShort.Length - 1)]} Material";
+    public static int Materials(int tier) => Data.materials != null && tier >= 0 && tier < Data.materials.Length ? Data.materials[tier] : 0;
+    public static int TotalMaterials => Data.materials != null ? Data.materials.Sum() : 0;
+
+    public static string CanExchange(CardInstance card)
+    {
+        if (card == null) return "No card selected";
+        if (card.locked) return "Unlock the card first";
+        if (IsInSlot(card.uid)) return "This card is in a build slot";
+        if (Data.cards.Count <= 1) return "You need to keep at least one card";
+        return null;
+    }
+
+    /// <summary>Turns a card into 1 material of its rarity (fusion fodder that takes no collection space).</summary>
+    public static string ExchangeCard(CardInstance card, bool save = true)
+    {
+        string err = CanExchange(card);
+        if (err != null) return err;
+        RemoveCard(card);
+        Data.materials[card.Tier]++;
+        if (save) Save();
+        return null;
+    }
+
+    /// <summary>Cards that "exchange all up to maxTier" would turn into materials.</summary>
+    public static List<CardInstance> ExchangeableCards(int maxTier) =>
+        Data.cards.Where(c => c.Tier <= maxTier && !IsProtected(c)).ToList();
+
+    /// <summary>Exchanges every unlocked, unslotted card up to maxTier. Returns materials gained per tier.</summary>
+    public static int[] ExchangeAll(int maxTier)
+    {
+        var gained = new int[GameRules.MaxTier + 1];
+        foreach (var c in ExchangeableCards(maxTier))
+        {
+            if (Data.cards.Count <= 1) break;
+            RemoveCard(c);
+            Data.materials[c.Tier]++;
+            gained[c.Tier]++;
+        }
+        Save();
+        return gained;
+    }
+
+    static bool ShouldAutoExchange(CardInstance card) =>
+        card != null && Data.autoExchange && card.Tier <= Data.autoExchangeMaxTier && Data.cards.Count > 1;
+
+    public static void SetAutoExchange(bool on, int maxTier)
+    {
+        Data.autoExchange = on;
+        Data.autoExchangeMaxTier = Mathf.Clamp(maxTier, 0, GameRules.MaxTier);
+        Save();
+    }
+
+    // ================================================================== test mode (editor / development builds)
+
+    public static bool TestModeAvailable => Application.isEditor || Debug.isDebugBuild;
+
+    /// <summary>Clears every floor of every LOC before the last one, so all 100 LOCs are open.</summary>
+    public static string TestUnlockAllLocations()
+    {
+        var db = CardDatabase.Instance;
+        if (db == null) return "No card database";
+        int count = db.LocationCount;
+        for (int loc = 1; loc < count; loc++) SetClearedFloors(loc, db.FloorCount(loc));
+        GameSession.SelectedLocation = count;
+        Save();
+        return $"LOC 1-{count - 1} cleared: every LOC up to {count} is open";
+    }
+
+    /// <summary>Adds a God card (active + passive talent, good Roll) and puts it in the main slot.</summary>
+    public static CardInstance TestGiveGodCard()
+    {
+        var build = RandomBuild(CardRarity.God);
+        int dev = GameRules.MaxDeviation(GameRules.MaxTier);
+        build.hp = build.atk = build.def = build.spd = dev / 2;
+        var card = AddCard(CardRarity.God, build);
+        if (!Data.buffs.Contains(Buffs.NewGeneration)) Data.buffs.Add(Buffs.NewGeneration);
+        var slot = GetSlot(ActiveSlot);
+        if (slot != null && slot.unlocked) { slot.cardUid = card.uid; slot.build = card.build.Clone(); }
+        Save();
+        return card;
+    }
+
+    public static void TestAddResources()
+    {
+        Data.gold += 1000000;
+        Data.diamonds += 50000;
+        Data.fusionOrbs += 200;
+        Data.elementOrbs += 50;
+        Data.talentOrbs += 50;
+        Data.godOrbs += 20;
+        Data.stamina = MaxStamina;
+        Save();
+    }
+
     // ================================================================== campaign progress
 
     public static int ClearedFloors(int location)
@@ -1138,8 +1322,13 @@ public static class PlayerProfile
         {
             string talent = enemy.talent != null ? enemy.talent.DisplayName : null;
             var rarity = ObtainedRarity(enemy.rarity, out bool upgraded);
-            r.droppedCard = AddCard(rarity, RandomBuild(rarity, talent, enemy.element));
+            r.droppedCard = AddCard(rarity, RandomBuild(rarity, talent, enemy.element, enemy.talent2 != null ? enemy.talent2.DisplayName : null));
             r.rareEncounter = upgraded;
+            if (ShouldAutoExchange(r.droppedCard))
+            {
+                ExchangeCard(r.droppedCard, false);
+                r.notes.Add($"Auto exchange: the card became 1 {MaterialName(r.droppedCard.Tier)}");
+            }
             r.lines.Add($"CARD DROP: {CharacterName} ({CardStats.RarityName(rarity)})" + (upgraded ? " - Rare Encounter!" : ""));
             if (upgraded) r.notes.Add("Rare Encounter: the card came one rarity higher!");
         }

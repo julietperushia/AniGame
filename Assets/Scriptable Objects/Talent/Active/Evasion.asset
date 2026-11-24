@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Evasion
   m_EditorClassIdentifier: Assembly-CSharp::Evasion
   talentName: Evasion
-  description: Increase your EVASION by 17%, allowing you to dodge enemy attacks.
+  description: 'Increase your EVASION rating by 17 (stacks, no limit). Evade chance has diminishing returns and never goes above 75%.'
   manaCost: 100
   evasionBonus: 17

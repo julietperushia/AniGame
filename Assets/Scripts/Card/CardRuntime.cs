@@ -21,7 +21,14 @@ public enum DamageKind
 public class CardRuntime
 {
     public Card baseCard;          // character art / name (may be null for a missing key)
+    /// <summary>Main talent (the first of <see cref="talents"/>).</summary>
     public Talent talent;
+    /// <summary>Every talent this card has in battle: God cards have an active + a passive; Gamble and Mimic add more.</summary>
+    public readonly List<Talent> talents = new List<Talent>();
+    readonly Dictionary<Talent, float> talentScale = new Dictionary<Talent, float>();
+    int nextActive;
+    /// <summary>The other fighter (set by the battle engine).</summary>
+    public CardRuntime opponent;
 
     public CardRarity rarity;
     public CardElement element;
@@ -68,7 +75,44 @@ public class CardRuntime
     public int lifesteal;   // percent of normal-attack damage healed back
     public int critRate;
     public int critDamage;
-    public int evasion;
+    public int evasion;     // evasion RATING (no limit); real chance = GameRules.EvadeChance(evasion), max 75%
+    public bool critIgnoresEvasion; // Precision: critical hits can't be evaded
+
+    // ---- New statuses (talent pack 2)
+    public int shield;               // Burst Barrier: absorbs damage first
+    public int shieldTurns;
+    public int shieldBurst;          // true damage dealt to the opponent when the shield breaks
+    public int debuffImmuneTurns;    // Purify
+    public float debuffResistChance; // Gigantify: chance to shrug off each debuff
+    public bool frozen;              // Frostbite: skips the next turn
+    public int sleepTurns;           // Sleep: skips turns until hit
+    public int blindTurns;           // Blind: 50% miss on normal attacks
+    public int hexTurns;             // Hex: ATK and DEF swapped
+    public int hypnoStacks;          // Hypnotize: +20% chance per stack to hit itself
+    public int hypnoImmuneTurns;
+    public bool silenceManaBoost;    // Silence talent: mana fills twice as fast while silenced
+    public float healTakenMultiplier = 1f; // Rot: healing and lifesteal received
+    public bool greedy;              // Greedy: the opponent's healing heals this card instead
+    public bool doppelganger;        // Doppelganger: copies 30% of the opponent's stat gains and heals
+    public bool gutsReady;           // Guts: survive one lethal hit
+    public float damageStoreRate;    // Death's Dance: part of the damage taken is stored instead
+    public int storedDamage;
+    public float defIgnore;          // Piercing Edge: part of the enemy DEF ignored
+    public bool reductionPierce;     // Piercing Edge: enemy damage reduction halved
+    public float slayerPercent;      // Slayer: + enemy max HP per attack
+    public float infernusPercent;    // Infernus: part of attack damage dealt as true damage
+    public float infernusHeal;
+    public int momentumStacks;       // Momentum
+    public float momentumPerStack;
+    public int momentumMax = 5;
+    public float hasteChance;        // Haste: extra attack when faster
+    public bool counterStance;       // Counter Stance: hit back after evading
+    public float counterDamage = 0.4f;
+    public bool chargeStrikeReady;   // Charge Strike: next attack x3, can't be evaded
+    public bool skipAttackThisTurn;
+    public bool chargeAttackPassive; // Charge Attack: store attacks until 30% HP
+    public int chargeStored;
+    public string skipReason;
 
     // Player buffs (set by PlayerProfile.ApplyCombatBuffs)
     public float secondWindChance;   // revive with 1 HP once
@@ -108,11 +152,14 @@ public class CardRuntime
     {
         baseCard = card;
         talent = card.talent;
+        AddTalent(card.talent);
+        AddTalent(card.talent2);
         rarity = card.rarity;
         element = card.element;
         talentPower = GameRules.TalentPower(Tier);
         float s = GameRules.EnemyStatScale;
-        SetBaseStats(Mathf.RoundToInt(card.health * s), Mathf.RoundToInt(card.attack * s),
+        // card.health is stored x10 (sheet HP x 10): rescale it to the current HP multiplier
+        SetBaseStats(Mathf.RoundToInt(card.health / 10f * GameRules.HpMultiplier * s), Mathf.RoundToInt(card.attack * s),
                      Mathf.RoundToInt(card.defense * s), Mathf.RoundToInt(card.speed * s));
         mana = Mathf.Max(0, card.mana);
         maxMana = card.maxMana > 0 ? card.maxMana : 100;
@@ -135,6 +182,8 @@ public class CardRuntime
             talent = db != null ? db.FindTalent(build.talent) : null,
         };
         rt.talentPower = GameRules.TalentPower(rt.Tier);
+        rt.AddTalent(rt.talent);
+        if (rt.Tier >= GameRules.MaxTier && db != null) rt.AddTalent(db.FindTalent(build.talent2));
         rt.SetBaseStats(CardStats.HpOf(card.rarity, build, card.godBonus), CardStats.AtkOf(card.rarity, build, card.godBonus),
                         CardStats.DefOf(card.rarity, build, card.godBonus), CardStats.SpdOf(card.rarity, build, card.godBonus));
         rt.mana = 0;
@@ -162,14 +211,27 @@ public class CardRuntime
     /// <summary>
     /// Heals the card by the specified amount (affected by healing bonus / Burn reduction), capped at max health.
     /// </summary>
-    public void Heal(int amount)
+    public void Heal(int amount) => Heal(amount, false);
+
+    /// <summary>redirected = this heal was sent here by Greedy / Doppelganger (no further redirects).</summary>
+    public void Heal(int amount, bool redirected)
     {
         if (!IsAlive || amount <= 0) return;
-        float multiplier = (1f + healingBonus) * (1f - healingReduction);
+        // Greedy: the opponent takes this healing instead
+        if (!redirected && opponent != null && opponent.greedy && opponent.IsAlive)
+        {
+            BattleLog.Status(opponent, $"<color=#FFD54F>[Greedy] {opponent.DisplayName} steals the healing!</color>");
+            opponent.Heal(amount, true);
+            return;
+        }
+        float multiplier = (1f + healingBonus) * (1f - healingReduction) * Mathf.Max(0f, healTakenMultiplier);
         int actualHeal = Mathf.Max(0, Mathf.RoundToInt(amount * multiplier)); // Can't heal if reduction >= 100%
         int before = health;
         health = Mathf.Min(maxHealth, health + actualHeal);
         BattleLog.Healed(this, health - before);
+        // Doppelganger: the opponent copies 30% of every heal
+        if (!redirected && health > before && opponent != null && opponent.doppelganger && opponent.IsAlive)
+            opponent.Heal(Mathf.Max(1, Mathf.RoundToInt((health - before) * 0.3f)), true);
     }
 
     /// <summary>Deals damage to the card, applying flat damage reduction (min 1).</summary>
@@ -179,14 +241,62 @@ public class CardRuntime
     }
 
     /// <summary>Deals damage of a given kind. Returns the damage actually taken.</summary>
-    public int TakeDamage(int amount, DamageKind kind)
+    public int TakeDamage(int amount, DamageKind kind) => TakeDamage(amount, kind, 1f);
+
+    /// <summary>reductionScale: 0.5 = the attacker halves this card's damage reduction (Piercing Edge).</summary>
+    public int TakeDamage(int amount, DamageKind kind, float reductionScale)
     {
         if (!IsAlive) return 0;
-        float scaled = amount * (1f - Mathf.Clamp01(damageTakenReduction));
-        int actualDamage = Mathf.Max(1, Mathf.RoundToInt(scaled) - damageReduction);
-        actualDamage = Mathf.Min(actualDamage, health);
+        float scaled = amount * (1f - Mathf.Clamp01(damageTakenReduction * reductionScale));
+        int actualDamage = Mathf.Max(1, Mathf.RoundToInt(scaled) - Mathf.RoundToInt(damageReduction * reductionScale));
+        return ApplyDamage(actualDamage, kind);
+    }
+
+    /// <summary>Shield, Death's Dance and Guts, then the HP loss itself.</summary>
+    int ApplyDamage(int amount, DamageKind kind)
+    {
+        if (shield > 0 && amount > 0)
+        {
+            int absorbed = Mathf.Min(shield, amount);
+            shield -= absorbed;
+            amount -= absorbed;
+            BattleLog.Status(this, $"<color=#6FD3FF>{DisplayName}'s barrier absorbs {absorbed}</color>");
+            if (shield <= 0)
+            {
+                shieldTurns = 0;
+                if (shieldBurst > 0 && opponent != null && opponent.IsAlive)
+                {
+                    int burst = shieldBurst;
+                    shieldBurst = 0;
+                    BattleLog.Status(this, $"<color=#6FD3FF>[Burst Barrier] The barrier explodes!</color>");
+                    opponent.TakeTrueDamage(burst, DamageKind.Skill);
+                }
+            }
+            if (amount <= 0) return 0;
+        }
+        if (damageStoreRate > 0f)
+        {
+            int stored = Mathf.RoundToInt(amount * damageStoreRate);
+            amount -= stored;
+            storedDamage += stored;
+        }
+        int actualDamage = Mathf.Min(Mathf.Max(0, amount), health);
+        if (gutsReady && actualDamage >= health)
+        {
+            gutsReady = false;
+            actualDamage = health - 1;
+            AddTimedBuff(30, 0, 3);
+            BattleLog.Status(this, $"<color=#FF8A3D>[Guts] {DisplayName} refuses to fall! +30% ATK for 3 turns</color>");
+        }
         health -= actualDamage;
         BattleLog.Damaged(this, actualDamage, kind);
+        if (damageStoreRate > 0f && health > 0 && storedDamage >= health)
+        {
+            BattleLog.Status(this, $"<color=#B39DDB>[Death's Dance] The stored damage ({storedDamage}) catches up with {DisplayName}!</color>");
+            int rest = health;
+            health = 0;
+            BattleLog.Damaged(this, rest, DamageKind.True);
+        }
         return actualDamage;
     }
 
@@ -199,10 +309,7 @@ public class CardRuntime
     public int TakeTrueDamage(int amount, DamageKind kind)
     {
         if (!IsAlive || amount <= 0) return 0;
-        int actualDamage = Mathf.Min(amount, health);
-        health -= actualDamage;
-        BattleLog.Damaged(this, actualDamage, kind);
-        return actualDamage;
+        return ApplyDamage(amount, kind);
     }
 
     /// <summary>Resets stats (and max HP) to base values, clears timed buffs and restores full health.</summary>
@@ -249,10 +356,69 @@ public class CardRuntime
         mana = Mathf.Clamp(mana + amount, 0, maxMana);
     }
 
-    /// <summary>Adds mana scaled by <see cref="manaRegen"/>.</summary>
+    /// <summary>Adds mana scaled by <see cref="manaRegen"/> (doubled while silenced by the Silence talent).</summary>
     public void GainManaWithRegen(int amount)
     {
-        GainMana(Mathf.RoundToInt(amount * Mathf.Max(0, manaRegen) / 100f));
+        float boost = silenceTurns > 0 && silenceManaBoost ? 2f : 1f;
+        GainMana(Mathf.RoundToInt(amount * Mathf.Max(0, manaRegen) / 100f * boost));
+    }
+
+    // ========== Talents ==========
+
+    /// <summary>Adds a talent (ignored if null or already there). scale = strength (Gamble talents: 0.6).</summary>
+    public void AddTalent(Talent t, float scale = 1f)
+    {
+        if (t == null || talents.Contains(t)) return;
+        talents.Add(t);
+        if (talent == null) talent = t;
+        if (!Mathf.Approximately(scale, 1f)) talentScale[t] = scale;
+    }
+
+    public bool HasTalent<T>() where T : Talent
+    {
+        foreach (var t in talents) if (t is T) return true;
+        return false;
+    }
+
+    public bool HasTalent(Talent t) => t != null && talents.Contains(t);
+
+    /// <summary>Strength multiplier of one of this card's talents (1, or 0.6 for Gamble's).</summary>
+    public float ScaleOf(Talent t) => t != null && talentScale.TryGetValue(t, out float s) ? s : 1f;
+
+    public IEnumerable<ActiveTalent> Actives()
+    {
+        foreach (var t in talents) if (t is ActiveTalent a) yield return a;
+    }
+
+    public IEnumerable<PassiveTalent> Passives()
+    {
+        foreach (var t in talents) if (t is PassiveTalent p) yield return p;
+    }
+
+    /// <summary>The active talent to try this turn (cards with several actives take turns between them).</summary>
+    public ActiveTalent NextActive()
+    {
+        var list = new List<ActiveTalent>(Actives());
+        if (list.Count == 0) return null;
+        return list[nextActive % list.Count];
+    }
+
+    public void AdvanceActive() => nextActive++;
+
+    /// <summary>True when any debuff on this card is blocked (Purify immunity, Gigantify resist).</summary>
+    public bool ResistsDebuff()
+    {
+        if (debuffImmuneTurns > 0)
+        {
+            BattleLog.Status(this, $"<color=#E0F7FA>{DisplayName} is immune (Purify)</color>");
+            return true;
+        }
+        if (debuffResistChance > 0f && BattleRandom.Value < debuffResistChance)
+        {
+            BattleLog.Status(this, $"<color=#E0F7FA>{DisplayName} shrugs it off (Gigantify)</color>");
+            return true;
+        }
+        return false;
     }
 
     // ========== Talent State Management ==========
@@ -291,6 +457,18 @@ public class CardRuntime
         if (hasEndurance) parts.Add($"<color=#6FD3FF>ENDURE {enduranceTurns}</color>");
         if (buffTurnsLeft > 0) parts.Add($"<color=#FFD54F>BLESS {buffTurnsLeft}</color>");
         if (lifesteal > 0) parts.Add($"<color=#FF6B8B>LIFESTEAL {lifesteal}%</color>");
+        if (critIgnoresEvasion) parts.Add("<color=#FFB23D>SURE CRIT</color>");
+        if (shield > 0) parts.Add($"<color=#6FD3FF>SHIELD {shield}</color>");
+        if (debuffImmuneTurns > 0) parts.Add($"<color=#E0F7FA>IMMUNE {debuffImmuneTurns}</color>");
+        if (frozen) parts.Add("<color=#81D4FA>FROZEN</color>");
+        if (sleepTurns > 0) parts.Add($"<color=#9FA8DA>SLEEP {sleepTurns}</color>");
+        if (blindTurns > 0) parts.Add($"<color=#B0BEC5>BLIND {blindTurns}</color>");
+        if (hexTurns > 0) parts.Add($"<color=#CE93D8>HEX {hexTurns}</color>");
+        if (hypnoStacks > 0) parts.Add($"<color=#BA68C8>HYPNO x{hypnoStacks}</color>");
+        if (momentumStacks > 0) parts.Add($"<color=#FF8A65>MOMENTUM x{momentumStacks}</color>");
+        if (chargeStored > 0) parts.Add($"<color=#FFB300>CHARGE {chargeStored}</color>");
+        if (chargeStrikeReady) parts.Add("<color=#FFB300>CHARGED</color>");
+        if (storedDamage > 0) parts.Add($"<color=#B39DDB>STORED {storedDamage}</color>");
         return string.Join("  ", parts);
     }
 }

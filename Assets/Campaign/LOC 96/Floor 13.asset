@@ -16,7 +16,8 @@ MonoBehaviour:
   cardImg: {fileID: 21300000, guid: a46aaa68a4662bb4090718873f222d5b, type: 3}
   element: 1
   rarity: 8
-  talent: {fileID: 11400000, guid: 9e5badc47ad033747a49fcf5d904d314, type: 2}
+  talent: {fileID: 11400000, guid: add3380d0448380439b92120ae052364, type: 2}
+  talent2: {fileID: 11400000, guid: 2aeb22294aa6e1546a08f7328a127752, type: 2}
   health: 1530
   defense: 538
   attack: 222

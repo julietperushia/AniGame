@@ -39,6 +39,24 @@ public abstract class Talent : ScriptableObject
 
     // Called every turn (after status effects, before acting)
     public virtual void OnTurnStart(CardRuntime self, CardRuntime enemy) { }
+
+    /// <summary>After every normal attack in the battle, by either fighter.</summary>
+    public virtual void OnAnyAttack(CardRuntime self, CardRuntime enemy, CardRuntime attacker) { }
+
+    /// <summary>After the enemy casts an active talent.</summary>
+    public virtual void OnEnemySkill(CardRuntime self, CardRuntime enemy) { }
+
+    /// <summary>This card evaded a normal attack.</summary>
+    public virtual void OnEvade(CardRuntime self, CardRuntime attacker) { }
+
+    /// <summary>This card's normal attack was evaded or missed.</summary>
+    public virtual void OnAttackMissed(CardRuntime self, CardRuntime enemy) { }
+
+    /// <summary>A normal attack hit this card (after the damage was taken).</summary>
+    public virtual void OnHitTaken(CardRuntime self, CardRuntime attacker, int damage, bool crit) { }
+
+    /// <summary>Category shown in the Library filter.</summary>
+    public TalentCategory Category => TalentCatalog.CategoryOf(this);
 }
 
 public abstract class PassiveTalent : Talent
@@ -57,4 +75,7 @@ public abstract class ActiveTalent : Talent
     public virtual int GetManaCost(CardRuntime self) => Mathf.Max(manaCost, self.maxMana);
 
     public abstract void Activate(CardRuntime self, CardRuntime enemy);
+
+    /// <summary>Extra condition to cast (checked before mana is spent). Default: always.</summary>
+    public virtual bool CanActivate(CardRuntime self, CardRuntime enemy) => true;
 }

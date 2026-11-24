@@ -177,8 +177,26 @@ public static class AniGameSetup
 
     // ------------------------------------------------------------------ 1. talents
 
+    // ------------------------------------------------------------------ game balance asset (HP multiplier, rounds)
+
+    [InitializeOnLoadMethod]
+    static void EnsureGameBalanceLater() => EditorApplication.delayCall += () => EnsureGameBalance();
+
+    /// <summary>Creates Assets/Resources/GameBalance.asset (HP multiplier, round limit, enrage) if it is missing.</summary>
+    public static void EnsureGameBalance()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        const string path = "Assets/Resources/GameBalance.asset";
+        if (AssetDatabase.LoadAssetAtPath<GameBalance>(path) != null) return;
+        CardImporter.CreateFolderRecursive("Assets/Resources");
+        AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<GameBalance>(), path);
+        AssetDatabase.SaveAssets();
+        Debug.Log("[AniGame] Created " + path + " (HP multiplier and battle length).");
+    }
+
     public static string RepairTalents()
     {
+        EnsureGameBalance();
         var types = TypeCache.GetTypesDerivedFrom<Talent>().Where(t => !t.IsAbstract && !t.IsGenericType).ToList();
         var existing = new List<Talent>();
         foreach (string guid in AssetDatabase.FindAssets("t:Talent"))

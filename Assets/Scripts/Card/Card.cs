@@ -9,6 +9,8 @@ public class Card : ScriptableObject
     public CardRarity rarity;
 
     public Talent talent;
+    [Tooltip("God cards only: second talent (one active + one passive).")]
+    public Talent talent2;
 
     [Tooltip("Stored already multiplied by 10 (Anigame shows HP stat x10).")]
     public int health;

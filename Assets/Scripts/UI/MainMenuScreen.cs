@@ -90,7 +90,10 @@ public class MainMenuScreen : MonoBehaviour
         }
 
         SfxSynth.Volume = PlayerProfile.Data.sfxVolume;
+        if (logo != null && logo.enabled) UIFx.Bob(logo.rectTransform, 7f, 1.2f);
+        UIFx.GlowBehind((RectTransform)playButton.transform, new Color(1f, 0.45f, 0.75f, 0.6f), 34f, 0.25f, 0.75f);
         BuildShowcase();
+        TestModePanel.AddButton(transform, () => { RefreshProfile(); BuildShowcase(); });
         StartCoroutine(RefreshLoop());
         StartCoroutine(TitleAnimation());
     }
@@ -160,6 +163,8 @@ public class MainMenuScreen : MonoBehaviour
             float offset = i - (shown - 1) / 2f;
             rt.anchoredPosition = new Vector2(offset * 190f, -Mathf.Abs(offset) * 30f);
             rt.localRotation = Quaternion.Euler(0, 0, -offset * 9f);
+            UIFx.Bob(rt, 8f, 1.3f + 0.15f * i);
+            UIFx.PopIn(rt, 0.25f + 0.1f * i, 0.4f);
         }
         if (shown == 3) showcase.GetChild(1).SetAsLastSibling();
     }

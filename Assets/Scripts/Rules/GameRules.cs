@@ -90,4 +90,44 @@ public static class GameRules
     public const int StartFusionOrbs = 2;
     /// <summary>Floor enemies use the sheet's stats as-is: the POWER column already scales them (user decision).</summary>
     public const float EnemyStatScale = 1f;
+
+    // ---- HP multiplier and battle length (Assets/Resources/GameBalance.asset; Test Mode can override it)
+    public const string HpOverrideKey = "AniGame.HpMultiplierOverride";
+
+    /// <summary>HP = HP stat x this (default 10).</summary>
+    public static int HpMultiplier
+    {
+        get
+        {
+            int o = PlayerPrefs.GetInt(HpOverrideKey, 0);
+            return o > 0 ? o : Mathf.Max(1, GameBalance.Current.hpMultiplier);
+        }
+    }
+
+    /// <summary>Test Mode: overrides the HP multiplier on this PC (0 = use GameBalance.asset).</summary>
+    public static void SetHpMultiplierOverride(int value)
+    {
+        if (value <= 0) PlayerPrefs.DeleteKey(HpOverrideKey);
+        else PlayerPrefs.SetInt(HpOverrideKey, Mathf.Clamp(value, 1, 200));
+        PlayerPrefs.Save();
+    }
+
+    public static bool HpMultiplierOverridden => PlayerPrefs.GetInt(HpOverrideKey, 0) > 0;
+
+    static float RoundScale => GameBalance.Current.scaleRoundsWithHp ? Mathf.Max(1f, HpMultiplier / 10f) : 1f;
+    public static int MaxRounds => Mathf.Max(10, Mathf.RoundToInt(GameBalance.Current.maxRounds * RoundScale));
+    public static int EnrageStartRound => Mathf.Max(1, Mathf.RoundToInt(GameBalance.Current.enrageStartRound * RoundScale));
+    public static int EnragePercent => Mathf.Max(0, GameBalance.Current.enragePercent);
+
+    // ---- Evasion: diminishing returns
+    // The card's evasion stat is a RATING with no upper limit. The real chance to evade a normal attack is
+    // cap x (1 - e^(-rating / cap)): almost 1:1 at low ratings, then flattening toward the cap (never reached).
+    // 10 -> 9.4%, 20 -> 17.6%, 50 -> 36.5%, 100 -> 55%, 200 -> 70%, 300 -> 73.6%, 1000 -> 75%.
+    public const float EvasionCap = 75f;
+
+    /// <summary>Real evade chance in percent (0..75) for an evasion rating.</summary>
+    public static float EvadeChance(int rating) => rating <= 0 ? 0f : EvasionCap * (1f - Mathf.Exp(-rating / EvasionCap));
+
+    /// <summary>"50 (36.5%)" for tooltips and stat lines.</summary>
+    public static string EvasionLabel(int rating) => $"{rating} ({EvadeChance(rating):0.#}%)";
 }

@@ -103,7 +103,7 @@ public static class Buffs
             description = "Unlocks dismantling cards for gold (half the stat reroll cost of their rarity)." },
         // Combat & Exploration (combat: diamonds, stamina: gold)
         new BuffDefinition { id = TheFlash, name = "The Flash", group = BuffGroup.Combat, currency = D, price = 300,
-            description = "+2% evasion." },
+            description = "+2 evasion rating (about +1.9% evade chance at low evasion)." },
         new BuffDefinition { id = HeadHunter, name = "Head Hunter", group = BuffGroup.Combat, currency = D, price = 300,
             description = "+2% critical chance." },
         new BuffDefinition { id = StrongestHero, name = "Strongest Hero", group = BuffGroup.Combat, currency = D, price = 100,

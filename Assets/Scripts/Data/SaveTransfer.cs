@@ -89,14 +89,15 @@ public static class SaveTransfer
         path = (path ?? "").Trim().Trim('"');
         if (path.Length == 0) return "No file chosen";
         if (!File.Exists(path)) return "File not found: " + path;
-        try { export = JsonUtility.FromJson<SaveExport>(File.ReadAllText(path)); }
+        string text = null;
+        try { text = File.ReadAllText(path); export = JsonUtility.FromJson<SaveExport>(text); }
         catch (Exception ex) { return "Not an AniGame save file (" + ex.Message + ")"; }
         if (export == null || export.format != Format || export.save == null) return "Not an AniGame save file";
         if (export.formatVersion > FormatVersion) return "This save comes from a newer version of the game. Update the game first";
         if (export.formatVersion < 2 || string.IsNullOrEmpty(export.hash)) return "This file was exported before save protection was added. Export it again from the old PC";
         string stored = export.hash;
         export.hash = "";
-        bool valid = PlayerProfile.Hash(JsonUtility.ToJson(export, true)) == stored;
+        bool valid = PlayerProfile.IsValidText(text, "hash", stored) || PlayerProfile.Hash(JsonUtility.ToJson(export, true)) == stored;
         export.hash = stored;
         if (!valid) return "This save file was edited or damaged, so it can't be imported";
         if (export.saveVersion != PlayerProfile.SaveVersion || export.save.version != PlayerProfile.SaveVersion)

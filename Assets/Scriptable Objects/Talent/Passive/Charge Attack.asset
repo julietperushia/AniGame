@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2ee1986ab41a0540b7d64d5d202a59e, type: 3}
+  m_Name: Charge Attack
+  m_EditorClassIdentifier: Assembly-CSharp::ChargeAttack
+  talentName: Charge Attack
+  description: 'While above 30% HP you don''t attack: each attack is stored instead.
+    Once your HP drops to 30% or lower, your next attack releases everything and
+    deals 130% of the stored damage on top.'

@@ -7,7 +7,8 @@ using UnityEngine;
 /// </summary>
 public static class CardStats
 {
-    public static int HpOf(CardRarity rarity, BuildData b, int godBonus = 0) => GameRules.Stat(b.hp, GameRules.Tier(rarity), godBonus) * 10;
+    /// <summary>HP = HP stat x GameRules.HpMultiplier (10 by default, adjustable in GameBalance / Test Mode).</summary>
+    public static int HpOf(CardRarity rarity, BuildData b, int godBonus = 0) => GameRules.Stat(b.hp, GameRules.Tier(rarity), godBonus) * GameRules.HpMultiplier;
     public static int AtkOf(CardRarity rarity, BuildData b, int godBonus = 0) => GameRules.Stat(b.atk, GameRules.Tier(rarity), godBonus);
     public static int DefOf(CardRarity rarity, BuildData b, int godBonus = 0) => GameRules.Stat(b.def, GameRules.Tier(rarity), godBonus);
     public static int SpdOf(CardRarity rarity, BuildData b, int godBonus = 0) => GameRules.Stat(b.spd, GameRules.Tier(rarity), godBonus);
@@ -16,7 +17,7 @@ public static class CardStats
     public static int Power(CardRarity rarity, BuildData b, int godBonus = 0)
     {
         if (b == null) return 0;
-        return HpOf(rarity, b, godBonus) / 10 + AtkOf(rarity, b, godBonus) + DefOf(rarity, b, godBonus) + SpdOf(rarity, b, godBonus);
+        return GameRules.Stat(b.hp, GameRules.Tier(rarity), godBonus) + AtkOf(rarity, b, godBonus) + DefOf(rarity, b, godBonus) + SpdOf(rarity, b, godBonus);
     }
 
     public static int Power(CardInstance c) => c == null ? 0 : Power(c.rarity, c.build, c.godBonus);

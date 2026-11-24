@@ -41,9 +41,16 @@ public class ShopScreen : MonoBehaviour
         {
             SfxSynth.Play("miss", 0.6f);
             messageText.text = $"<color=#FF6B6B>{err}.</color>";
+            UIFx.Shake(messageText.rectTransform, 0.3f, 8f);
             return;
         }
         SfxSynth.Play("buff", 0.8f);
+        var ov = UIFx.Overlay;
+        var pp = UIFx.PointerPos(ov);
+        var theme = UITheme.Instance;
+        UIFx.Sparks(ov, pp, new Color(0.75f, 0.6f, 1f), 14, 520f, 34f, 0.6f, 600f, theme != null ? theme.OrbIcon(type) : null);
+        UIFx.FloatText(ov, pp + new Vector2(0f, 40f), $"+{qty} {PlayerProfile.OrbName(type)}", new Color(0.75f, 0.9f, 1f), 30);
+        SfxSynth.Play("coin", 0.5f);
         messageText.text = $"<color=#7CFC6A>Bought {qty}x {PlayerProfile.OrbName(type)} for {PlayerProfile.OrbShopPrice(type) * qty:N0} gold.</color>";
         Refresh();
     }

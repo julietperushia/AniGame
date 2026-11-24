@@ -32,8 +32,9 @@ public static class GameSession
         LoadScene(SceneNames.Battle);
     }
 
+    /// <summary>Loads a screen behind the animated transition (ScreenFader).</summary>
     public static void LoadScene(string sceneName)
     {
-        SceneManager.LoadScene(sceneName);
+        ScreenFader.Load(sceneName);
     }
 }

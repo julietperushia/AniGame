@@ -124,6 +124,18 @@ public class CardDatabase : ScriptableObject
         return valid.Count > 0 ? valid[UnityEngine.Random.Range(0, valid.Count)] : null;
     }
 
+    public Talent RandomActive()
+    {
+        var valid = talents.FindAll(t => t != null && t.IsActive);
+        return valid.Count > 0 ? valid[UnityEngine.Random.Range(0, valid.Count)] : null;
+    }
+
+    public Talent RandomPassive()
+    {
+        var valid = talents.FindAll(t => t != null && !t.IsActive);
+        return valid.Count > 0 ? valid[UnityEngine.Random.Range(0, valid.Count)] : null;
+    }
+
     /// <summary>A random character card whose sheet rarity matches (falls back to any card).</summary>
     public Card RandomCardOfRarity(CardRarity rarity)
     {

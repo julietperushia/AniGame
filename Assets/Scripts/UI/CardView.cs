@@ -31,6 +31,7 @@ public class CardView : MonoBehaviour
     public Text nameText;
     public Text talentText;      // rarity bonus under the talent icon ("+15%")
     public Image talentIcon;
+    public Image talentIcon2;    // God cards: the passive talent
     public StatBar hpBar;
     public StatBar manaBar;
     public Text atkText;
@@ -56,7 +57,7 @@ public class CardView : MonoBehaviour
         if (card == null || build == null) { gameObject.SetActive(false); return; }
         gameObject.SetActive(true);
         var rt = CardRuntime.ForBuild(card, build);
-        ApplyIdentity(rt.baseCard, card.rarity, build.element, rt.talent, $"POWER {CardStats.Power(card, build)}");
+        ApplyIdentity(rt.baseCard, card.rarity, build.element, rt.talent, $"POWER {CardStats.Power(card, build)}", rt.talents.Count > 1 ? rt.talents[1] : null);
         hpBar.Set(rt.maxHealth, rt.maxHealth, true);
         manaBar.Set(0, rt.maxMana, true);
         SetStats(rt);
@@ -72,11 +73,11 @@ public class CardView : MonoBehaviour
         if (card == null) { gameObject.SetActive(false); return; }
         gameObject.SetActive(true);
         var rt = new CardRuntime(card);
-        ApplyIdentity(card, card.rarity, card.element, card.talent, $"POWER {CardStats.EnemyPower(card)}");
+        ApplyIdentity(card, card.rarity, card.element, card.talent, $"POWER {CardStats.EnemyPower(card)}", card.talent2);
         hpBar.Set(rt.maxHealth, rt.maxHealth, true);
         manaBar.Set(rt.mana, rt.maxMana, true);
         SetStats(rt);
-        statusText.text = $"<color=#9AA4B5>Crit {rt.critRate}%   Evasion {rt.evasion}%</color>";
+        statusText.text = $"<color=#9AA4B5>Crit {rt.critRate}%   Evasion {GameRules.EvasionLabel(rt.evasion)}</color>";
         SetDefeated(false);
     }
 
@@ -87,17 +88,16 @@ public class CardView : MonoBehaviour
         if (runtime == null) return;
         gameObject.SetActive(true);
         int power = runtime.instance != null ? CardStats.Power(runtime.instance, runtime.build) : CardStats.EnemyPower(runtime.baseCard);
-        ApplyIdentity(runtime.baseCard, runtime.rarity, runtime.element, runtime.talent, $"POWER {power}");
+        ApplyIdentity(runtime.baseCard, runtime.rarity, runtime.element, runtime.talent, $"POWER {power}", runtime.talents.Count > 1 ? runtime.talents[1] : null);
         SetVitals(runtime.health, runtime.maxHealth, runtime.mana, runtime.maxMana, true);
         RefreshLive();
         SetDefeated(false);
-        body.anchoredPosition = Vector2.zero;
-        body.localScale = Vector3.one;
+        ResetPose();
     }
 
     static string Signed(int v) => v > 0 ? $"<color=#7CFC6A>+{v}</color>" : v < 0 ? $"<color=#FF6B6B>{v}</color>" : "0";
 
-    void ApplyIdentity(Card art, CardRarity rarity, CardElement element, Talent talent, string bottomLabel)
+    void ApplyIdentity(Card art, CardRarity rarity, CardElement element, Talent talent, string bottomLabel, Talent talent2 = null)
     {
         Color rarityColor = CardStats.RarityColor(rarity);
         Color elementColor = ElementSystem.GetColor(element);
@@ -160,6 +160,25 @@ public class CardView : MonoBehaviour
             talentIcon.gameObject.SetActive(talent != null);
             TooltipTrigger.Add(talentIcon, IconInfo.Talent(talent, rarity));
         }
+        // God cards: second (passive) talent icon under the first one, created on demand
+        if (talent2 != null && talentIcon2 == null && talentIcon != null)
+        {
+            talentIcon2 = UIFactory.CreateImage(talentIcon.transform.parent, "TalentIcon2", Color.white);
+            talentIcon2.preserveAspect = true;
+            var r1 = talentIcon.rectTransform;
+            var r2 = talentIcon2.rectTransform;
+            r2.anchorMin = r1.anchorMin; r2.anchorMax = r1.anchorMax; r2.pivot = r1.pivot;
+            r2.sizeDelta = r1.sizeDelta;
+            r2.anchoredPosition = r1.anchoredPosition + new Vector2(0f, -r1.sizeDelta.y - 24f);
+        }
+        if (talentIcon2 != null)
+        {
+            var s2 = talent2 != null && theme != null ? theme.TalentIcon(talent2) : null;
+            talentIcon2.sprite = s2;
+            talentIcon2.enabled = s2 != null;
+            talentIcon2.gameObject.SetActive(talent2 != null);
+            if (talent2 != null) TooltipTrigger.Add(talentIcon2, IconInfo.Talent(talent2, rarity));
+        }
         int bonus = Mathf.RoundToInt((GameRules.TalentPower(GameRules.Tier(rarity)) - 1f) * 100f);
         if (talent == null) talentText.text = "";
         else if (talentSprite == null) talentText.text = talent.DisplayName; // no icon yet: fall back to the name
@@ -193,7 +212,8 @@ public class CardView : MonoBehaviour
         if (Runtime == null) return;
         SetStats(Runtime);
         string status = Runtime.StatusSummary();
-        statusText.text = string.IsNullOrEmpty(status) ? "<color=#5A6475>No effects</color>" : status;
+        string combat = $"<color=#9AA4B5>Crit {Runtime.critRate}%   Evasion {GameRules.EvasionLabel(Runtime.evasion)}</color>";
+        statusText.text = combat + "\n" + (string.IsNullOrEmpty(status) ? "<color=#5A6475>No effects</color>" : status);
     }
 
     void SetStats(CardRuntime rt)
@@ -216,11 +236,96 @@ public class CardView : MonoBehaviour
     }
 
     // ---------------------------------------------------------------- animation
+    // The body is posed from layers that combine: a move (attack, dodge, knock-back, entrance),
+    // a shake, a pulse scale, a tilt and an optional idle float. Card moves run on UIFx.Dt, so they
+    // follow the battle speed (x1/x2/x4) and slow motion.
 
-    public void Lunge(float direction, float duration)
+    Vector2 moveOffset, shakeOffset;
+    float tilt;
+    Vector2 squash = Vector2.one;
+    float pulseScale = 1f;
+    Coroutine shakeRoutine;
+    bool knockedOut;
+    float idlePhase;
+
+    /// <summary>Gentle floating while waiting (battle).</summary>
+    [System.NonSerialized] public bool idle;
+
+    static float Dt => UIFx.Dt;
+
+    void Awake() => idlePhase = Random.Range(0f, 6.3f);
+
+    void LateUpdate()
+    {
+        if (body == null) return;
+        Vector2 bob = idle && !knockedOut ? new Vector2(0f, Mathf.Sin(Time.unscaledTime * 1.8f + idlePhase) * 6f) : Vector2.zero;
+        body.anchoredPosition = moveOffset + shakeOffset + bob;
+        body.localRotation = Quaternion.Euler(0f, 0f, tilt);
+        body.localScale = new Vector3(squash.x * pulseScale, squash.y * pulseScale, 1f);
+    }
+
+    /// <summary>Stops every move and puts the card back in its resting pose.</summary>
+    public void ResetPose()
     {
         if (moveRoutine != null) StopCoroutine(moveRoutine);
-        moveRoutine = StartCoroutine(LungeRoutine(direction, duration));
+        if (shakeRoutine != null) StopCoroutine(shakeRoutine);
+        if (pulseRoutine != null) StopCoroutine(pulseRoutine);
+        moveRoutine = shakeRoutine = pulseRoutine = null;
+        moveOffset = shakeOffset = Vector2.zero;
+        tilt = 0f;
+        squash = Vector2.one;
+        pulseScale = 1f;
+        knockedOut = false;
+        if (body != null)
+        {
+            body.anchoredPosition = Vector2.zero;
+            body.localRotation = Quaternion.identity;
+            body.localScale = Vector3.one;
+        }
+    }
+
+    bool CanAnimate => isActiveAndEnabled && body != null;
+
+    void Run(IEnumerator sequence)
+    {
+        if (!CanAnimate) return;
+        if (moveRoutine != null) StopCoroutine(moveRoutine);
+        moveRoutine = StartCoroutine(sequence);
+    }
+
+    /// <summary>Tweens the move layer to a pose.</summary>
+    IEnumerator Pose(Vector2 offset, float toTilt, Vector2 toSquash, float duration, System.Func<float, float> ease, System.Action<float> onStep = null)
+    {
+        Vector2 fromOffset = moveOffset, fromSquash = squash;
+        float fromTilt = tilt;
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Dt;
+            float k = Mathf.Clamp01(t / duration);
+            float e = ease(k);
+            moveOffset = Vector2.LerpUnclamped(fromOffset, offset, e);
+            tilt = Mathf.LerpUnclamped(fromTilt, toTilt, e);
+            squash = Vector2.LerpUnclamped(fromSquash, toSquash, e);
+            onStep?.Invoke(k);
+            yield return null;
+        }
+        moveOffset = offset;
+        tilt = toTilt;
+        squash = toSquash;
+        onStep?.Invoke(1f);
+    }
+
+    IEnumerator Hold(float seconds)
+    {
+        float t = 0f;
+        while (t < seconds) { t += Dt; yield return null; }
+    }
+
+    /// <summary>Simple forward-and-back hop (kept for older callers).</summary>
+    public void Lunge(float direction, float duration)
+    {
+        Run(LungeRoutine(direction, duration));
     }
 
     IEnumerator LungeRoutine(float direction, float duration)
@@ -228,18 +333,125 @@ public class CardView : MonoBehaviour
         float t = 0f;
         while (t < duration)
         {
-            t += Time.unscaledDeltaTime;
+            t += Dt;
             float k = Mathf.Clamp01(t / duration);
-            body.anchoredPosition = new Vector2(Mathf.Sin(k * Mathf.PI) * 70f * direction, Mathf.Sin(k * Mathf.PI) * 12f);
+            moveOffset = new Vector2(Mathf.Sin(k * Mathf.PI) * 70f * direction, Mathf.Sin(k * Mathf.PI) * 12f);
             yield return null;
         }
-        body.anchoredPosition = Vector2.zero;
+        moveOffset = Vector2.zero;
+    }
+
+    /// <summary>Pulls back and leans away before an attack (bigger for a crit). dir: +1 attacks right, -1 left.</summary>
+    public void WindUp(float dir, bool heavy)
+    {
+        Run(Pose(new Vector2(-dir * (heavy ? 50f : 28f), heavy ? 16f : 6f), dir * (heavy ? 8f : 4f),
+                 heavy ? new Vector2(0.93f, 1.07f) : new Vector2(0.97f, 1.03f), heavy ? 0.26f : 0.13f, UIFx.EaseOutQuad));
+    }
+
+    /// <summary>Fast dash toward the enemy, leaving afterimages. Stays forward until ReturnHome / HitReact.</summary>
+    public void Dash(float dir, float distance, Color ghostTint, int ghosts = 3)
+    {
+        int spawned = 0;
+        Run(Pose(new Vector2(dir * distance, 0f), -dir * 6f, new Vector2(1.1f, 0.92f), 0.09f, UIFx.EaseInQuad, k =>
+        {
+            while (spawned < ghosts && k >= spawned / (float)ghosts)
+            {
+                spawned++;
+                UIFx.Ghost(this, ghostTint, 0.3f, 0.42f);
+            }
+        }));
+    }
+
+    /// <summary>Eases back to the resting spot.</summary>
+    public void ReturnHome(float duration = 0.24f)
+    {
+        if (knockedOut) return;
+        Run(Pose(Vector2.zero, 0f, Vector2.one, duration, UIFx.EaseOutBack));
+    }
+
+    /// <summary>Knock-back + shake when hit. dir = direction of the push (the attacker's dir).</summary>
+    public void HitReact(float dir, bool crit)
+    {
+        Run(HitSequence(dir, crit));
+        Shake(crit ? 0.42f : 0.24f, crit ? 18f : 9f);
+    }
+
+    IEnumerator HitSequence(float dir, bool crit)
+    {
+        yield return Pose(new Vector2(dir * (crit ? 80f : 36f), crit ? 14f : 4f), -dir * (crit ? 11f : 5f),
+                          crit ? new Vector2(0.88f, 1.1f) : new Vector2(0.94f, 1.05f), crit ? 0.08f : 0.06f, UIFx.EaseOutQuad);
+        if (crit) yield return Hold(0.06f);
+        yield return Pose(Vector2.zero, 0f, Vector2.one, crit ? 0.4f : 0.26f, UIFx.EaseOutBack);
+    }
+
+    /// <summary>Side-hop away from an attack. dir = direction away from the attacker.</summary>
+    public void Dodge(float dir)
+    {
+        Run(DodgeSequence(dir));
+    }
+
+    IEnumerator DodgeSequence(float dir)
+    {
+        yield return Pose(new Vector2(dir * 95f, 64f), -dir * 13f, new Vector2(0.92f, 1.07f), 0.1f, UIFx.EaseOutQuad);
+        yield return Hold(0.14f);
+        yield return Pose(Vector2.zero, 0f, Vector2.one, 0.24f, UIFx.EaseOutBack);
+    }
+
+    /// <summary>Defeat: staggers, tips over and drops. Stays down until the next Bind/ResetPose.</summary>
+    public void KnockOut(float dir)
+    {
+        knockedOut = true;
+        Run(KnockOutSequence(dir));
+    }
+
+    IEnumerator KnockOutSequence(float dir)
+    {
+        yield return Pose(new Vector2(dir * 40f, 24f), -dir * 6f, new Vector2(0.92f, 1.08f), 0.12f, UIFx.EaseOutQuad);
+        yield return Pose(new Vector2(dir * 80f, -56f), -dir * 17f, new Vector2(1.02f, 0.96f), 0.5f, UIFx.EaseOutBounce);
+    }
+
+    /// <summary>Slides in from off-screen (fromDir -1 = from the left) and lands with a squash.</summary>
+    public void EnterFrom(float fromDir, float duration = 0.42f)
+    {
+        if (!CanAnimate) return;
+        moveOffset = new Vector2(fromDir * 1150f, 0f);
+        tilt = fromDir * 8f;
+        Run(EnterSequence(fromDir, duration));
+    }
+
+    IEnumerator EnterSequence(float fromDir, float duration)
+    {
+        int ghosts = 0;
+        yield return Pose(new Vector2(-fromDir * 22f, 0f), fromDir * 5f, new Vector2(1.08f, 0.94f), duration, UIFx.EaseOutCubic, k =>
+        {
+            if (ghosts < 3 && k >= 0.15f + ghosts * 0.2f) { ghosts++; UIFx.Ghost(this, Color.white, 0.25f, 0.3f, 0.35f); }
+        });
+        yield return Pose(Vector2.zero, 0f, new Vector2(1.04f, 0.95f), 0.08f, UIFx.EaseOutQuad);
+        yield return Pose(Vector2.zero, 0f, Vector2.one, 0.2f, UIFx.EaseOutBack);
+    }
+
+    /// <summary>Two happy hops (winner).</summary>
+    public void Victory()
+    {
+        if (knockedOut) return;
+        Run(VictorySequence());
+    }
+
+    IEnumerator VictorySequence()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            yield return Pose(Vector2.zero, 0f, new Vector2(1.07f, 0.92f), 0.08f, UIFx.EaseOutQuad);
+            yield return Pose(new Vector2(0f, 48f), i == 0 ? 3f : -3f, new Vector2(0.95f, 1.06f), 0.16f, UIFx.EaseOutQuad);
+            yield return Pose(Vector2.zero, 0f, Vector2.one, 0.16f, UIFx.EaseInQuad);
+        }
     }
 
     public void Shake(float duration, float strength = 14f)
     {
-        if (moveRoutine != null) StopCoroutine(moveRoutine);
-        moveRoutine = StartCoroutine(ShakeRoutine(duration, strength));
+        if (!CanAnimate) return;
+        if (shakeRoutine != null) StopCoroutine(shakeRoutine);
+        shakeRoutine = StartCoroutine(ShakeRoutine(duration, strength));
     }
 
     IEnumerator ShakeRoutine(float duration, float strength)
@@ -247,16 +459,17 @@ public class CardView : MonoBehaviour
         float t = 0f;
         while (t < duration)
         {
-            t += Time.unscaledDeltaTime;
+            t += Dt;
             float falloff = 1f - Mathf.Clamp01(t / duration);
-            body.anchoredPosition = Random.insideUnitCircle * strength * falloff;
+            shakeOffset = Random.insideUnitCircle * strength * falloff;
             yield return null;
         }
-        body.anchoredPosition = Vector2.zero;
+        shakeOffset = Vector2.zero;
     }
 
     public void Flash(Color color, float duration)
     {
+        if (!CanAnimate || flash == null) return;
         if (flashRoutine != null) StopCoroutine(flashRoutine);
         flashRoutine = StartCoroutine(FlashRoutine(color, duration));
     }
@@ -275,6 +488,7 @@ public class CardView : MonoBehaviour
 
     public void Pulse(float duration, float amount = 0.06f)
     {
+        if (!CanAnimate) return;
         if (pulseRoutine != null) StopCoroutine(pulseRoutine);
         pulseRoutine = StartCoroutine(PulseRoutine(duration, amount));
     }
@@ -284,11 +498,11 @@ public class CardView : MonoBehaviour
         float t = 0f;
         while (t < duration)
         {
-            t += Time.unscaledDeltaTime;
-            body.localScale = Vector3.one * (1f + amount * Mathf.Sin(Mathf.Clamp01(t / duration) * Mathf.PI));
+            t += Dt;
+            pulseScale = 1f + amount * Mathf.Sin(Mathf.Clamp01(t / duration) * Mathf.PI);
             yield return null;
         }
-        body.localScale = Vector3.one;
+        pulseScale = 1f;
     }
 
     // ---------------------------------------------------------------- construction

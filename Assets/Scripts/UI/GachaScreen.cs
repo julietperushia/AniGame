@@ -58,6 +58,7 @@ public class GachaScreen : MonoBehaviour
         oddsPanel.SetActive(false);
         revealPanel.SetActive(false);
         messageText.text = "";
+        BuildAutoExchangeToggle();
         PlayerProfile.Changed += Refresh;
         Refresh();
     }
@@ -153,6 +154,37 @@ public class GachaScreen : MonoBehaviour
 
     // ---------------------------------------------------------------- open + reveal
 
+    // ---------------------------------------------------------------- auto exchange (quick toggle; full settings in My Cards > MATERIALS)
+
+    Button autoExchangeQuick;
+
+    void BuildAutoExchangeToggle()
+    {
+        autoExchangeQuick = UIFactory.CreateButton(transform, "AutoExchangeQuick", "", UIFactory.PanelLight, 18);
+        UIFactory.Place((RectTransform)autoExchangeQuick.transform, new Vector2(1f, 0f), new Vector2(-190, 148), new Vector2(300, 56));
+        autoExchangeQuick.onClick.AddListener(() =>
+        {
+            // OFF -> up to Common -> Uncommon -> Rare -> Super Rare -> OFF
+            var d = PlayerProfile.Data;
+            if (!d.autoExchange) PlayerProfile.SetAutoExchange(true, 0);
+            else if (d.autoExchangeMaxTier < 3) PlayerProfile.SetAutoExchange(true, d.autoExchangeMaxTier + 1);
+            else PlayerProfile.SetAutoExchange(false, d.autoExchangeMaxTier);
+            RefreshAutoExchangeToggle();
+        });
+        TooltipTrigger.Add(autoExchangeQuick.image, "<b>Auto exchange</b>\nNew cards up to the chosen rarity become materials right away (fusion fodder that takes no space). Click to change; more options in My Cards > MATERIALS.");
+        RefreshAutoExchangeToggle();
+    }
+
+    void RefreshAutoExchangeToggle()
+    {
+        if (autoExchangeQuick == null) return;
+        var d = PlayerProfile.Data;
+        UIFactory.ButtonLabel(autoExchangeQuick).text = d.autoExchange
+            ? $"AUTO EXCHANGE: <color=#7CFC6A>UP TO {CardStats.RarityName((CardRarity)d.autoExchangeMaxTier).ToUpperInvariant()}</color>"
+            : "AUTO EXCHANGE: OFF";
+        autoExchangeQuick.image.color = d.autoExchange ? new Color(0.15f, 0.4f, 0.28f) : UIFactory.PanelLight;
+    }
+
     void Open(PackDefinition pack)
     {
         string err = PlayerProfile.CanOpenPack(pack);
@@ -188,6 +220,7 @@ public class GachaScreen : MonoBehaviour
             var back = BuildBack(holder, pack, i, w, h);
             backs.Add(back);
             fronts.Add(front);
+            UIFx.PopIn(holder, 0.05f * i, 0.32f);
         }
 
         revealSummary.text = "";
@@ -248,10 +281,12 @@ public class GachaScreen : MonoBehaviour
             UIFactory.Stretch(rarityText.rectTransform, 4, 0, 4, 0);
             UIFactory.BestFit(rarityText, 11);
             UIFactory.AddShadow(rarityText, UIFactory.ShadowColor, 2f);
-            var badge = UIFactory.CreateChip(root, "New", UIFactory.Accent2);
-            UIFactory.Place(badge.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, 14), new Vector2(90, 28));
-            var nt = UIFactory.CreateText(badge.transform, "Text", "NEW", 17, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+            var badge = UIFactory.CreateChip(root, "New", item.exchanged ? new Color(0.2f, 0.5f, 0.75f) : UIFactory.Accent2);
+            UIFactory.Place(badge.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, 14), new Vector2(item.exchanged ? 200 : 90, 28));
+            var nt = UIFactory.CreateText(badge.transform, "Text", item.exchanged ? $"+1 {PlayerProfile.MaterialName(GameRules.Tier(item.rarity)).ToUpperInvariant()}" : "NEW", 17, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Stretch(nt.rectTransform);
+            UIFactory.BestFit(nt, 10);
+            if (item.exchanged) view.group.alpha = 0.55f;
             return root;
         }
 
@@ -277,14 +312,79 @@ public class GachaScreen : MonoBehaviour
 
     IEnumerator RevealSequence()
     {
-        yield return new WaitForSecondsRealtime(0.35f);
+        yield return new WaitForSecondsRealtime(0.35f + 0.05f * backs.Count);
         for (int i = 0; i < backs.Count; i++)
         {
             if (!backs[i].gameObject.activeSelf) continue;
+            int tier = ItemTier(shownItems[i]);
+            if (tier >= 5) yield return Charge(i, tier);
             yield return Flip(i);
-            yield return new WaitForSecondsRealtime(0.12f);
+            RevealFx(i, tier, true);
+            yield return new WaitForSecondsRealtime(tier >= 7 ? 0.6f : tier >= 5 ? 0.35f : 0.12f);
         }
         Finish();
+    }
+
+    static int ItemTier(PackItem item) => item.type == RewardType.Card ? GameRules.Tier(item.rarity) : -1;
+
+    /// <summary>High rarity tease: the card back shakes and glows while light is pulled in.</summary>
+    IEnumerator Charge(int i, int tier)
+    {
+        var layer = (RectTransform)revealPanel.transform;
+        var holder = backs[i].parent as RectTransform;
+        var color = CardStats.RarityColor(shownItems[i].rarity);
+        var at = UIFx.LocalPos(layer, holder);
+        float time = tier >= 7 ? 0.75f : 0.45f;
+        UIFx.Shake(backs[i], time, 4f + tier);
+        UIFx.Ring(layer, at, UIFactory.WithAlpha(color, 0.9f), 700f, 120f, time * 0.8f);
+        UIFx.Ring(layer, at, UIFactory.WithAlpha(Color.white, 0.6f), 520f, 100f, time * 0.7f, time * 0.25f);
+        UIFx.GlowFlash(layer, at, UIFactory.WithAlpha(color, 0.65f), 520f, time + 0.1f);
+        SfxSynth.Play("charge", 0.9f, tier >= 7 ? 0.8f : 1f);
+        yield return new WaitForSecondsRealtime(time);
+    }
+
+    /// <summary>Reveal burst sized by rarity (rays, confetti and a name slam for the best pulls).</summary>
+    void RevealFx(int i, int tier, bool loud)
+    {
+        var layer = (RectTransform)revealPanel.transform;
+        var holder = fronts[i].parent as RectTransform;
+        if (holder == null) return;
+        var item = shownItems[i];
+        var at = UIFx.LocalPos(layer, holder);
+        if (tier < 0)
+        {
+            UIFx.Sparks(layer, at, ItemColor(item.type), 10, 420f, 24f, 0.45f, 300f);
+            return;
+        }
+        var color = CardStats.RarityColor(item.rarity);
+        if (tier >= 5)
+        {
+            // A spinning halo stays behind the card while the reveal is open
+            var halo = UIFactory.CreateImage(revealRow, "Halo", UIFactory.WithAlpha(color, 0.45f), UIFactory.Theme != null ? UIFactory.Theme.lightRays : null);
+            halo.raycastTarget = false;
+            var hrt = halo.rectTransform;
+            hrt.anchorMin = hrt.anchorMax = new Vector2(0.5f, 0.5f);
+            hrt.sizeDelta = holder.sizeDelta * 2.2f;
+            hrt.anchoredPosition = holder.anchoredPosition;
+            hrt.SetAsFirstSibling();
+            UIFx.Spin(hrt, 25f);
+            UIFx.Breathe(halo, 0.25f, 0.6f, 2.5f, 0.06f);
+            UIFx.Burst(layer, at, color, tier >= 7 ? 1.8f : 1.3f);
+            if (loud)
+            {
+                UIFx.TextSlam(layer, at + new Vector2(0f, holder.sizeDelta.y * 0.5f + 60f), CardStats.RarityName(item.rarity).ToUpperInvariant() + "!", color, tier >= 7 ? 84 : 64, 1.1f);
+                SfxSynth.Play("sparkle", 0.8f);
+            }
+            if (tier >= 7)
+            {
+                UIFx.ScreenFlash(layer, new Color(1f, 1f, 1f, 0.7f), 0.5f);
+                UIFx.Confetti(layer, 110);
+                UIFx.Shake(revealRow, 0.4f, 14f);
+                if (loud) SfxSynth.Play("impact", 0.9f);
+            }
+        }
+        else if (tier >= 3) UIFx.Burst(layer, at, color, 0.8f, false);
+        else UIFx.Sparks(layer, at, color, 10, 460f, 26f, 0.45f, 300f);
     }
 
     IEnumerator Flip(int i)
@@ -327,11 +427,18 @@ public class GachaScreen : MonoBehaviour
     {
         if (revealRoutine != null) StopCoroutine(revealRoutine);
         revealRoutine = null;
+        int bestIndex = -1, bestTier = -2;
         for (int i = 0; i < backs.Count; i++)
         {
-            if (backs[i].gameObject.activeSelf) ShowFront(i);
+            bool hidden = backs[i].gameObject.activeSelf;
+            if (hidden) ShowFront(i);
+            backs[i].localScale = Vector3.one;
             fronts[i].localScale = Vector3.one;
+            int tier = ItemTier(shownItems[i]);
+            if (hidden && tier > bestTier) { bestTier = tier; bestIndex = i; }
+            else if (hidden) RevealFx(i, Mathf.Min(tier, 4), false);
         }
+        if (bestIndex >= 0) RevealFx(bestIndex, bestTier, true);
         Finish();
     }
 
@@ -350,7 +457,8 @@ public class GachaScreen : MonoBehaviour
             else
                 parts.Add($"<color=#{ColorUtility.ToHtmlStringRGB(ItemColor(g.Key))}>{ItemLabel(g.Key, g.Sum(x => x.amount), CardRarity.Common)}</color>");
         }
-        revealSummary.text = "You got: " + string.Join("   ", parts);
+        int exchanged = shownItems.Count(x => x.exchanged);
+        revealSummary.text = "You got: " + string.Join("   ", parts) + (exchanged > 0 ? $"   <color=#6FD3FF>({exchanged} exchanged for materials)</color>" : "");
         openAgainButton.interactable = lastPack != null && PlayerProfile.CanOpenPack(lastPack) == null;
     }
 

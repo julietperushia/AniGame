@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebe4f4c5b5f92854c90418d1d86fce2c, type: 3}
+  m_Name: True Sight
+  m_EditorClassIdentifier: Assembly-CSharp::TrueSight
+  talentName: True Sight
+  description: The enemy loses 30% of its evasion rating, and you gain 30% of what
+    it lost as evasion rating.
+  manaCost: 100
+  stealPercent: 0.3

@@ -103,6 +103,7 @@ public class LocationMapScreen : MonoBehaviour
                 TooltipTrigger.Add(lockImg, $"<b>LOCKED</b>\nClear every floor of LOC {number - 1} to unlock LOC {number}.");
             }
             btn.onClick.AddListener(() => SelectLocation(number));
+            if (locationButtons.Count < 20) UIFx.PopIn((RectTransform)btn.transform, 0.15f + 0.03f * locationButtons.Count, 0.28f, 0.4f);
             locationButtons.Add(btn);
         }
     }
@@ -145,6 +146,7 @@ public class LocationMapScreen : MonoBehaviour
             else if (done) tile.SetBadge("CLEARED", new Color(0.2f, 0.6f, 0.35f));
             else tile.SetBadge("NEXT", UIFactory.Accent2);
             tile.button.onClick.AddListener(() => SelectFloor(floor));
+            UIFx.PopIn((RectTransform)tile.transform, Mathf.Min(0.6f, 0.025f * floorTiles.Count), 0.26f);
             floorTiles.Add(tile);
         }
 

@@ -38,6 +38,11 @@ public class CollectionScreen : MonoBehaviour
     public Image talentIcon;
     public Text talentBonus;
     public GameObject talentNew;
+    public Text talentName;
+    public Text talentDesc;
+    public Image talentIcon2;   // God cards: passive talent
+    public Text talentName2;
+    public Text talentDesc2;
     public Button rerollStatsButton, rerollElementButton, rerollTalentButton, fusionButton, autoMergeButton, godOrbButton, dismantleButton;
     public Image rerollStatsIcon, rerollElementIcon, rerollTalentIcon, fusionIcon, godOrbIcon, dismantleIcon;
     public Text rerollStatsCost, rerollElementCost, rerollTalentCost, fusionCost, godOrbCost, dismantleCost;
@@ -59,6 +64,19 @@ public class CollectionScreen : MonoBehaviour
     public Button fuseButton;
     public Button fusionCloseButton;
     public Text fusionResult;
+
+    [Header("Materials")]
+    public Button materialsButton;
+    public GameObject materialsPanel;
+    public RectTransform materialsRow;
+    public Text materialsInfo;
+    public Button exchangeSelectedButton;
+    public Dropdown exchangeTarget;
+    public Button exchangeAllButton;
+    public Button autoExchangeButton;
+    public Dropdown autoExchangeTarget;
+    public Text materialsResult;
+    public Button materialsCloseButton;
 
     [Header("Auto merge")]
     public GameObject mergePanel;
@@ -87,6 +105,8 @@ public class CollectionScreen : MonoBehaviour
     float dismantleConfirmUntil;
     bool mergeConfirm;
     float mergeConfirmUntil;
+    bool exchangeConfirm;
+    float exchangeConfirmUntil;
     readonly List<CardInstance> fodderSelection = new List<CardInstance>();
 
     BuildData ShownBuild => pendingBuild ?? viewBuild;
@@ -126,6 +146,17 @@ public class CollectionScreen : MonoBehaviour
         mergeOrbsAll.onClick.AddListener(() => mergeOrbs.text = PlayerProfile.Data.fusionOrbs.ToString());
         fusionPanel.SetActive(false);
         mergePanel.SetActive(false);
+        if (materialsPanel != null)
+        {
+            materialsPanel.SetActive(false);
+            materialsButton.onClick.AddListener(OpenMaterials);
+            materialsCloseButton.onClick.AddListener(() => { materialsPanel.SetActive(false); RefreshAll(); });
+            exchangeSelectedButton.onClick.AddListener(ExchangeSelected);
+            exchangeAllButton.onClick.AddListener(ExchangeAll);
+            autoExchangeButton.onClick.AddListener(() => { PlayerProfile.SetAutoExchange(!PlayerProfile.Data.autoExchange, autoExchangeTarget.value); RefreshMaterials(); });
+            autoExchangeTarget.onValueChanged.AddListener(v => { PlayerProfile.SetAutoExchange(PlayerProfile.Data.autoExchange, v); RefreshMaterials(); });
+            exchangeTarget.onValueChanged.AddListener(_ => { exchangeConfirm = false; RefreshMaterials(); });
+        }
         messageText.text = "";
 
         int active = PlayerProfile.ActiveSlot;
@@ -138,6 +169,7 @@ public class CollectionScreen : MonoBehaviour
     void Update()
     {
         if (mergeConfirm && Time.unscaledTime > mergeConfirmUntil) { mergeConfirm = false; RefreshMergeInfo(); }
+        if (exchangeConfirm && Time.unscaledTime > exchangeConfirmUntil) { exchangeConfirm = false; RefreshMaterials(); }
         if (showcaseGlow != null && selected != null)
         {
             var c = CardStats.RarityColor(selected.rarity);
@@ -354,7 +386,7 @@ public class CollectionScreen : MonoBehaviour
             statFills[i].color = k >= 0 ? Color.Lerp(new Color(0.4f, 0.8f, 0.4f), new Color(0.45f, 1f, 0.35f), k) : Color.Lerp(new Color(0.9f, 0.5f, 0.4f), new Color(1f, 0.3f, 0.3f), -k);
             statRolls[i].text = rolls[i] > 0 ? $"<color=#7CFC6A>+{rolls[i]}</color>" : rolls[i] < 0 ? $"<color=#FF6B6B>{rolls[i]}</color>" : "0";
             statTips[i].text = $"<b>{StatNames[i]} {values[i]:N0}</b>\n= (100 {(rolls[i] >= 0 ? "+" : "-")} {Mathf.Abs(rolls[i])}) x {mult:0.00}" +
-                               (selected.godBonus > 0 ? $" x {1f + GameRules.GodOrbStatBonus * selected.godBonus:0.00}" : "") + (i == 0 ? " x 10" : "") +
+                               (selected.godBonus > 0 ? $" x {1f + GameRules.GodOrbStatBonus * selected.godBonus:0.00}" : "") + (i == 0 ? $" x {GameRules.HpMultiplier}" : "") +
                                $"\nRoll range at this rarity: -{max} to +{max}";
         }
 
@@ -379,13 +411,17 @@ public class CollectionScreen : MonoBehaviour
                 TooltipTrigger.Add(icon, IconInfo.Element(strong[i]));
             }
         }
-        var talent = CardDatabase.Instance != null ? CardDatabase.Instance.FindTalent(shown.talent) : null;
+        var db = CardDatabase.Instance;
+        var talent = db != null ? db.FindTalent(shown.talent) : null;
+        bool god = tier >= GameRules.MaxTier;
+        var talent2 = god && db != null ? db.FindTalent(shown.talent2) : null;
         talentIcon.sprite = theme != null ? theme.TalentIcon(talent) : null;
         talentIcon.enabled = talentIcon.sprite != null;
         TooltipTrigger.Add(talentIcon, IconInfo.Talent(talent, selected.rarity));
-        int bonus = Mathf.RoundToInt((GameRules.TalentPower(tier) - 1f) * 100f);
-        talentBonus.text = talent == null ? "" : !talentIcon.enabled ? talent.DisplayName : bonus > 0 ? $"+{bonus}% talent power" : "base talent power";
-        talentNew.SetActive(pendingBuild != null && pendingBuild.talent != viewBuild.talent);
+        talentBonus.text = "";
+        ShowTalentInfo(talent, talent2, tier, theme);
+        talentNew.SetActive(pendingBuild != null && (pendingBuild.talent != viewBuild.talent || pendingBuild.talent2 != viewBuild.talent2));
+        UIFactory.ButtonLabel(rerollTalentButton).text = god ? "REROLL BOTH TALENTS" : "REROLL TALENT";
 
         // Showcase buttons
         UIFactory.ButtonLabel(lockButton).text = selected.locked ? "UNLOCK" : "LOCK";
@@ -435,6 +471,12 @@ public class CollectionScreen : MonoBehaviour
         if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
         pendingBuild = null;
         SfxSynth.Play("buff", 0.7f);
+        if (index >= 0 && index < saveSlotButtons.Length && saveSlotButtons[index] != null)
+        {
+            var brt = (RectTransform)saveSlotButtons[index].transform;
+            UIFx.BurstAt(brt, UIFactory.Good, 0.55f, false);
+            UIFx.FloatText(UIFx.Overlay, UIFx.LocalPos(UIFx.Overlay, brt, new Vector2(0f, 40f)), "SAVED!", new Color(0.55f, 1f, 0.6f), 30);
+        }
         ViewSlot(index);
         Message($"<color=#7CFC6A>{(wasPending ? "New roll" : "Build")} saved to slot {index + 1}.</color>");
     }
@@ -467,9 +509,25 @@ public class CollectionScreen : MonoBehaviour
         if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
         SfxSynth.Play("skill", 0.6f, 1f + Random.Range(-0.05f, 0.1f));
         pendingBuild = result;
-        showcaseView.Pulse(0.25f, 0.05f);
         Message(kind == 0 ? "New stats rolled." : kind == 1 ? "New element rolled." : "New talent rolled.");
         RefreshDetail();
+        RerollFx(kind, result);
+    }
+
+    /// <summary>Sparkle on the showcase card + a pop on the values that changed.</summary>
+    void RerollFx(int kind, BuildData result)
+    {
+        var color = kind == 0 ? UIFactory.Gold : kind == 1 ? ElementSystem.GetColor(result.element) : new Color(0.75f, 0.45f, 1f);
+        showcaseView.Pulse(0.3f, 0.06f);
+        showcaseView.Flash(new Color(1f, 1f, 1f, 0.55f), 0.35f);
+        var o = UIFx.Overlay;
+        var at = UIFx.LocalPos(o, (RectTransform)showcaseView.transform);
+        UIFx.Ring(o, at, UIFactory.WithAlpha(color, 0.85f), 80f, 520f, 0.45f);
+        UIFx.Sparks(o, at, color, 18, 700f, 30f, 0.55f, 500f);
+        if (kind == 0) { foreach (var v in statValues) if (v != null) UIFx.PopScale(v.rectTransform, 1.6f, 0.3f); }
+        else if (kind == 1 && elementIcon != null) { UIFx.PopScale(elementIcon.rectTransform, 2f, 0.35f); UIFx.Sparks(o, UIFx.LocalPos(o, elementIcon.rectTransform), color, 10, 380f, 22f, 0.45f, 200f); }
+        else if (kind == 2 && talentIcon != null) { UIFx.PopScale(talentIcon.rectTransform, 2f, 0.35f); UIFx.Sparks(o, UIFx.LocalPos(o, talentIcon.rectTransform), color, 10, 380f, 22f, 0.45f, 200f); }
+        if (newRollRibbon != null && newRollRibbon.activeSelf) UIFx.PopScale((RectTransform)newRollRibbon.transform, 1.5f, 0.3f);
     }
 
     // ---------------------------------------------------------------- fusion (manual)
@@ -480,7 +538,8 @@ public class CollectionScreen : MonoBehaviour
         if (!GameRules.CanFuseFrom(selected.Tier)) { Message("God is the maximum rarity."); return; }
         DropPending();
         fodderSelection.Clear();
-        foreach (var c in PlayerProfile.FodderCandidates(selected).Take(GameRules.FusionFodderCount)) fodderSelection.Add(c);
+        int matsFirst = Mathf.Min(GameRules.FusionFodderCount, PlayerProfile.Materials(selected.Tier));
+        foreach (var c in PlayerProfile.FodderCandidates(selected).Take(GameRules.FusionFodderCount - matsFirst)) fodderSelection.Add(c);
         fusionResult.text = "";
         fusionPanel.SetActive(true);
         RefreshFusion();
@@ -516,13 +575,15 @@ public class CollectionScreen : MonoBehaviour
         int tier = selected.Tier;
         int orbCost = GameRules.FusionOrbCost(tier);
         float rate = PlayerProfile.FusionRate(tier);
-        string reason = PlayerProfile.CanFuse(selected, fodderSelection);
+        int mats = FusionMaterials;
+        string reason = PlayerProfile.CanFuse(selected, fodderSelection, mats);
         var next = (CardRarity)Mathf.Min(GameRules.MaxTier, tier + 1);
         fusionInfo.text =
             $"<b>{CardStats.RarityName(selected.rarity)} > <color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor(next))}>{CardStats.RarityName(next)}</color></b>\n\n" +
             $"Success: <size=40><b>{rate * 100f:0}%</b></size>\n" +
             $"Fusion Orbs: {orbCost}  <color=#9AA4B5>(have {PlayerProfile.Data.fusionOrbs})</color>\n" +
-            $"Fodder: {fodderSelection.Count}/{GameRules.FusionFodderCount}  <color=#9AA4B5>({candidates.Count} available)</color>\n\n" +
+            $"Fodder: {fodderSelection.Count + mats}/{GameRules.FusionFodderCount}  <color=#9AA4B5>({candidates.Count} cards, {PlayerProfile.Materials(tier)} {PlayerProfile.MaterialName(tier)}s)</color>\n" +
+            (mats > 0 ? $"<color=#7CFC6A>Using {mats} {PlayerProfile.MaterialName(tier)}{(mats > 1 ? "s" : "")} (they fill empty fodder slots)</color>\n\n" : "\n") +
             "<color=#C9C3D8>Success: +1 rarity, Roll/element/talent kept.\nFail: lose the fodder and the orbs; the main card stays.</color>" +
             BuffNotes(tier, orbCost) +
             (reason != null ? $"\n\n<color=#FF6B6B>{reason}</color>" : "");
@@ -540,13 +601,17 @@ public class CollectionScreen : MonoBehaviour
         return buffs.Count > 0 ? $"\n\n<color=#7CFC6A>{string.Join("\n", buffs)}</color>" : "";
     }
 
+    /// <summary>Materials of the main card's rarity fill the fodder slots not taken by picked cards.</summary>
+    int FusionMaterials => selected == null ? 0 : Mathf.Clamp(GameRules.FusionFodderCount - fodderSelection.Count, 0, PlayerProfile.Materials(selected.Tier));
+
     void DoFuse()
     {
-        var result = PlayerProfile.Fuse(selected, fodderSelection);
+        var result = PlayerProfile.Fuse(selected, fodderSelection, FusionMaterials);
         if (result == null) return;
         fodderSelection.Clear();
         string extra = (result.orbRefund ? "\n<color=#7CFC6A>Lucky Fusion: +1 Fusion Orb back!</color>" : "") +
                        (result.fodderSaved > 0 ? $"\n<color=#7CFC6A>Fusion Protection saved {result.fodderSaved} card.</color>" : "");
+        FusionFx(result.success, result.blessed, result.to);
         if (result.success)
         {
             SfxSynth.Play("win");
@@ -557,8 +622,175 @@ public class CollectionScreen : MonoBehaviour
             SfxSynth.Play("lose");
             fusionResult.text = $"<color=#FF6B6B><b>FAILED</b> ({result.rate * 100f:0}%). Lost {result.fodderLost} fodder and {result.orbsSpent} orbs.</color>" + extra;
         }
-        foreach (var c in PlayerProfile.FodderCandidates(selected).Take(GameRules.FusionFodderCount)) fodderSelection.Add(c);
+        int matsNext = Mathf.Min(GameRules.FusionFodderCount, PlayerProfile.Materials(selected.Tier));
+        foreach (var c in PlayerProfile.FodderCandidates(selected).Take(GameRules.FusionFodderCount - matsNext)) fodderSelection.Add(c);
         RefreshFusion();
+    }
+
+    void FusionFx(bool success, bool blessed, CardRarity to)
+    {
+        var o = UIFx.Overlay;
+        var target = fusionMainHolder != null ? fusionMainHolder : (RectTransform)fusionPanel.transform;
+        var at = UIFx.LocalPos(o, target);
+        if (success)
+        {
+            var color = CardStats.RarityColor(to);
+            UIFx.ScreenFlash(o, new Color(1f, 0.95f, 0.8f, 0.45f), 0.35f);
+            UIFx.Burst(o, at, color, 1.5f);
+            UIFx.Burst(o, at, UIFactory.Gold, 0.9f, false);
+            UIFx.TextSlam(o, at + new Vector2(0f, 230f), blessed ? "BLESSED!" : "SUCCESS!", UIFactory.Gold, 96);
+            UIFx.Confetti(o, GameRules.Tier(to) >= 5 ? 90 : 45);
+            UIFx.PopScale(target, 1.25f, 0.4f);
+            SfxSynth.Play("sparkle", 0.8f);
+        }
+        else
+        {
+            UIFx.Puff(o, at, new Color(0.55f, 0.55f, 0.65f), 1.6f);
+            UIFx.Shake(target, 0.4f, 14f);
+            UIFx.TextSlam(o, at + new Vector2(0f, 230f), "FAILED", UIFactory.Bad, 90, 0.9f, 4f);
+            SfxSynth.Play("fail", 0.8f);
+        }
+    }
+
+    // ---------------------------------------------------------------- talent info
+
+    void ShowTalentInfo(Talent t1, Talent t2, int tier, UITheme theme)
+    {
+        if (talentName == null) return;
+        int bonus = Mathf.RoundToInt((GameRules.TalentPower(tier) - 1f) * 100f);
+        bool two = t2 != null;
+        // Layout: one big block, or two compact blocks for God cards (active + passive)
+        Place(talentIcon.rectTransform, 20, two ? 352 : 358, two ? 48 : 56);
+        UIFactory.TopLeft(talentName.rectTransform, two ? 76 : 88, two ? 350 : 352, two ? 424 : 412, two ? 26 : 30);
+        UIFactory.TopLeft(talentDesc.rectTransform, two ? 76 : 88, two ? 375 : 382, two ? 424 : 412, two ? 34 : 84);
+        talentName.fontSize = two ? 18 : 20;
+        talentDesc.fontSize = two ? 14 : 16;
+        talentDesc.resizeTextMaxSize = talentDesc.fontSize;
+        talentName.text = TalentHeader(t1, bonus);
+        talentDesc.text = t1 != null ? t1.Description : "<color=#9AA4B5>No talent</color>";
+        talentIcon2.gameObject.SetActive(two);
+        talentName2.gameObject.SetActive(two);
+        talentDesc2.gameObject.SetActive(two);
+        if (!two) return;
+        talentIcon2.sprite = theme != null ? theme.TalentIcon(t2) : null;
+        talentIcon2.enabled = talentIcon2.sprite != null;
+        TooltipTrigger.Add(talentIcon2, IconInfo.Talent(t2, selected.rarity));
+        talentName2.text = TalentHeader(t2, bonus);
+        talentDesc2.text = t2.Description;
+    }
+
+    static void Place(RectTransform rt, float x, float y, float size) => UIFactory.TopLeft(rt, x, y, size, size);
+
+    static string TalentHeader(Talent t, int bonus)
+    {
+        if (t == null) return "";
+        string type = t.IsActive ? "<color=#6FD3FF>ACTIVE</color>" : "<color=#FFB23D>PASSIVE</color>";
+        return $"<b>{t.DisplayName}</b>  <size=15>{type} <color=#9AA4B5>· {TalentCatalog.Name(t.Category)}</color>" +
+               (bonus > 0 ? $"  <color=#7CFC6A>+{bonus}% power</color>" : "") + "</size>";
+    }
+
+    // ---------------------------------------------------------------- materials (card exchange)
+
+    void OpenMaterials()
+    {
+        DropPending();
+        exchangeConfirm = false;
+        materialsResult.text = "";
+        var opts = new List<Dropdown.OptionData>();
+        var theme = UITheme.Instance;
+        for (int t = 0; t < GameRules.MaxTier; t++)
+            opts.Add(new Dropdown.OptionData($"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor((CardRarity)t))}>{CardStats.RarityName((CardRarity)t)}</color>", theme != null ? theme.Frame((CardRarity)t) : null));
+        exchangeTarget.ClearOptions();
+        exchangeTarget.AddOptions(opts);
+        exchangeTarget.SetValueWithoutNotify(Mathf.Clamp(PlayerProfile.Data.autoExchangeMaxTier, 0, opts.Count - 1));
+        autoExchangeTarget.ClearOptions();
+        autoExchangeTarget.AddOptions(opts);
+        autoExchangeTarget.SetValueWithoutNotify(Mathf.Clamp(PlayerProfile.Data.autoExchangeMaxTier, 0, opts.Count - 1));
+        materialsPanel.SetActive(true);
+        RefreshMaterials();
+    }
+
+    void RefreshMaterials()
+    {
+        if (materialsPanel == null || !materialsPanel.activeSelf) return;
+        UIFactory.Clear(materialsRow);
+        var theme = UITheme.Instance;
+        const float w = 112f, gap = 10f;
+        int n = GameRules.MaxTier + 1;
+        float total = n * w + (n - 1) * gap;
+        for (int t = 0; t < n; t++)
+        {
+            var color = CardStats.RarityColor((CardRarity)t);
+            var chip = UIFactory.CreatePanel(materialsRow, $"Mat {t}", new Color(0.06f, 0.05f, 0.12f, 0.98f), true);
+            UIFactory.Place(chip.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(-total / 2f + w / 2f + t * (w + gap), 0f), new Vector2(w, 132));
+            UIFactory.AddOutline(chip, UIFactory.WithAlpha(color, 0.8f), 2f);
+            var icon = UIFactory.CreateImage(chip.transform, "Icon", color, theme != null ? theme.diamondIcon : null);
+            icon.preserveAspect = true;
+            UIFactory.Place(icon.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, -12), new Vector2(50, 50));
+            var count = UIFactory.CreateText(chip.transform, "Count", PlayerProfile.Materials(t).ToString("N0"), 26, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Place(count.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 34), new Vector2(w, 30));
+            var name = UIFactory.CreateText(chip.transform, "Name", CardStats.RarityShort((CardRarity)t), 16, color, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Place(name.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 8), new Vector2(w, 24));
+            TooltipTrigger.Add(chip, $"<b>{PlayerProfile.MaterialName(t)}</b>: {PlayerProfile.Materials(t)}\nCounts as one {CardStats.RarityName((CardRarity)t)} fodder card in fusion and auto merge.");
+        }
+
+        int max = exchangeTarget.value;
+        var list = PlayerProfile.ExchangeableCards(max);
+        string err = PlayerProfile.CanExchange(selected);
+        exchangeSelectedButton.interactable = err == null;
+        UIFactory.ButtonLabel(exchangeSelectedButton).text = selected == null ? "EXCHANGE SELECTED CARD" :
+            err == null ? $"EXCHANGE SELECTED CARD  <size=17>(+1 {PlayerProfile.MaterialName(selected.Tier)})</size>" : $"SELECTED CARD: <size=17>{err}</size>";
+        exchangeAllButton.interactable = list.Count > 0;
+        UIFactory.ButtonLabel(exchangeAllButton).text = exchangeConfirm ? $"CONFIRM - EXCHANGE {list.Count} CARDS" : $"EXCHANGE ALL UP TO THIS RARITY  <size=17>({list.Count} cards)</size>";
+        exchangeAllButton.image.color = exchangeConfirm ? UIFactory.Accent2 : new Color(0.55f, 0.3f, 0.95f);
+        bool on = PlayerProfile.Data.autoExchange;
+        UIFactory.ButtonLabel(autoExchangeButton).text = on ? "AUTO EXCHANGE: ON" : "AUTO EXCHANGE: OFF";
+        autoExchangeButton.image.color = on ? new Color(0.2f, 0.6f, 0.35f) : UIFactory.PanelLight;
+        materialsInfo.text =
+            "1 card = 1 material of its rarity. Materials take no space in your collection and count as fodder cards of their rarity: " +
+            "fusion and auto merge use them first, before cards.\n" +
+            "<color=#9AA4B5>Locked and slotted cards are never exchanged.</color>";
+    }
+
+    void ExchangeSelected()
+    {
+        if (selected == null) return;
+        var card = selected;
+        string err = PlayerProfile.ExchangeCard(card);
+        if (err != null) { materialsResult.text = $"<color=#FF6B6B>{err}.</color>"; return; }
+        materialsResult.text = $"<color=#7CFC6A>+1 {PlayerProfile.MaterialName(card.Tier)}</color>";
+        SfxSynth.Play("coin", 0.7f);
+        UIFx.BurstAt((RectTransform)exchangeSelectedButton.transform, CardStats.RarityColor(card.rarity), 0.7f, false);
+        selected = null; viewBuild = null; pendingBuild = null;
+        var slot = PlayerProfile.GetSlot(PlayerProfile.ActiveSlot);
+        if (slot != null && slot.HasCard) ViewSlot(PlayerProfile.ActiveSlot); else RefreshAll();
+        RefreshMaterials();
+    }
+
+    void ExchangeAll()
+    {
+        if (!exchangeConfirm)
+        {
+            exchangeConfirm = true;
+            exchangeConfirmUntil = Time.unscaledTime + 5f;
+            RefreshMaterials();
+            return;
+        }
+        exchangeConfirm = false;
+        var gained = PlayerProfile.ExchangeAll(exchangeTarget.value);
+        var parts = new List<string>();
+        for (int t = 0; t < gained.Length; t++)
+            if (gained[t] > 0) parts.Add($"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor((CardRarity)t))}>+{gained[t]} {PlayerProfile.MaterialName(t)}</color>");
+        materialsResult.text = parts.Count > 0 ? string.Join("   ", parts) : "Nothing to exchange.";
+        if (parts.Count > 0)
+        {
+            SfxSynth.Play("sparkle", 0.7f);
+            UIFx.BurstAt(materialsRow, UIFactory.Gold, 1.1f, false);
+        }
+        if (selected != null && PlayerProfile.FindCard(selected.uid) == null) { selected = null; viewBuild = null; pendingBuild = null; }
+        var slot = PlayerProfile.GetSlot(PlayerProfile.ActiveSlot);
+        if (selected == null && slot != null && slot.HasCard) ViewSlot(PlayerProfile.ActiveSlot); else RefreshAll();
+        RefreshMaterials();
     }
 
     // ---------------------------------------------------------------- auto merge
@@ -641,7 +873,17 @@ public class CollectionScreen : MonoBehaviour
             tile.SetInstance(card);
             tile.SetBadge($"{CardStats.RarityShort(kv.Value.from)} > {CardStats.RarityShort(kv.Value.to)}", new Color(0.85f, 0.55f, 0.15f));
             tile.button.interactable = false;
+            UIFx.PopIn((RectTransform)tile.transform, Mathf.Min(0.8f, 0.06f * mergeResultGrid.childCount), 0.3f);
         }
+        if (r.successes > 0)
+        {
+            var o = UIFx.Overlay;
+            var at = UIFx.LocalPos(o, mergeResultGrid);
+            UIFx.Burst(o, at, UIFactory.Gold, 1.1f, false);
+            UIFx.TextSlam(o, at + new Vector2(0f, 140f), $"{r.successes} UPGRADE{(r.successes > 1 ? "S" : "")}!", UIFactory.Gold, 70);
+            SfxSynth.Play("sparkle", 0.7f);
+        }
+        else if (r.attempts > 0) UIFx.Shake(mergeResultGrid, 0.3f, 10f);
         if (selected != null && PlayerProfile.FindCard(selected.uid) == null) { selected = null; viewBuild = null; }
         RefreshMergeInfo();
     }
@@ -653,7 +895,23 @@ public class CollectionScreen : MonoBehaviour
         if (selected == null) return;
         string err = PlayerProfile.UseGodOrb(selected, out bool success);
         if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
-        SfxSynth.Play(success ? "win" : "lose", 0.8f);
+        SfxSynth.Play(success ? "win" : "fail", 0.8f);
+        var o = UIFx.Overlay;
+        var srt = (RectTransform)showcaseView.transform;
+        var at = UIFx.LocalPos(o, srt);
+        if (success)
+        {
+            UIFx.ScreenFlash(o, new Color(1f, 0.9f, 0.55f, 0.5f), 0.4f);
+            UIFx.Burst(o, at, new Color(1f, 0.88f, 0.45f), 1.7f);
+            UIFx.TextSlam(o, at + new Vector2(0f, 300f), $"GOD ORB +{selected.godBonus}%!", new Color(1f, 0.9f, 0.5f), 80);
+            showcaseView.Flash(new Color(1f, 0.9f, 0.5f, 0.7f), 0.6f);
+            showcaseView.Pulse(0.5f, 0.08f);
+        }
+        else
+        {
+            UIFx.Puff(o, at, new Color(0.7f, 0.65f, 0.5f), 1.4f);
+            showcaseView.Shake(0.4f, 12f);
+        }
         Message(success ? $"<color=#FFE9A3>GOD ORB WORKED! +{selected.godBonus}% to every stat.</color>" : "<color=#FF6B6B>The God Orb faded... no effect this time.</color>");
         RefreshAll();
     }
@@ -682,6 +940,11 @@ public class CollectionScreen : MonoBehaviour
         if (slot != null && slot.HasCard) ViewSlot(PlayerProfile.ActiveSlot);
         else RefreshAll();
         Message($"<color=#7CFC6A>Dismantled for +{gold:N0} gold.</color>");
+        var ov = UIFx.Overlay;
+        var pp = UIFx.PointerPos(ov);
+        UIFx.Sparks(ov, pp, UIFactory.Gold, 16, 520f, 30f, 0.6f, 900f, UIFactory.Theme != null ? UIFactory.Theme.goldIcon : null);
+        UIFx.FloatText(ov, pp + new Vector2(0f, 30f), $"+{gold:N0} gold", UIFactory.Gold, 34);
+        SfxSynth.Play("coin", 0.7f);
     }
 
     // ================================================================ layout
@@ -808,25 +1071,46 @@ public class CollectionScreen : MonoBehaviour
         screen.strongRow = UIFactory.CreateRect("StrongVs", up.transform);
         UIFactory.TopLeft(screen.strongRow, 90, 302, 360, 40);
         screen.elementNew = NewBadge(up.transform, new Vector2(440, 308));
+        // Talent box: full information (name, type, group, description); God cards show two compact blocks
+        var talentBox = UIFactory.CreateImage(up.transform, "TalentBox", new Color(1f, 1f, 1f, 0.04f), theme != null ? theme.roundedSmall : null, true);
+        UIFactory.TopLeft(talentBox.rectTransform, 12, 346, uw - 24, 124);
         screen.talentIcon = UIFactory.CreateImage(up.transform, "TalentIcon", Color.white);
         screen.talentIcon.preserveAspect = true;
-        UIFactory.TopLeft(screen.talentIcon.rectTransform, 20, 360, 60, 60);
-        screen.talentBonus = UIFactory.CreateText(up.transform, "TalentBonus", "", 21, new Color(0.55f, 1f, 0.45f), TextAnchor.MiddleLeft, FontStyle.Bold);
-        UIFactory.TopLeft(screen.talentBonus.rectTransform, 92, 370, 330, 40);
-        screen.talentNew = NewBadge(up.transform, new Vector2(440, 376));
+        UIFactory.TopLeft(screen.talentIcon.rectTransform, 20, 358, 56, 56);
+        screen.talentBonus = UIFactory.CreateText(up.transform, "TalentBonus", "", 16, new Color(0.55f, 1f, 0.45f), TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(screen.talentBonus.rectTransform, 20, 420, 60, 24);
+        screen.talentName = UIFactory.CreateText(up.transform, "TalentName", "", 20, UIFactory.TextMain, TextAnchor.MiddleLeft);
+        UIFactory.TopLeft(screen.talentName.rectTransform, 88, 352, 412, 30);
+        UIFactory.BestFit(screen.talentName, 12);
+        screen.talentDesc = UIFactory.CreateText(up.transform, "TalentDesc", "", 16, new Color(0.85f, 0.87f, 0.93f), TextAnchor.UpperLeft);
+        UIFactory.TopLeft(screen.talentDesc.rectTransform, 88, 382, 412, 84);
+        UIFactory.BestFit(screen.talentDesc, 10);
+        screen.talentIcon2 = UIFactory.CreateImage(up.transform, "TalentIcon2", Color.white);
+        screen.talentIcon2.preserveAspect = true;
+        UIFactory.TopLeft(screen.talentIcon2.rectTransform, 20, 412, 48, 48);
+        screen.talentName2 = UIFactory.CreateText(up.transform, "TalentName2", "", 18, UIFactory.TextMain, TextAnchor.MiddleLeft);
+        UIFactory.TopLeft(screen.talentName2.rectTransform, 76, 410, 424, 26);
+        UIFactory.BestFit(screen.talentName2, 12);
+        screen.talentDesc2 = UIFactory.CreateText(up.transform, "TalentDesc2", "", 14, new Color(0.85f, 0.87f, 0.93f), TextAnchor.UpperLeft);
+        UIFactory.TopLeft(screen.talentDesc2.rectTransform, 76, 435, 424, 34);
+        UIFactory.BestFit(screen.talentDesc2, 10);
+        screen.talentIcon2.gameObject.SetActive(false);
+        screen.talentName2.gameObject.SetActive(false);
+        screen.talentDesc2.gameObject.SetActive(false);
+        screen.talentNew = NewBadge(up.transform, new Vector2(436, 440));
 
-        Section(up.transform, "UPGRADE  (keep rolling, save when you like it)", 430, uw);
-        screen.rerollStatsButton = ActionButton(up.transform, "RerollStats", "REROLL STATS", new Color(0.85f, 0.55f, 0.15f), 20, 468, uw - 40, 56, out screen.rerollStatsIcon, out screen.rerollStatsCost);
-        screen.rerollElementButton = ActionButton(up.transform, "RerollElement", "REROLL ELEMENT", new Color(0.2f, 0.6f, 0.45f), 20, 530, uw - 40, 56, out screen.rerollElementIcon, out screen.rerollElementCost);
-        screen.rerollTalentButton = ActionButton(up.transform, "RerollTalent", "REROLL TALENT", new Color(0.75f, 0.55f, 0.15f), 20, 592, uw - 40, 56, out screen.rerollTalentIcon, out screen.rerollTalentCost);
-        Section(up.transform, "RANK UP", 662, uw);
-        screen.fusionButton = ActionButton(up.transform, "Fusion", "FUSION", new Color(0.55f, 0.3f, 0.95f), 20, 700, uw - 40, 56, out screen.fusionIcon, out screen.fusionCost);
+        Section(up.transform, "UPGRADE  (keep rolling, save when you like it)", 474, uw);
+        screen.rerollStatsButton = ActionButton(up.transform, "RerollStats", "REROLL STATS", new Color(0.85f, 0.55f, 0.15f), 20, 510, uw - 40, 50, out screen.rerollStatsIcon, out screen.rerollStatsCost);
+        screen.rerollElementButton = ActionButton(up.transform, "RerollElement", "REROLL ELEMENT", new Color(0.2f, 0.6f, 0.45f), 20, 564, uw - 40, 50, out screen.rerollElementIcon, out screen.rerollElementCost);
+        screen.rerollTalentButton = ActionButton(up.transform, "RerollTalent", "REROLL TALENT", new Color(0.75f, 0.55f, 0.15f), 20, 618, uw - 40, 50, out screen.rerollTalentIcon, out screen.rerollTalentCost);
+        Section(up.transform, "RANK UP", 674, uw);
+        screen.fusionButton = ActionButton(up.transform, "Fusion", "FUSION", new Color(0.55f, 0.3f, 0.95f), 20, 710, uw - 40, 50, out screen.fusionIcon, out screen.fusionCost);
         screen.autoMergeButton = UIFactory.CreateButton(up.transform, "AutoMerge", "AUTO MERGE  <size=16>fuse everything up to a rarity</size>", new Color(0.35f, 0.25f, 0.75f), 20);
-        UIFactory.TopLeft((RectTransform)screen.autoMergeButton.transform, 20, 762, uw - 40, 52);
-        screen.godOrbButton = ActionButton(up.transform, "GodOrb", "GOD ORB", new Color(0.75f, 0.62f, 0.25f), 20, 822, 234, 52, out screen.godOrbIcon, out screen.godOrbCost);
-        screen.dismantleButton = ActionButton(up.transform, "Dismantle", "DISMANTLE", new Color(0.5f, 0.32f, 0.24f), 266, 822, 234, 52, out screen.dismantleIcon, out screen.dismantleCost);
+        UIFactory.TopLeft((RectTransform)screen.autoMergeButton.transform, 20, 766, uw - 40, 46);
+        screen.godOrbButton = ActionButton(up.transform, "GodOrb", "GOD ORB", new Color(0.75f, 0.62f, 0.25f), 20, 818, 234, 50, out screen.godOrbIcon, out screen.godOrbCost);
+        screen.dismantleButton = ActionButton(up.transform, "Dismantle", "DISMANTLE", new Color(0.5f, 0.32f, 0.24f), 266, 818, 234, 50, out screen.dismantleIcon, out screen.dismantleCost);
         screen.messageText = UIFactory.CreateText(up.transform, "Message", "", 20, UIFactory.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
-        UIFactory.TopLeft(screen.messageText.rectTransform, 16, 882, uw - 32, 54);
+        UIFactory.TopLeft(screen.messageText.rectTransform, 16, 874, uw - 32, 62);
         UIFactory.BestFit(screen.messageText, 12);
 
         // ---------- collection (right)
@@ -840,7 +1124,9 @@ public class CollectionScreen : MonoBehaviour
         screen.sortDropdown = UIFactory.CreateDropdown(col.transform, "Sort", 20, 230f);
         UIFactory.TopLeft((RectTransform)screen.sortDropdown.transform, 536, 14, 208, 52);
         screen.countText = UIFactory.CreateText(col.transform, "Count", "", 18, UIFactory.TextDim, TextAnchor.MiddleLeft);
-        UIFactory.TopLeft(screen.countText.rectTransform, 20, 70, 720, 26);
+        UIFactory.TopLeft(screen.countText.rectTransform, 20, 70, 530, 26);
+        screen.materialsButton = UIFactory.CreateButton(col.transform, "Materials", "MATERIALS / EXCHANGE", new Color(0.2f, 0.5f, 0.75f), 17);
+        UIFactory.TopLeft((RectTransform)screen.materialsButton.transform, 556, 66, 188, 32);
         UIFactory.BestFit(screen.countText, 11);
         var scroll = UIFactory.CreateScroll(col.transform, "GridScroll", true, out RectTransform gridContent);
         UIFactory.Stretch((RectTransform)scroll.transform, 8, 100, 8, 214);
@@ -857,7 +1143,51 @@ public class CollectionScreen : MonoBehaviour
 
         BuildFusion(canvas, screen);
         BuildAutoMerge(canvas, screen);
+        BuildMaterials(canvas, screen);
         return screen;
+    }
+
+    static void BuildMaterials(RectTransform canvas, CollectionScreen screen)
+    {
+        var dim = UIFactory.CreateImage(canvas, "MaterialsPanel", new Color(0, 0, 0, 0.8f), null, false, true);
+        UIFactory.Stretch(dim.rectTransform);
+        screen.materialsPanel = dim.gameObject;
+        var panel = UIFactory.CreatePanel(dim.transform, "Panel", new Color(0.07f, 0.08f, 0.16f, 1f), true);
+        UIFactory.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1200, 780));
+        UIFactory.AddOutline(panel, UIFactory.WithAlpha(new Color(0.3f, 0.7f, 1f), 0.6f), 3f);
+        var title = UIFactory.CreateText(panel.transform, "Title", "CARD MATERIALS", 46, new Color(0.55f, 0.85f, 1f), TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopStrip(title.rectTransform, 16, 60, 20, 20);
+        UIFactory.AddShadow(title, UIFactory.ShadowColor, 3f);
+        screen.materialsInfo = UIFactory.CreateText(panel.transform, "Info", "", 20, UIFactory.TextMain, TextAnchor.MiddleCenter);
+        UIFactory.TopStrip(screen.materialsInfo.rectTransform, 80, 76, 60, 60);
+        UIFactory.BestFit(screen.materialsInfo, 12);
+        screen.materialsRow = UIFactory.CreateRect("Row", panel.transform);
+        UIFactory.TopStrip(screen.materialsRow, 166, 140, 20, 20);
+
+        Section(panel.transform, "EXCHANGE", 326, 1200);
+        screen.exchangeSelectedButton = UIFactory.CreateButton(panel.transform, "ExchangeSelected", "EXCHANGE SELECTED CARD", new Color(0.2f, 0.5f, 0.75f), 22);
+        UIFactory.TopLeft((RectTransform)screen.exchangeSelectedButton.transform, 40, 372, 1120, 60);
+        var upTo = UIFactory.CreateText(panel.transform, "UpTo", "Every unlocked card up to:", 20, UIFactory.TextDim, TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(upTo.rectTransform, 40, 446, 290, 56);
+        screen.exchangeTarget = UIFactory.CreateDropdown(panel.transform, "ExchangeTarget", 20, 360f);
+        UIFactory.TopLeft((RectTransform)screen.exchangeTarget.transform, 330, 446, 260, 56);
+        screen.exchangeAllButton = UIFactory.CreateButton(panel.transform, "ExchangeAll", "EXCHANGE ALL", new Color(0.55f, 0.3f, 0.95f), 20);
+        UIFactory.TopLeft((RectTransform)screen.exchangeAllButton.transform, 606, 446, 554, 56);
+
+        Section(panel.transform, "AUTO EXCHANGE  (new cards from packs and drops)", 526, 1200);
+        screen.autoExchangeButton = UIFactory.CreateButton(panel.transform, "AutoExchange", "AUTO EXCHANGE: OFF", UIFactory.PanelLight, 22);
+        UIFactory.TopLeft((RectTransform)screen.autoExchangeButton.transform, 40, 572, 420, 58);
+        var autoUpTo = UIFactory.CreateText(panel.transform, "AutoUpTo", "for cards up to:", 20, UIFactory.TextDim, TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(autoUpTo.rectTransform, 480, 572, 180, 58);
+        screen.autoExchangeTarget = UIFactory.CreateDropdown(panel.transform, "AutoTarget", 20, 360f);
+        UIFactory.TopLeft((RectTransform)screen.autoExchangeTarget.transform, 660, 572, 260, 58);
+
+        screen.materialsResult = UIFactory.CreateText(panel.transform, "Result", "", 22, UIFactory.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopStrip(screen.materialsResult.rectTransform, 642, 44, 40, 40);
+        UIFactory.BestFit(screen.materialsResult, 12);
+        screen.materialsCloseButton = UIFactory.CreateButton(panel.transform, "Close", "CLOSE", UIFactory.PanelLight, 24);
+        UIFactory.Place((RectTransform)screen.materialsCloseButton.transform, new Vector2(0.5f, 0f), new Vector2(0, 24), new Vector2(260, 60));
+        dim.gameObject.SetActive(false);
     }
 
     static void BuildFusion(RectTransform canvas, CollectionScreen screen)

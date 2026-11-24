@@ -85,6 +85,21 @@ public class BuffsScreen : MonoBehaviour
             messageText.text = $"<color=#7CFC6A><b>{b.name}</b> is now active forever!</color>";
         }
         Refresh();
+        BuyFx(index, err == null, b);
+    }
+
+    void BuyFx(int index, bool bought, BuffDefinition b)
+    {
+        if (index < 0 || index >= buyButtons.Length || buyButtons[index] == null) return;
+        var brt = (RectTransform)buyButtons[index].transform;
+        if (!bought) { UIFx.Shake(brt, 0.3f, 8f); return; }
+        var color = b.currency == BuffCurrency.Gold ? UIFactory.Gold : new Color(0.45f, 0.8f, 1f);
+        var card = cardBackgrounds != null && index < cardBackgrounds.Length ? cardBackgrounds[index] : null;
+        var target = card != null ? card.rectTransform : brt;
+        UIFx.BurstAt(target, color, 0.9f);
+        UIFx.FloatText(UIFx.Overlay, UIFx.LocalPos(UIFx.Overlay, target, new Vector2(0f, 40f)), "UNLOCKED!", new Color(0.55f, 1f, 0.6f), 32);
+        if (card != null) { UIFx.FlashGraphic(card, new Color(0.6f, 1f, 0.7f, 1f), 0.6f); UIFx.PopScale(card.rectTransform, 1.08f, 0.3f); }
+        SfxSynth.Play("sparkle", 0.6f);
     }
 
     // ---------------------------------------------------------------- layout

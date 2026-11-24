@@ -63,6 +63,12 @@ public class BattleScreen : MonoBehaviour
     bool skipping;
     bool battleFinished;
     Coroutine bannerRoutine;
+    RectTransform arena;      // everything but the result panel (camera shake / zoom)
+    RectTransform backLayer;  // effects behind the cards (auras, light bursts)
+    CardView meleeActor;      // attacker that dashed forward and waits for its hit
+    float meleeDir;
+    Color dropColor = Color.white;
+    int dropTier = -1;
 
     float Speed => speeds[Mathf.Clamp(speedIndex, 0, speeds.Length - 1)];
 
@@ -71,6 +77,7 @@ public class BattleScreen : MonoBehaviour
         resultPanel.SetActive(false);
         bannerGroup.alpha = 0f;
         logText.text = "";
+        SetupArena();
 
         backButton.onClick.AddListener(() => GameSession.LoadScene(SceneNames.LocationMap));
         speedButton.onClick.AddListener(CycleSpeed);
@@ -153,6 +160,13 @@ public class BattleScreen : MonoBehaviour
         var label = UIFactory.ButtonLabel(speedButton);
         if (label != null) label.text = $"SPEED x{Speed}";
         DamagePopup.SpeedMultiplier = Speed;
+        UIFx.Speed = Speed;
+    }
+
+    void OnDestroy()
+    {
+        UIFx.Speed = 1f;
+        DamagePopup.SpeedMultiplier = 1f;
     }
 
     // ---------------------------------------------------------------- battle flow
@@ -162,6 +176,7 @@ public class BattleScreen : MonoBehaviour
         var enemy = new CardRuntime(enemyCard);
         enemyView.Bind(enemy);
         playerView.Bind(player);
+        playerView.idle = enemyView.idle = true;
         UpdateMatchup(player, enemy);
         if (reserveRow != null) reserveRow.gameObject.SetActive(false);
 
@@ -182,6 +197,13 @@ public class BattleScreen : MonoBehaviour
             engine.Step();
         }
 
+        if (skipping)
+        {
+            meleeActor = null;
+            playerView.ResetPose();
+            enemyView.ResetPose();
+            MarkDefeated();
+        }
         battleFinished = true;
         var state = engine.State;
         bool victory = state == BattleState.PlayerWon || (state == BattleState.Draw && !enemy.IsAlive);
@@ -252,59 +274,59 @@ public class BattleScreen : MonoBehaviour
     {
         var actorView = ViewFor(e.actor);
         var targetView = ViewFor(e.target);
+        float dir = actorView == enemyView ? -1f : 1f;
 
         switch (e.type)
         {
             case BattleEventType.BattleStart:
                 Log(e.text);
                 ApplySnapshot(e, true);
-                ShowBanner("FIGHT!", UIFactory.Accent2);
-                yield return Wait(0.8f);
+                yield return IntroRun();
                 break;
 
             case BattleEventType.RoundStart:
+                EndMelee();
                 roundText.text = $"ROUND {e.round}";
+                UIFx.PopScale(roundText.rectTransform, 1.5f, 0.3f);
                 Log(e.text);
                 yield return Wait(0.15f);
                 break;
 
             case BattleEventType.TurnStart:
-                if (actorView != null) actorView.Pulse(0.2f / Speed, 0.03f);
+                EndMelee();
+                if (actorView != null)
+                {
+                    actorView.Pulse(0.22f, 0.035f);
+                    UIFx.GlowFlash(backLayer, FxPos(actorView, backLayer), UIFactory.WithAlpha(SideColor(actorView), 0.35f), 640f, 0.35f);
+                }
                 yield return Wait(0.12f);
                 break;
 
             case BattleEventType.NormalAttack:
-                if (actorView != null) actorView.Lunge(actorView == playerView ? 1f : -1f, 0.3f / Speed);
-                SfxSynth.Play("swing", 0.6f);
-                yield return Wait(0.16f);
+                yield return AttackRun(actorView, dir, e.crit);
                 break;
 
             case BattleEventType.Evaded:
                 Log(e.text);
-                if (actorView != null) actorView.Lunge(actorView == playerView ? 1f : -1f, 0.3f / Speed);
-                yield return Wait(0.15f);
-                Popup(targetView, "MISS", new Color(0.8f, 0.85f, 0.9f), 44);
-                SfxSynth.Play("miss");
-                yield return Wait(0.35f);
+                yield return EvadeRun(actorView, targetView, dir, e.miss);
                 break;
 
             case BattleEventType.Damage:
                 Log(e.text);
                 ApplySnapshot(e, false);
-                if (targetView != null)
-                {
-                    targetView.Shake(e.crit ? 0.35f : 0.22f, e.crit ? 22f : 12f);
-                    targetView.Flash(DamageFlash(e.kind), 0.3f);
-                }
-                Popup(targetView, DamageLabel(e), DamageColor(e.kind), e.crit ? 64 : 50);
-                SfxSynth.Play(DamageSfx(e.kind), e.crit ? 1f : 0.8f, Random.Range(0.92f, 1.08f));
-                yield return Wait(e.crit ? 0.5f : 0.34f);
+                yield return DamageRun(e, targetView);
                 break;
 
             case BattleEventType.Heal:
                 Log(e.text);
                 ApplySnapshot(e, false);
-                if (targetView != null) targetView.Flash(new Color(0.4f, 1f, 0.6f, 0.45f), 0.35f);
+                if (targetView != null)
+                {
+                    targetView.Flash(new Color(0.4f, 1f, 0.6f, 0.45f), 0.35f);
+                    var at = FxPos(targetView, popupLayer);
+                    UIFx.Rise(popupLayer, at, new Color(0.5f, 1f, 0.65f, 0.95f), 14, 300f, 30f, 0.9f);
+                    UIFx.Ring(popupLayer, at, new Color(0.45f, 1f, 0.6f, 0.6f), 120f, 520f, 0.5f);
+                }
                 Popup(targetView, $"+{e.amount}", new Color(0.45f, 1f, 0.6f), 44);
                 SfxSynth.Play("heal", 0.7f);
                 yield return Wait(0.32f);
@@ -315,10 +337,17 @@ public class BattleScreen : MonoBehaviour
                 ApplySnapshot(e, false);
                 if (actorView != null)
                 {
-                    actorView.Pulse(0.6f / Speed, 0.08f);
+                    var color = SideColor(actorView);
+                    var back = FxPos(actorView, backLayer);
+                    var front = FxPos(actorView, popupLayer);
+                    actorView.Pulse(0.6f, 0.08f);
                     actorView.Flash(new Color(0.45f, 0.8f, 1f, 0.5f), 0.5f);
+                    UIFx.Starburst(backLayer, back, UIFactory.WithAlpha(color, 0.55f), 900f, 0.9f, 60f);
+                    UIFx.GlowFlash(backLayer, back, UIFactory.WithAlpha(color, 0.6f), 760f, 0.6f);
+                    UIFx.Ring(popupLayer, front, new Color(0.6f, 0.9f, 1f, 0.85f), 100f, 640f, 0.55f);
+                    UIFx.Rise(popupLayer, front, new Color(0.7f, 0.92f, 1f, 1f), 16, 360f, 32f, 0.9f);
                 }
-                string skillName = e.actor != null && e.actor.talent != null ? e.actor.talent.DisplayName : "Talent";
+                string skillName = e.skill != null ? e.skill.DisplayName : e.actor != null && e.actor.talent != null ? e.actor.talent.DisplayName : "Talent";
                 ShowBanner(skillName.ToUpperInvariant() + "!", e.actor != null && e.actor.isPlayer ? UIFactory.Accent : UIFactory.Accent2);
                 SfxSynth.Play("skill");
                 yield return Wait(0.85f);
@@ -327,7 +356,13 @@ public class BattleScreen : MonoBehaviour
             case BattleEventType.PassiveTriggered:
                 Log(e.text);
                 ApplySnapshot(e, false);
-                if (actorView != null) actorView.Pulse(0.4f / Speed, 0.05f);
+                if (actorView != null)
+                {
+                    actorView.Pulse(0.4f, 0.05f);
+                    var at = FxPos(actorView, popupLayer);
+                    UIFx.Ring(popupLayer, at, new Color(1f, 0.85f, 0.4f, 0.6f), 120f, 480f, 0.4f);
+                    UIFx.Rise(popupLayer, at, new Color(1f, 0.9f, 0.5f, 1f), 8, 260f, 26f, 0.7f);
+                }
                 SfxSynth.Play("buff", 0.6f);
                 yield return Wait(0.45f);
                 break;
@@ -335,13 +370,19 @@ public class BattleScreen : MonoBehaviour
             case BattleEventType.Status:
                 Log(e.text);
                 ApplySnapshot(e, false);
-                if (e.text != null && e.text.Contains("stunned")) SfxSynth.Play("stun");
+                if (e.text != null && e.text.Contains("stunned"))
+                {
+                    SfxSynth.Play("stun");
+                    if (targetView != null) StunStars(targetView);
+                }
                 yield return Wait(0.3f);
                 break;
 
             case BattleEventType.TurnSkipped:
                 Log(e.text);
-                Popup(actorView, "STUNNED", new Color(1f, 0.88f, 0.3f), 44);
+                string why = e.text != null && e.text.Contains("frozen") ? "FROZEN" : e.text != null && e.text.Contains("asleep") ? "ZZZ..." : "STUNNED";
+                Popup(actorView, why, why == "FROZEN" ? new Color(0.6f, 0.9f, 1f) : why == "ZZZ..." ? new Color(0.7f, 0.75f, 1f) : new Color(1f, 0.88f, 0.3f), 44);
+                if (actorView != null) { StunStars(actorView); actorView.Shake(0.3f, 6f); }
                 SfxSynth.Play("stun");
                 yield return Wait(0.5f);
                 break;
@@ -353,15 +394,239 @@ public class BattleScreen : MonoBehaviour
                 break;
 
             case BattleEventType.BattleEnd:
+                EndMelee();
                 Log(e.text);
                 ApplySnapshot(e, false);
-                MarkDefeated();
-                yield return Wait(0.7f);
+                yield return FinishRun();
                 break;
         }
 
         playerView.RefreshLive();
         enemyView.RefreshLive();
+    }
+
+    // ---------------------------------------------------------------- animation runs
+
+    /// <summary>Puts every top-level element (except the result panel) in an "Arena" so the whole
+    /// battle can shake / zoom like a camera, and adds a layer behind the cards for auras.</summary>
+    void SetupArena()
+    {
+        var canvas = (RectTransform)transform;
+        arena = UIFactory.CreateRect("Arena", canvas);
+        UIFactory.Stretch(arena);
+        var move = new List<Transform>();
+        foreach (Transform child in canvas)
+            if (child != arena && (resultPanel == null || child != resultPanel.transform)) move.Add(child);
+        arena.SetSiblingIndex(0);
+        foreach (var c in move) c.SetParent(arena, false);
+        if (resultPanel != null) resultPanel.transform.SetAsLastSibling();
+
+        backLayer = UIFactory.CreateRect("BackFx", arena);
+        UIFactory.Stretch(backLayer);
+        int index = 0;
+        for (int i = 0; i < arena.childCount; i++)
+            if (arena.GetChild(i).GetComponent<AnimeBackground>() != null) { index = i + 1; break; }
+        backLayer.SetSiblingIndex(index);
+    }
+
+    Vector2 FxPos(CardView view, RectTransform layer)
+    {
+        if (view == null) return Vector2.zero;
+        return UIFx.LocalPos(layer, view.body != null ? view.body : (RectTransform)view.transform);
+    }
+
+    Color SideColor(CardView view) => view == playerView ? UIFactory.Accent : UIFactory.Accent2;
+
+    void EndMelee()
+    {
+        if (meleeActor != null) meleeActor.ReturnHome(0.22f);
+        meleeActor = null;
+    }
+
+    IEnumerator IntroRun()
+    {
+        if (skipping) yield break;
+        playerView.EnterFrom(-1f);
+        enemyView.EnterFrom(1f);
+        SfxSynth.Play("whoosh", 0.8f);
+        yield return Wait(0.42f);
+        UIFx.Shake(arena, 0.22f, 9f);
+        if (vsText != null)
+        {
+            UIFx.PopScale(vsText.rectTransform, 2.6f, 0.4f);
+            var vsPos = UIFx.LocalPos(popupLayer, vsText.rectTransform);
+            UIFx.Ring(popupLayer, vsPos, UIFactory.WithAlpha(UIFactory.Accent2, 0.9f), 60f, 560f, 0.5f);
+            UIFx.Sparks(popupLayer, vsPos, UIFactory.Gold, 16, 700f, 30f, 0.55f);
+        }
+        SfxSynth.Play("impact", 0.6f, 1.2f);
+        ShowBanner("FIGHT!", UIFactory.Accent2);
+        yield return Wait(0.75f);
+    }
+
+    IEnumerator AttackRun(CardView attacker, float dir, bool crit)
+    {
+        if (attacker == null) yield break;
+        attacker.WindUp(dir, crit);
+        if (crit)
+        {
+            var at = FxPos(attacker, popupLayer);
+            attacker.Flash(new Color(1f, 0.75f, 0.2f, 0.6f), 0.35f);
+            UIFx.GlowFlash(backLayer, FxPos(attacker, backLayer), new Color(1f, 0.55f, 0.1f, 0.8f), 700f, 0.4f);
+            UIFx.Ring(popupLayer, at, new Color(1f, 0.8f, 0.3f, 0.9f), 620f, 160f, 0.28f);
+            UIFx.Sparks(popupLayer, at + new Vector2(0f, 180f), new Color(1f, 0.85f, 0.35f), 6, 220f, 46f, 0.35f, 0f);
+            SfxSynth.Play("charge", 0.85f);
+            yield return Wait(0.3f);
+        }
+        else yield return Wait(0.13f);
+
+        Color ghost = crit ? new Color(1f, 0.75f, 0.25f) : new Color(0.65f, 0.75f, 1f);
+        attacker.Dash(dir, crit ? 240f : 200f, ghost);
+        UIFx.Streaks(popupLayer, FxPos(attacker, popupLayer), dir, new Color(1f, 1f, 1f, 0.55f), crit ? 8 : 5, 420f, 0.3f);
+        SfxSynth.Play("swing", crit ? 0.9f : 0.6f, crit ? 0.85f : 1f);
+        meleeActor = attacker;
+        meleeDir = dir;
+        yield return Wait(0.09f);
+    }
+
+    IEnumerator EvadeRun(CardView attacker, CardView dodger, float dir, bool miss = false)
+    {
+        if (attacker != null)
+        {
+            attacker.WindUp(dir, false);
+            yield return Wait(0.12f);
+            attacker.Dash(dir, 250f, new Color(0.65f, 0.75f, 1f));
+            SfxSynth.Play("swing", 0.6f);
+        }
+        if (dodger != null)
+        {
+            yield return Wait(0.03f);
+            UIFx.Ghost(dodger, new Color(0.45f, 0.9f, 1f), 0.45f, 0.6f);
+            dodger.Dodge(dir);
+            var at = FxPos(dodger, popupLayer);
+            UIFx.Streaks(popupLayer, at, dir, new Color(0.75f, 0.95f, 1f, 0.85f), 8, 480f, 0.36f);
+            UIFx.TextSlam(popupLayer, at + new Vector2(0f, 200f), miss ? "MISS!" : "EVADE!", miss ? new Color(0.8f, 0.85f, 0.9f) : new Color(0.55f, 0.95f, 1f), 76, 0.85f, dir * 6f);
+            SfxSynth.Play("whoosh", 0.9f, 1.1f);
+            SfxSynth.Play("miss", 0.45f);
+        }
+        yield return Wait(0.2f);
+        if (attacker != null) attacker.ReturnHome(0.28f);
+        yield return Wait(0.34f);
+    }
+
+    IEnumerator DamageRun(BattleEvent e, CardView target)
+    {
+        if (target == null) { yield return Wait(0.2f); yield break; }
+        bool melee = meleeActor != null && target != meleeActor && (e.kind == DamageKind.Normal || e.kind == DamageKind.Critical);
+        var at = FxPos(target, popupLayer);
+
+        if (melee)
+        {
+            float d = meleeDir;
+            bool crit = e.crit;
+            var hit = at + new Vector2(-d * 70f, 40f);
+            float angle = d > 0f ? -32f : 212f;
+            if (crit)
+            {
+                UIFx.ScreenFlash(popupLayer, new Color(1f, 0.93f, 0.75f, 0.45f), 0.32f);
+                UIFx.Starburst(backLayer, FxPos(target, backLayer), new Color(1f, 0.65f, 0.2f, 0.85f), 1100f, 0.8f, 80f);
+                UIFx.Slash(popupLayer, hit, angle, new Color(1f, 0.6f, 0.15f, 1f), 620f, 90f, 0.34f);
+                UIFx.Slash(popupLayer, hit, d > 0f ? 32f : 148f, new Color(1f, 0.85f, 0.3f, 1f), 620f, 90f, 0.34f, 0.05f);
+                UIFx.Sparks(popupLayer, hit, new Color(1f, 0.78f, 0.25f), 34, 1250f, 40f, 0.7f, 700f);
+                UIFx.Ring(popupLayer, hit, new Color(1f, 0.85f, 0.4f, 0.95f), 80f, 700f, 0.45f);
+                UIFx.Ring(popupLayer, hit, new Color(1f, 1f, 1f, 0.8f), 40f, 420f, 0.3f, 0.06f);
+                UIFx.TextSlam(popupLayer, new Vector2(at.x * 0.4f, 40f), "CRITICAL!", new Color(1f, 0.8f, 0.2f), 112, 1.05f, d > 0f ? -6f : 6f);
+                UIFx.Shake(arena, 0.45f, 22f);
+                UIFx.Punch(arena, 0.045f, 0.38f);
+                UIFx.SlowMo(0.3f, 0.3f);
+                target.Flash(new Color(1f, 0.55f, 0.15f, 0.65f), 0.4f);
+                SfxSynth.Play("impact", 1f);
+                SfxSynth.Play("slash", 0.8f);
+            }
+            else
+            {
+                UIFx.Slash(popupLayer, hit, angle, new Color(0.85f, 0.92f, 1f, 0.95f), 460f, 60f, 0.26f);
+                UIFx.Sparks(popupLayer, hit, new Color(1f, 0.95f, 0.75f), 14, 800f, 30f, 0.45f, 700f);
+                UIFx.Ring(popupLayer, hit, new Color(1f, 1f, 1f, 0.7f), 50f, 380f, 0.3f);
+                UIFx.Shake(arena, 0.16f, 7f);
+                target.Flash(DamageFlash(e.kind), 0.3f);
+                SfxSynth.Play("slash", 0.5f, Random.Range(0.95f, 1.1f));
+            }
+            // Hit-stop: both cards freeze for a beat, then the target is knocked back.
+            yield return Wait(crit ? 0.12f : 0.05f);
+            target.HitReact(d, crit);
+            meleeActor.ReturnHome(crit ? 0.34f : 0.24f);
+            meleeActor = null;
+        }
+        else
+        {
+            target.Shake(e.crit ? 0.35f : 0.22f, e.crit ? 22f : 12f);
+            target.Flash(DamageFlash(e.kind), 0.3f);
+            KindFx(e.kind, at);
+        }
+
+        Popup(target, DamageLabel(e), DamageColor(e.kind), e.crit ? 64 : 50);
+        SfxSynth.Play(DamageSfx(e.kind), e.crit ? 1f : 0.8f, Random.Range(0.92f, 1.08f));
+        yield return Wait(e.crit ? 0.62f : 0.34f);
+    }
+
+    void KindFx(DamageKind kind, Vector2 at)
+    {
+        switch (kind)
+        {
+            case DamageKind.Burn:
+                UIFx.Rise(popupLayer, at, new Color(1f, 0.55f, 0.15f, 1f), 16, 260f, 36f, 0.7f, UIFx.DotSprite);
+                UIFx.GlowFlash(popupLayer, at, new Color(1f, 0.4f, 0.1f, 0.45f), 420f, 0.4f);
+                break;
+            case DamageKind.Poison:
+                UIFx.Rise(popupLayer, at, new Color(0.5f, 1f, 0.35f, 0.9f), 14, 260f, 30f, 0.8f, UIFx.RingSprite);
+                break;
+            case DamageKind.Skill:
+                UIFx.Ring(popupLayer, at, new Color(0.5f, 0.85f, 1f, 0.9f), 60f, 520f, 0.4f);
+                UIFx.Sparks(popupLayer, at, new Color(0.55f, 0.85f, 1f), 18, 800f, 32f, 0.5f, 400f);
+                UIFx.Shake(arena, 0.18f, 8f);
+                break;
+            case DamageKind.True:
+                UIFx.Ring(popupLayer, at, new Color(0.8f, 0.55f, 1f, 0.9f), 60f, 480f, 0.4f);
+                UIFx.Sparks(popupLayer, at, new Color(0.8f, 0.6f, 1f), 16, 700f, 30f, 0.5f, 400f);
+                break;
+            case DamageKind.Reflect:
+                UIFx.Ring(popupLayer, at, new Color(0.45f, 0.85f, 1f, 0.9f), 400f, 80f, 0.3f);
+                UIFx.Sparks(popupLayer, at, new Color(0.5f, 0.9f, 1f), 10, 600f, 26f, 0.4f);
+                break;
+            case DamageKind.Recoil:
+                UIFx.Sparks(popupLayer, at, new Color(1f, 0.5f, 0.5f), 10, 500f, 26f, 0.45f);
+                break;
+            default:
+                UIFx.Sparks(popupLayer, at, Color.white, 10, 600f, 26f, 0.4f);
+                break;
+        }
+    }
+
+    void StunStars(CardView view)
+    {
+        var at = FxPos(view, popupLayer) + new Vector2(0f, 250f);
+        UIFx.Sparks(popupLayer, at, new Color(1f, 0.9f, 0.3f), 8, 260f, 38f, 0.8f, -40f, null, 90f, 200f);
+    }
+
+    IEnumerator FinishRun()
+    {
+        if (skipping) { MarkDefeated(); yield break; }
+        bool playerDown = playerView.Runtime != null && !playerView.Runtime.IsAlive;
+        bool enemyDown = enemyView.Runtime != null && !enemyView.Runtime.IsAlive;
+        if (playerDown || enemyDown)
+        {
+            UIFx.Shake(arena, 0.35f, 14f);
+            SfxSynth.Play("impact", 0.8f, 0.8f);
+        }
+        if (playerDown) { playerView.KnockOut(-1f); UIFx.Puff(popupLayer, FxPos(playerView, popupLayer), new Color(0.6f, 0.6f, 0.7f)); }
+        else if (enemyDown) playerView.Victory();
+        if (enemyDown) { enemyView.KnockOut(1f); UIFx.Puff(popupLayer, FxPos(enemyView, popupLayer), new Color(0.6f, 0.6f, 0.7f)); }
+        else if (playerDown) enemyView.Victory();
+        if (enemyDown && !playerDown)
+            UIFx.Rise(popupLayer, FxPos(playerView, popupLayer), new Color(1f, 0.9f, 0.45f, 1f), 18, 380f, 34f, 1.1f);
+        yield return Wait(0.35f);
+        MarkDefeated();
+        yield return Wait(0.6f);
     }
 
     void MarkDefeated()
@@ -494,8 +759,11 @@ public class BattleScreen : MonoBehaviour
             if (r.godOrbs > 0) chips.Add((ItemKind.GodOrb, r.godOrbs));
             LayoutRewardChips(chips);
 
+            dropTier = -1;
             if (r.droppedCard != null)
             {
+                dropTier = r.droppedCard.Tier;
+                dropColor = CardStats.RarityColor(r.droppedCard.rarity);
                 resultDropView.gameObject.SetActive(true);
                 resultDropView.ShowInstance(r.droppedCard, r.droppedCard.build);
                 resultCardLabel.text = $"NEW CARD!  <color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor(r.droppedCard.rarity))}>{CardStats.RarityName(r.droppedCard.rarity).ToUpperInvariant()}</color>";
@@ -523,6 +791,97 @@ public class BattleScreen : MonoBehaviour
 
         retryButton.onClick.RemoveAllListeners();
         retryButton.onClick.AddListener(() => TryStart(location, floor));
+        StartCoroutine(ResultFx(victory));
+    }
+
+    /// <summary>Result panel entrance: pop-in, spinning rays, title punch, confetti (win) or a heavy drop (loss).</summary>
+    IEnumerator ResultFx(bool victory)
+    {
+        var layer = (RectTransform)resultPanel.transform;
+        var panel = layer.Find("Panel") as RectTransform;
+        if (panel != null)
+        {
+            UIFx.PopIn(panel, 0f, 0.32f, 0.6f);
+            var rays = panel.Find("Rays") as RectTransform;
+            if (rays != null) UIFx.Spin(rays, 12f);
+        }
+        var title = resultTitle.rectTransform;
+        if (victory)
+        {
+            UIFx.PopScale(title, 2.8f, 0.45f, 0.12f);
+            yield return new WaitForSecondsRealtime(0.28f);
+            if (panel != null)
+            {
+                var halo = UIFx.Starburst(panel, UIFx.LocalPos(panel, title), UIFactory.WithAlpha(UIFactory.Gold, 0.55f), 900f, 1.2f, 40f);
+                if (halo != null) halo.transform.SetSiblingIndex(title.GetSiblingIndex());
+            }
+            UIFx.Burst(layer, UIFx.LocalPos(layer, title), UIFactory.Gold, 1.3f, false);
+            UIFx.Confetti(layer, 90);
+            SfxSynth.Play("sparkle", 0.7f);
+            if (dropTier >= 0 && resultDropView.gameObject.activeSelf && panel != null)
+            {
+                var drt = (RectTransform)resultDropView.transform;
+                UIFx.PopIn(drt, 0.15f, 0.4f);
+                yield return new WaitForSecondsRealtime(0.3f);
+                var rays = UIFx.Starburst(panel, UIFx.LocalPos(panel, drt), UIFactory.WithAlpha(dropColor, 0.7f), 480f + 50f * dropTier, 1.4f, 50f);
+                if (rays != null) rays.transform.SetSiblingIndex(drt.GetSiblingIndex());
+                UIFx.Burst(layer, UIFx.LocalPos(layer, drt), dropColor, 0.7f + 0.1f * dropTier, false);
+                if (dropTier >= 5) SfxSynth.Play("impact", 0.5f, 1.3f);
+            }
+        }
+        else
+        {
+            UIFx.DropIn(title, 260f, 0.7f, 0.1f);
+            UIFx.ScreenFlash(layer, new Color(0.6f, 0f, 0.05f, 0.35f), 0.5f);
+            yield return new WaitForSecondsRealtime(0.55f);
+            if (panel != null) UIFx.Shake(panel, 0.25f, 8f);
+        }
+    }
+
+    /// <summary>Dev helper for the editor bridge ("ui:BattleScreen.DebugFx:crit"): replays one animation.
+    /// Kinds: hit, crit, evade, skill, heal, intro, ko (add "2" for the enemy side, e.g. crit2).</summary>
+    void DebugFx(string kind)
+    {
+        if (playerView.Runtime == null || enemyView.Runtime == null) return;
+        resultPanel.SetActive(false);
+        foreach (var v in new[] { playerView, enemyView }) { v.ResetPose(); v.SetDefeated(false); v.idle = true; }
+        StartCoroutine(DebugRun(kind ?? "hit"));
+    }
+
+    IEnumerator DebugRun(string kind)
+    {
+        bool enemySide = kind.EndsWith("2");
+        kind = kind.TrimEnd('2');
+        var a = enemySide ? enemyView : playerView;
+        var t = enemySide ? playerView : enemyView;
+        float d = enemySide ? -1f : 1f;
+        var ev = new BattleEvent { type = BattleEventType.Damage, amount = 1234, actor = a.Runtime, target = t.Runtime };
+        switch (kind)
+        {
+            case "crit": ev.crit = true; ev.kind = DamageKind.Critical; yield return AttackRun(a, d, true); yield return DamageRun(ev, t); break;
+            case "evade": yield return EvadeRun(a, t, d); break;
+            case "intro": yield return IntroRun(); break;
+            case "ko": t.KnockOut(d); a.Victory(); UIFx.Shake(arena, 0.35f, 14f); break;
+            case "heal": UIFx.Rise(popupLayer, FxPos(a, popupLayer), new Color(0.5f, 1f, 0.65f, 0.95f), 14, 300f, 30f, 0.9f); UIFx.Ring(popupLayer, FxPos(a, popupLayer), new Color(0.45f, 1f, 0.6f, 0.6f), 120f, 520f, 0.5f); break;
+            case "skill":
+                UIFx.Starburst(backLayer, FxPos(a, backLayer), UIFactory.WithAlpha(SideColor(a), 0.55f), 900f, 0.9f, 60f);
+                UIFx.GlowFlash(backLayer, FxPos(a, backLayer), UIFactory.WithAlpha(SideColor(a), 0.6f), 760f, 0.6f);
+                UIFx.Ring(popupLayer, FxPos(a, popupLayer), new Color(0.6f, 0.9f, 1f, 0.85f), 100f, 640f, 0.55f);
+                UIFx.Rise(popupLayer, FxPos(a, popupLayer), new Color(0.7f, 0.92f, 1f, 1f), 16, 360f, 32f, 0.9f);
+                a.Pulse(0.6f, 0.08f);
+                ShowBanner("SKILL!", SideColor(a));
+                break;
+            default: ev.kind = DamageKind.Normal; yield return AttackRun(a, d, false); yield return DamageRun(ev, t); break;
+        }
+    }
+
+    IEnumerator ChipSparkle(RectTransform chip, float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay);
+        if (chip == null) yield break;
+        var layer = (RectTransform)resultPanel.transform;
+        UIFx.Sparks(layer, UIFx.LocalPos(layer, chip), UIFactory.Gold, 10, 420f, 24f, 0.5f, 300f);
+        SfxSynth.Play("coin", 0.35f, 1f + delay * 0.3f);
     }
 
     void LayoutRewardChips(List<(ItemKind kind, int amount)> chips)
@@ -535,7 +894,8 @@ public class BattleScreen : MonoBehaviour
             chip.anchorMin = chip.anchorMax = new Vector2(0.5f, 0.5f);
             chip.pivot = new Vector2(0.5f, 0.5f);
             chip.anchoredPosition = new Vector2(-total / 2f + size / 2f + i * (size + gap), 0f);
-            StartCoroutine(PopIn(chip, 0.08f * i));
+            StartCoroutine(PopIn(chip, 0.3f + 0.08f * i));
+            StartCoroutine(ChipSparkle(chip, 0.45f + 0.08f * i));
         }
     }
 

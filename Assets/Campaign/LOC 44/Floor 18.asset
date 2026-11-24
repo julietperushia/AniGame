@@ -17,6 +17,7 @@ MonoBehaviour:
   element: 6
   rarity: 5
   talent: {fileID: 11400000, guid: 9405281ed41986d4fa8ce22fc2e63949, type: 2}
+  talent2: {fileID: 0}
   health: 1490
   defense: 203
   attack: 143

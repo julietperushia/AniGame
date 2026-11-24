@@ -4,7 +4,8 @@ using UnityEngine;
 /// <summary>
 /// Procedural sound effects (no audio files needed). Clips are synthesised once on first use.
 /// Replace with real AudioClips later by assigning them in <see cref="overrides"/>.
-/// Ids: click, swing, hit, crit, miss, heal, skill, buff, burn, poison, stun, win, lose.
+/// Ids: click, swing, hit, crit, miss, heal, skill, buff, burn, poison, stun, win, lose,
+/// whoosh, swoosh, impact, slash, charge, sparkle, fail, coin.
 /// </summary>
 public class SfxSynth : MonoBehaviour
 {
@@ -99,6 +100,14 @@ public class SfxSynth : MonoBehaviour
             case "stun": return Tone(0.35f, t => Square(t, 880f - 400f * t) * 0.25f * Env(t, 0.35f, 0.005f));
             case "win": return Arpeggio(new[] { 523.25f, 659.25f, 783.99f, 1046.5f }, 0.12f, 0.6f);
             case "lose": return Arpeggio(new[] { 392f, 349.23f, 311.13f, 261.63f }, 0.16f, 0.7f);
+            case "whoosh": return Tone(0.3f, t => (Noise() * 0.5f + Sine(t, Mathf.Lerp(260f, 900f, t / 0.3f)) * 0.12f) * Mathf.Sin(Mathf.PI * t / 0.3f) * Mathf.Sin(Mathf.PI * t / 0.3f));
+            case "swoosh": return Tone(0.36f, t => Noise() * 0.28f * Mathf.Sin(Mathf.PI * t / 0.36f) * (0.6f + 0.4f * Sine(t, 6f)));
+            case "impact": return Tone(0.55f, t => (Sine(t, Mathf.Lerp(130f, 38f, t / 0.55f)) * 0.95f + Noise() * 0.5f * Env(t, 0.14f, 0.001f)) * Env(t, 0.55f, 0.002f));
+            case "slash": return Tone(0.14f, t => (Noise() * 0.6f + Sine(t, Mathf.Lerp(2600f, 700f, t / 0.14f)) * 0.25f) * Env(t, 0.14f, 0.001f));
+            case "charge": return Tone(0.34f, t => (Sine(t, Mathf.Lerp(220f, 1100f, (t / 0.34f) * (t / 0.34f))) * 0.45f + Noise() * 0.08f) * Mathf.Clamp01(t / 0.3f) * Mathf.Clamp01((0.34f - t) / 0.04f));
+            case "sparkle": return Arpeggio(new[] { 1318.5f, 1567.98f, 2093f, 2637f }, 0.045f, 0.32f);
+            case "fail": return Tone(0.42f, t => Square(t, Mathf.Lerp(320f, 110f, t / 0.42f)) * 0.18f * Env(t, 0.42f, 0.01f));
+            case "coin": return Arpeggio(new[] { 1567.98f, 2093f }, 0.06f, 0.22f);
         }
         return null;
     }

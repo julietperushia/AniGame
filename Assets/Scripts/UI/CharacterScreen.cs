@@ -198,6 +198,8 @@ public class CharacterScreen : MonoBehaviour
         pendingSource = null;
         pendingSprite = null;
         SfxSynth.Play("win", 0.7f);
+        UIFx.BurstAtPointer(UIFactory.Accent2, 1f);
+        SfxSynth.Play("sparkle", 0.6f);
         if (firstTime) GameSession.LoadScene(SceneNames.MainMenu);
         else { Message("<color=#7CFC6A>Saved! All your cards now show the new name and picture.</color>"); RefreshPreview(); }
     }

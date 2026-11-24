@@ -47,7 +47,13 @@ public class BattleEngine
         Enemy = enemy ?? throw new ArgumentNullException(nameof(enemy));
         Player.isPlayer = true;
         Enemy.isPlayer = false;
+        Player.opponent = Enemy;
+        Enemy.opponent = Player;
         BattleRandom.Seed(seed);
+        // Round limit and enrage follow the HP multiplier (longer fights when HP is higher)
+        MaxRounds = GameRules.MaxRounds;
+        EnrageStartRound = GameRules.EnrageStartRound;
+        EnragePercent = GameRules.EnragePercent;
     }
 
     /// <summary>Triggers battle-start talents. Set runEnemyStart=false when a new player card swaps in
@@ -71,8 +77,8 @@ public class BattleEngine
                 sh.text = $"<color=#FFD54F>STRONGEST HERO! {Enemy.DisplayName} loses 50% HP</color>";
             }
 
-            if (runPlayerStart) RunTalent(Player, () => Player.talent.OnBattleStart(Player, Enemy));
-            if (runEnemyStart) RunTalent(Enemy, () => Enemy.talent.OnBattleStart(Enemy, Player));
+            if (runPlayerStart) RunTalents(Player, Enemy, t => t.OnBattleStart(Player, Enemy));
+            if (runEnemyStart) RunTalents(Enemy, Player, t => t.OnBattleStart(Enemy, Player));
             CurrentActor = null;
             CheckBattleEnd();
         }
@@ -156,77 +162,197 @@ public class BattleEngine
         var ts = Emit(BattleEventType.TurnStart, attacker, defender);
         ts.text = $"{attacker.DisplayName}'s turn";
 
-        // Burn, Poison, Regeneration, countdowns, Stun
+        // Burn, Poison, Regeneration, countdowns, Stun / Freeze / Sleep
         bool canAct = StatusEffects.ProcessStatusEffects(attacker);
         if (!attacker.IsAlive) return;
         if (!canAct)
         {
             var skip = Emit(BattleEventType.TurnSkipped, attacker, defender);
-            skip.text = $"<color=#FFE14D>{attacker.DisplayName} is stunned and skips the turn!</color>";
+            skip.text = $"<color=#FFE14D>{attacker.DisplayName} is {attacker.skipReason ?? "stunned"} and skips the turn!</color>";
             attacker.TickBuffs();
+            StatusEffects.EndOfTurn(attacker);
             return;
         }
 
-        RunTalent(attacker, () => attacker.talent.OnTurnStart(attacker, defender));
+        RunTalents(attacker, defender, t => t.OnTurnStart(attacker, defender));
         if (!attacker.IsAlive || !defender.IsAlive) return;
 
         bool usedSkill = false;
-        if (attacker.talent is ActiveTalent active && attacker.silenceTurns == 0)
+        var active = attacker.NextActive();
+        if (active != null && attacker.silenceTurns == 0)
         {
             int cost = active.GetManaCost(attacker);
-            if (attacker.mana >= cost)
+            bool can = false;
+            try { can = active.CanActivate(attacker, defender); } catch (Exception ex) { Debug.LogException(ex); }
+            if (can && attacker.mana >= cost)
             {
                 attacker.mana -= cost;
+                attacker.AdvanceActive();
                 var sk = Emit(BattleEventType.SkillActivated, attacker, defender);
                 sk.text = $"<color=#6FD3FF>{attacker.DisplayName} uses <b>{active.DisplayName}</b>!</color>";
-                RunTalent(attacker, () => active.Activate(attacker, defender));
+                sk.skill = active;
+                Guarded(attacker, active, () => active.Activate(attacker, defender));
                 usedSkill = true;
+                if (defender.IsAlive && attacker.IsAlive)
+                    RunTalents(defender, attacker, t => t.OnEnemySkill(defender, attacker));
             }
         }
 
         // The talent fires first, then the card still attacks (so buffs/debuffs are not a wasted turn).
-        if (attacker.IsAlive && defender.IsAlive)
+        if (attacker.skipAttackThisTurn)
         {
-            NormalAttack(attacker, defender);
+            attacker.skipAttackThisTurn = false;
+            var info = Emit(BattleEventType.Info, attacker, defender);
+            info.text = $"<color=#FFB300>{attacker.DisplayName} charges up instead of attacking</color>";
+        }
+        else if (attacker.IsAlive && defender.IsAlive)
+        {
+            NormalAttack(attacker, defender, AttackOptions.Normal);
+            // Haste: a faster card may attack twice
+            if (attacker.IsAlive && defender.IsAlive && attacker.hasteChance > 0f && attacker.TotalSpeed > defender.TotalSpeed
+                && BattleRandom.Value < attacker.hasteChance)
+            {
+                var h = Emit(BattleEventType.Info, attacker, defender);
+                h.text = $"<color=#00E5FF>[Haste] {attacker.DisplayName} attacks again!</color>";
+                NormalAttack(attacker, defender, new AttackOptions { extra = true });
+            }
         }
 
         GainTurnMana(attacker, usedSkill);
         attacker.TickBuffs();
+        StatusEffects.EndOfTurn(attacker);
     }
 
-    void NormalAttack(CardRuntime attacker, CardRuntime defender)
+    /// <summary>Options for one attack hit (normal attack, Haste's extra attack, Counter Stance, Flurry...).</summary>
+    public class AttackOptions
     {
-        RunTalent(attacker, () => attacker.talent.OnBeforeAttack(attacker, defender));
+        public float multiplier = 1f;
+        public bool counter;     // Counter Stance riposte: can't be countered, no mana for the attacker
+        public bool extra;       // Haste's second attack
+        public bool skillHit;    // hit from an active talent (Flurry, Assassinate): no blind/hypnotize/charge checks
+        public bool forceCrit;
+        public bool unevadable;
+        public static AttackOptions Normal => new AttackOptions();
+    }
+
+    /// <summary>Lets active talents make attack hits that count as normal-attack damage.</summary>
+    public void PerformAttack(CardRuntime attacker, CardRuntime defender, AttackOptions options)
+    {
+        if (attacker == null || defender == null || !attacker.IsAlive || !defender.IsAlive) return;
+        NormalAttack(attacker, defender, options ?? new AttackOptions { skillHit = true });
+    }
+
+    /// <summary>Runs a talent that was just added in battle (Mimic, Gamble) as if the battle had started.</summary>
+    public void InitTalent(CardRuntime owner, CardRuntime enemy, Talent t)
+    {
+        if (owner == null || t == null) return;
+        Guarded(owner, t, () => t.OnBattleStart(owner, enemy));
+    }
+
+    void NormalAttack(CardRuntime attacker, CardRuntime defender, AttackOptions opt)
+    {
+        opt = opt ?? AttackOptions.Normal;
+        RunTalents(attacker, defender, t => t.OnBeforeAttack(attacker, defender));
         if (!attacker.IsAlive || !defender.IsAlive) return;
 
         float elementMul = ElementSystem.GetElementMultiplier(attacker.Element, defender.Element);
+        bool plain = !opt.skillHit && !opt.counter;
 
-        // Evasion check first
-        if (BattleRandom.Chance(defender.evasion))
+        // Hypnotize: chance to hit itself instead
+        if (plain && attacker.hypnoStacks > 0 && BattleRandom.Chance(20 * attacker.hypnoStacks))
         {
-            attacker.lastDamageDealt = 0;
-            attacker.lastAttackWasCrit = false;
-            var ev = Emit(BattleEventType.Evaded, attacker, defender);
-            ev.elementMultiplier = elementMul;
-            ev.text = $"<color=#C9D1DC>{defender.DisplayName} evaded the attack!</color>";
-            defender.GainMana(5);
+            int self = Mathf.Max(1, DamageCalculator.NormalAttack(attacker, attacker, false) / 2);
+            attacker.hypnoStacks = 0;
+            attacker.hypnoImmuneTurns = 2;
+            var hy = Emit(BattleEventType.Info, attacker, attacker);
+            hy.text = $"<color=#BA68C8>[Hypnotize] {attacker.DisplayName} attacks itself!</color>";
+            attacker.TakeDamage(self, DamageKind.Normal);
             return;
         }
 
-        int damage = DamageCalculator.NormalAttack(attacker, defender, out bool isCrit);
+        // Charge Attack (passive): above 30% HP the card stores its attacks instead of hitting
+        int chargeBonus = 0;
+        if (plain && attacker.chargeAttackPassive)
+        {
+            if (attacker.healthPercent > 0.3f)
+            {
+                int would = DamageCalculator.NormalAttack(attacker, defender, false);
+                attacker.chargeStored += would;
+                var ch = Emit(BattleEventType.Info, attacker, defender);
+                ch.text = $"<color=#FFB300>[Charge Attack] {attacker.DisplayName} stores {would} damage (total {attacker.chargeStored})</color>";
+                return;
+            }
+            if (attacker.chargeStored > 0)
+            {
+                chargeBonus = Mathf.RoundToInt(attacker.chargeStored * 1.3f);
+                attacker.chargeStored = 0;
+                var rel = Emit(BattleEventType.Info, attacker, defender);
+                rel.text = $"<color=#FFB300>[Charge Attack] {attacker.DisplayName} releases everything: +{chargeBonus} damage!</color>";
+            }
+        }
+
+        // Blind: 50% miss
+        if (plain && attacker.blindTurns > 0 && BattleRandom.Chance(50))
+        {
+            Missed(attacker, defender, elementMul, $"<color=#B0BEC5>{attacker.DisplayName} is blinded and misses!</color>", true);
+            return;
+        }
+
+        // Charge Strike: x3 and can't be evaded
+        float mult = opt.multiplier;
+        bool unevadable = opt.unevadable;
+        if (!opt.skillHit && !opt.counter && attacker.chargeStrikeReady)
+        {
+            attacker.chargeStrikeReady = false;
+            mult *= 3f;
+            unevadable = true;
+        }
+
+        // Crit is rolled first so a Precision card's critical hits can skip the evasion check.
+        bool isCrit = opt.forceCrit || BattleRandom.Chance(attacker.critRate);
+        bool canEvade = !unevadable && !(isCrit && attacker.critIgnoresEvasion) && defender.sleepTurns <= 0 && !defender.frozen;
+
+        // Evasion: the defender's rating goes through the diminishing-returns curve (max 75%)
+        if (canEvade && BattleRandom.Chance(GameRules.EvadeChance(defender.evasion)))
+        {
+            Missed(attacker, defender, elementMul, $"<color=#C9D1DC>{defender.DisplayName} evaded the attack!</color>", false);
+            defender.GainMana(5);
+            RunTalents(defender, attacker, t => t.OnEvade(defender, attacker));
+            // Counter Stance: hit back right away (60% weaker, no mana)
+            if (!opt.counter && defender.counterStance && defender.IsAlive && attacker.IsAlive)
+            {
+                var c = Emit(BattleEventType.Info, defender, attacker);
+                c.text = $"<color=#FFB300>[Counter Stance] {defender.DisplayName} strikes back!</color>";
+                NormalAttack(defender, attacker, new AttackOptions { counter = true, multiplier = defender.counterDamage });
+            }
+            return;
+        }
+
+        int damage = Mathf.RoundToInt(DamageCalculator.NormalAttack(attacker, defender, isCrit) * mult) + chargeBonus;
+        if (attacker.slayerPercent > 0f) damage += Mathf.RoundToInt(defender.maxHealth * attacker.slayerPercent);
+
+        // Sleep: the hit wakes the target up and deals +40%
+        if (defender.sleepTurns > 0)
+        {
+            damage = Mathf.RoundToInt(damage * 1.4f);
+            defender.sleepTurns = 0;
+            BattleLog.Status(defender, $"<color=#9FA8DA>{defender.DisplayName} wakes up! (+40% damage)</color>");
+        }
 
         // Endurance: 65% less damage from normal attacks, 35% of the blocked damage is reflected as true damage
+        // (Piercing Edge halves the reduction)
         int reflect = 0;
         if (defender.hasEndurance)
         {
             int original = damage;
-            damage = Mathf.Max(1, Mathf.RoundToInt(original * 0.35f));
+            float keep = attacker.reductionPierce ? 0.675f : 0.35f;
+            damage = Mathf.Max(1, Mathf.RoundToInt(original * keep));
             reflect = Mathf.RoundToInt((original - damage) * defender.enduranceReflect);
         }
 
-        if (defender.talent != null)
+        foreach (var dt in defender.talents.ToArray())
         {
-            try { defender.talent.OnTakeDamage(defender, ref damage); }
+            try { dt.OnTakeDamage(defender, ref damage); }
             catch (Exception ex) { Debug.LogException(ex); }
         }
 
@@ -235,7 +361,16 @@ public class BattleEngine
         atk.elementMultiplier = elementMul;
         atk.text = $"{attacker.DisplayName} attacks{(isCrit ? " - <color=#FFB23D>CRITICAL!</color>" : "")}";
 
-        int dealt = defender.TakeDamage(damage, isCrit ? DamageKind.Critical : DamageKind.Normal);
+        // Infernus: part of the damage is dealt as true damage, and half of it heals the attacker
+        int trueDamage = attacker.infernusPercent > 0f ? Mathf.RoundToInt(damage * attacker.infernusPercent) : 0;
+        float reductionScale = attacker.reductionPierce ? 0.5f : 1f;
+        int dealt = defender.TakeDamage(Mathf.Max(1, damage - trueDamage), isCrit ? DamageKind.Critical : DamageKind.Normal, reductionScale);
+        if (trueDamage > 0 && defender.IsAlive)
+        {
+            int td = defender.TakeTrueDamage(trueDamage, DamageKind.True);
+            dealt += td;
+            if (attacker.infernusHeal > 0f) attacker.Heal(Mathf.RoundToInt(td * attacker.infernusHeal));
+        }
         attacker.lastDamageDealt = dealt;
         attacker.lastAttackWasCrit = isCrit;
 
@@ -253,8 +388,34 @@ public class BattleEngine
 
         // Defender gains mana when hit
         defender.GainMana(5);
+        if (opt.counter) { } // the riposte gives the attacker no mana (mana is only gained per turn anyway)
 
-        RunTalent(attacker, () => attacker.talent.OnAfterAttack(attacker, defender));
+        if (defender.IsAlive)
+            RunTalents(defender, attacker, t => t.OnHitTaken(defender, attacker, dealt, isCrit));
+        RunTalents(attacker, defender, t => t.OnAfterAttack(attacker, defender));
+        AfterAnyAttack(attacker, defender);
+    }
+
+    void Missed(CardRuntime attacker, CardRuntime defender, float elementMul, string text, bool miss)
+    {
+        attacker.lastDamageDealt = 0;
+        attacker.lastAttackWasCrit = false;
+        var ev = Emit(BattleEventType.Evaded, attacker, defender);
+        ev.elementMultiplier = elementMul;
+        ev.miss = miss;
+        ev.text = text;
+        RunTalents(attacker, defender, t => t.OnAttackMissed(attacker, defender));
+        AfterAnyAttack(attacker, defender);
+    }
+
+    void AfterAnyAttack(CardRuntime attacker, CardRuntime defender)
+    {
+        foreach (var card in new[] { Player, Enemy })
+        {
+            if (!card.IsAlive || card.opponent == null) continue;
+            var other = card.opponent;
+            RunTalents(card, other, t => t.OnAnyAttack(card, other, attacker));
+        }
     }
 
     void GainTurnMana(CardRuntime attacker, bool usedSkill)
@@ -290,14 +451,101 @@ public class BattleEngine
         e.text = $"<b>{message}</b>";
     }
 
-    void RunTalent(CardRuntime owner, Action call)
+    /// <summary>Calls a hook on every talent of a card (a copy of the list, so talents added meanwhile wait).</summary>
+    void RunTalents(CardRuntime owner, CardRuntime enemy, Action<Talent> call)
     {
-        if (owner == null || owner.talent == null) return;
+        if (owner == null || owner.talents.Count == 0) return;
+        foreach (var t in owner.talents.ToArray())
+        {
+            if (!owner.IsAlive && owner.health <= 0 && t == null) continue;
+            Guarded(owner, t, () => call(t));
+        }
+    }
+
+    struct StatSnap { public int atk, bonusAtk, def, bonusDef, spd, maxHp; }
+
+    static StatSnap Snap(CardRuntime c) => new StatSnap
+    { atk = c.attack, bonusAtk = c.bonusAttack, def = c.defense, bonusDef = c.bonusDefense, spd = c.speed, maxHp = c.maxHealth };
+
+    /// <summary>
+    /// Runs one talent call with that talent's strength (Gamble talents 60%), then applies the stat rules to
+    /// whatever ATK/DEF/SPD/max HP changes the call made: Purify immunity and Gigantify resist block drops caused
+    /// by the enemy, Chaotic flips every change, Blackhole cancels every gain, Doppelganger copies 30% of gains.
+    /// </summary>
+    void Guarded(CardRuntime owner, Talent t, Action call)
+    {
+        if (owner == null || t == null) return;
+        var a = Snap(Player);
+        var b = Snap(Enemy);
+        float prevPower = owner.talentPower;
+        owner.talentPower = GameRules.TalentPower(owner.Tier) * owner.ScaleOf(t);
         var previous = CurrentActor;
         CurrentActor = owner;
         try { call(); }
         catch (Exception ex) { Debug.LogException(ex); }
         CurrentActor = previous;
+        owner.talentPower = prevPower;
+        ApplyStatRules(Player, a, owner);
+        ApplyStatRules(Enemy, b, owner);
+    }
+
+    void ApplyStatRules(CardRuntime card, StatSnap before, CardRuntime source)
+    {
+        int dAtk = card.attack - before.atk, dBonusAtk = card.bonusAttack - before.bonusAtk;
+        int dDef = card.defense - before.def, dBonusDef = card.bonusDefense - before.bonusDef;
+        int dSpd = card.speed - before.spd, dHp = card.maxHealth - before.maxHp;
+        if (dAtk == 0 && dBonusAtk == 0 && dDef == 0 && dBonusDef == 0 && dSpd == 0 && dHp == 0) return;
+
+        // Debuff protection: stat drops caused by the enemy
+        bool anyDrop = dAtk < 0 || dBonusAtk < 0 || dDef < 0 || dBonusDef < 0 || dSpd < 0 || dHp < 0;
+        if (anyDrop && source != card && card.ResistsDebuff())
+        {
+            if (dAtk < 0) dAtk = 0; if (dBonusAtk < 0) dBonusAtk = 0; if (dDef < 0) dDef = 0;
+            if (dBonusDef < 0) dBonusDef = 0; if (dSpd < 0) dSpd = 0; if (dHp < 0) dHp = 0;
+        }
+
+        bool chaotic = Player.HasTalent<Chaotic>() || Enemy.HasTalent<Chaotic>();
+        bool blackhole = Player.HasTalent<Blackhole>() || Enemy.HasTalent<Blackhole>();
+        if (chaotic) { dAtk = -dAtk; dBonusAtk = -dBonusAtk; dDef = -dDef; dBonusDef = -dBonusDef; dSpd = -dSpd; dHp = -dHp; }
+        if (blackhole)
+        {
+            if (dAtk > 0) dAtk = 0; if (dBonusAtk > 0) dBonusAtk = 0; if (dDef > 0) dDef = 0;
+            if (dBonusDef > 0) dBonusDef = 0; if (dSpd > 0) dSpd = 0; if (dHp > 0) dHp = 0;
+        }
+
+        int wasHealth = card.health;
+        card.attack = before.atk + dAtk;
+        card.bonusAttack = before.bonusAtk + dBonusAtk;
+        card.defense = before.def + dDef;
+        card.bonusDefense = before.bonusDef + dBonusDef;
+        card.speed = before.spd + dSpd;
+        card.maxHealth = Mathf.Max(1, before.maxHp + dHp);
+        if (card.health > card.maxHealth) card.health = card.maxHealth;
+
+        if (chaotic || blackhole)
+        {
+            var note = Emit(BattleEventType.Info, card, null);
+            note.text = blackhole && !chaotic ? "<color=#9E9E9E>[Blackhole] Stat gains are swallowed</color>" : "<color=#FF4081>[Chaotic] The stat change is reversed!</color>";
+        }
+
+        // Doppelganger: the opponent copies 30% of every gain
+        var other = card.opponent;
+        if (other != null && other.doppelganger && other.IsAlive)
+        {
+            int gAtk = Mathf.Max(0, dAtk) + Mathf.Max(0, dBonusAtk), gDef = Mathf.Max(0, dDef) + Mathf.Max(0, dBonusDef);
+            int gSpd = Mathf.Max(0, dSpd), gHp = Mathf.Max(0, dHp);
+            if (gAtk + gDef + gSpd + gHp > 0)
+            {
+                other.attack += Mathf.RoundToInt(gAtk * 0.3f);
+                other.defense += Mathf.RoundToInt(gDef * 0.3f);
+                other.speed += Mathf.RoundToInt(gSpd * 0.3f);
+                int hp = Mathf.RoundToInt(gHp * 0.3f);
+                other.maxHealth += hp;
+                other.health += hp;
+                BattleLog.Status(other, $"<color=#7986CB>[Doppelganger] {other.DisplayName} copies 30% of the gain</color>");
+            }
+        }
+        _ = wasHealth;
     }
 
     /// <summary>Creates, snapshots and records an event. Used by BattleLog too.</summary>
@@ -335,16 +583,23 @@ public static class DamageCalculator
     public const float FlatConstant = 638000f;
     public const float DefCoefficient = 87f; // 8.7 * 10
 
+    /// <summary>Normal attack damage that rolls its own crit.</summary>
     public static int NormalAttack(CardRuntime attacker, CardRuntime defender, out bool isCrit)
     {
+        isCrit = BattleRandom.Chance(attacker.critRate);
+        return NormalAttack(attacker, defender, isCrit);
+    }
+
+    /// <summary>Normal attack damage with the crit already decided.</summary>
+    public static int NormalAttack(CardRuntime attacker, CardRuntime defender, bool isCrit)
+    {
         float baseAtk = Mathf.Max(1, attacker.baseAttack);
-        float currentAtk = attacker.TotalAttack;
-        float def = defender.TotalDefense;
+        float currentAtk = attacker.TotalAttack * (1f + attacker.momentumPerStack * attacker.momentumStacks); // Momentum
+        float def = Mathf.Max(1f, defender.TotalDefense * (1f - Mathf.Clamp01(attacker.defIgnore)));        // Piercing Edge
 
         float damage = (AtkCoefficient * baseAtk * currentAtk + FlatConstant) / (DefCoefficient * def);
         damage *= ElementSystem.GetElementMultiplier(attacker.Element, defender.Element);
 
-        isCrit = BattleRandom.Chance(attacker.critRate);
         if (isCrit) damage *= Mathf.Max(100, attacker.critDamage) / 100f;
 
         return Mathf.Max(1, Mathf.RoundToInt(damage));
