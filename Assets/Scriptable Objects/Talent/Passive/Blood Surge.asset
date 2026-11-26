@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Blood Surge
   m_EditorClassIdentifier: Assembly-CSharp::BloodSurge
   talentName: Blood Surge
-  description: When your health becomes low, increase the LIFESTEAL of all allies
-    by 45%.
+  autoDescription: 1
+  description: The first time your HP is at or below 30% at the start of your turn,
+    gain +45% (Max 54%) Lifesteal for the rest of the battle (you heal that % of
+    the damage your normal attacks deal).
   threshold: 0.3
   lifestealBonus: 45

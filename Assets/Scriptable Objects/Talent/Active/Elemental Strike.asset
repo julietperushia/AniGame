@@ -13,5 +13,9 @@ MonoBehaviour:
   m_Name: Elemental Strike
   m_EditorClassIdentifier: Assembly-CSharp::ElementalStrike
   talentName: Elemental Strike
-  description: Deal Elemental damage based on 12% of your ATK.
+  autoDescription: 1
+  description: 'Deal damage of your element equal to 12% (Max 14.4%) of your ATK.
+    Element advantage applies (more damage against a weak element, less against a
+    strong one). Mana cost: 100.'
   manaCost: 100
+  atkPercent: 0.12

@@ -59,7 +59,8 @@ public class ScreenIntroRunner : MonoBehaviour
             float e = UIFx.EaseOutCubic(k);
             if (it.group != null) it.group.alpha = Mathf.Clamp01(k * 1.6f);
             if (!it.slide) continue;
-            if (it.rt.anchoredPosition != it.lastSet) { it.slide = false; continue; } // moved by its own script
+            // Moved by its own script? (half a pixel tolerance: reading anchoredPosition back has float rounding)
+            if ((it.rt.anchoredPosition - it.lastSet).sqrMagnitude > 0.25f) { it.slide = false; continue; }
             var p = it.basePos + it.offset * (1f - e);
             it.rt.anchoredPosition = p;
             it.lastSet = p;

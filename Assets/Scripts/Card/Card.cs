@@ -38,8 +38,14 @@ public class Card : ScriptableObject
     [Tooltip("Character id taken from the image URL; stable across re-generations.")]
     public string characterId;
 
-    /// <summary>Stable id used by save files. "L12F5" for campaign cards, asset name otherwise.</summary>
-    public string Key => location > 0 ? $"L{location}F{floor}" : name;
+    [Header("Hidden Location (3v3)")]
+    [Tooltip("Enemy of the Hidden Location (3v3) instead of the normal campaign.")]
+    public bool hidden;
+    [Tooltip("Hidden Location: position in the enemy team (0-2).")]
+    public int teamSlot;
+
+    /// <summary>Stable id used by save files. "L12F5" for campaign cards, "H3F2S1" for Hidden Location enemies, asset name otherwise.</summary>
+    public string Key => hidden ? $"H{location}F{floor}S{teamSlot}" : location > 0 ? $"L{location}F{floor}" : name;
 
     public string DisplayName => string.IsNullOrEmpty(cardName) ? name : cardName;
 

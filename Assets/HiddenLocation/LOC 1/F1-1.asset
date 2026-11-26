@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F1-1
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Sasha Blouse
+  cardImg: {fileID: 21300000, guid: 68268e0181cdaa44cb3387418306a2f5, type: 3}
+  element: 2
+  rarity: 0
+  talent: {fileID: 11400000, guid: 50615731e2803ec4fadcf6fe583a2663, type: 2}
+  talent2: {fileID: 0}
+  health: 1060
+  defense: 106
+  attack: 106
+  speed: 106
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 424
+  location: 1
+  floor: 1
+  floorCode: H1-1A
+  anime: Attack on Titan
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b45887-QPtJH0KwqthW.jpg
+  characterId: b45887-QPtJH0KwqthW
+  hidden: 1
+  teamSlot: 0

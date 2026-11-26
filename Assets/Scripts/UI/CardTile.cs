@@ -15,6 +15,7 @@ public class CardTile : MonoBehaviour
     public Text topRight;
     public Image elementDot;
     public Image talentDot;
+    public Image talentDot2;     // God cards: the second talent
     public Text elementText;
     public Image lockIcon;
     public Image badge;
@@ -25,13 +26,15 @@ public class CardTile : MonoBehaviour
 
     public object Data { get; set; }
     Card shownCard;
+    CardRarity shownRarity;
+    bool layoutChecked;
 
     /// <summary>A floor / sheet card with its own rarity and element.</summary>
     public void Set(Card card, string leftLabel, string rightLabel)
     {
         if (card == null) { SetEmpty("Empty"); return; }
         Set(card, card.rarity, card.element, leftLabel, rightLabel);
-        SetTalent(card.talent);
+        SetTalent(card.talent, card.talent2 != card.talent ? card.talent2 : null);
     }
 
     /// <summary>An owned card instance (rarity and element from the instance / build).</summary>
@@ -40,13 +43,18 @@ public class CardTile : MonoBehaviour
         if (card == null) { SetEmpty("Empty"); return; }
         var b = build ?? card.build;
         Set(PlayerProfile.Art(card), card.rarity, b.element, CardStats.RarityName(card.rarity), CardStats.Power(card, b).ToString());
-        SetTalent(CardDatabase.Instance != null ? CardDatabase.Instance.FindTalent(b.talent) : null);
+        nameText.text = PlayerProfile.CardName(card, b);
+        var db = CardDatabase.Instance;
+        var t2 = card.Tier >= GameRules.MaxTier && db != null ? db.FindTalent(b.talent2) : null;
+        SetTalent(db != null ? db.FindTalent(b.talent) : null, t2);
         SetLockIcon(PlayerProfile.IsProtected(card));
     }
 
     public void Set(Card card, CardRarity rarity, CardElement element, string leftLabel, string rightLabel)
     {
+        EnsureLayout();
         shownCard = card;
+        shownRarity = rarity;
         frame.color = CardStats.RarityColorDark(rarity);
         if (frameFx != null) frameFx.SetRarity(rarity);
         Sprite sprite = card != null ? card.cardImg : null;
@@ -77,17 +85,69 @@ public class CardTile : MonoBehaviour
         elementDot.sprite = icon != null ? icon : (theme != null ? theme.circle : null);
         elementDot.color = icon != null ? Color.white : ElementSystem.GetColor(element);
         elementText.text = icon != null ? "" : ElementSystem.ShortName(element).Substring(0, 1);
+        TooltipTrigger.Add(elementDot, IconInfo.Element(element));
+        SetTalent(null);
         SetLockIcon(false);
     }
 
-    /// <summary>Small talent picture next to the element (hidden when there is no icon).</summary>
-    public void SetTalent(Talent talent)
+    /// <summary>The card's talent pictures at the bottom right (God cards: both), each with its tooltip.</summary>
+    public void SetTalent(Talent talent, Talent talent2 = null)
     {
+        EnsureLayout();
         if (talentDot == null) return;
         var theme = UITheme.Instance;
         var icon = theme != null ? theme.TalentIcon(talent) : null;
+        var icon2 = theme != null && talent2 != null ? theme.TalentIcon(talent2) : null;
         talentDot.sprite = icon;
         talentDot.gameObject.SetActive(icon != null);
+        if (icon != null) TooltipTrigger.Add(talentDot, IconInfo.Talent(talent, shownRarity));
+        if (talentDot2 != null)
+        {
+            talentDot2.sprite = icon2;
+            talentDot2.gameObject.SetActive(icon2 != null);
+            if (icon2 != null) TooltipTrigger.Add(talentDot2, IconInfo.Talent(talent2, shownRarity));
+        }
+        // One talent sits in the corner; with two, the first moves left of the second
+        float dot = talentDot.rectTransform.sizeDelta.x;
+        talentDot.rectTransform.anchoredPosition = new Vector2(icon2 != null ? -8f - dot : -4f, 4f);
+    }
+
+    /// <summary>Element in the top-right corner (power label left of it), talents at the bottom right.
+    /// Also fixes tiles that were saved in a scene with the older layout.</summary>
+    void EnsureLayout()
+    {
+        if (layoutChecked || elementDot == null) return;
+        layoutChecked = true;
+        float dot = elementDot.rectTransform.sizeDelta.x;
+        UIFactory.Place(elementDot.rectTransform, new Vector2(1f, 1f), new Vector2(-4f, -4f), new Vector2(dot, dot));
+        // Rarity name on the left half, power on the right half (left of the element): one line each, shrunk to fit
+        if (topLeft != null)
+        {
+            float lh = topLeft.fontSize + 8f;
+            var l = topLeft.rectTransform;
+            l.anchorMin = new Vector2(0f, 1f); l.anchorMax = new Vector2(0.5f, 1f); l.pivot = new Vector2(0f, 1f);
+            l.offsetMin = new Vector2(6f, -4f - lh); l.offsetMax = new Vector2(0f, -4f);
+            UIFactory.BestFit(topLeft, 8);
+        }
+        if (topRight != null)
+        {
+            float lh = topRight.fontSize + 8f;
+            var r = topRight.rectTransform;
+            r.anchorMin = new Vector2(0.5f, 1f); r.anchorMax = new Vector2(1f, 1f); r.pivot = new Vector2(1f, 1f);
+            r.offsetMin = new Vector2(2f, -4f - lh); r.offsetMax = new Vector2(-(dot + 8f), -4f);
+            UIFactory.BestFit(topRight, 8);
+        }
+        if (talentDot != null)
+        {
+            UIFactory.Place(talentDot.rectTransform, new Vector2(1f, 0f), new Vector2(-4f, 4f), new Vector2(dot, dot));
+            if (talentDot2 == null)
+            {
+                talentDot2 = UIFactory.CreateImage(talentDot.transform.parent, "Talent2", Color.white);
+                talentDot2.preserveAspect = true;
+                UIFactory.Place(talentDot2.rectTransform, new Vector2(1f, 0f), new Vector2(-4f, 4f), new Vector2(dot, dot));
+                talentDot2.gameObject.SetActive(false);
+            }
+        }
     }
 
     public void SetEmpty(string label)
@@ -104,6 +164,7 @@ public class CardTile : MonoBehaviour
         topRight.text = "";
         elementDot.gameObject.SetActive(false);
         if (talentDot != null) talentDot.gameObject.SetActive(false);
+        if (talentDot2 != null) talentDot2.gameObject.SetActive(false);
         SetLockIcon(false);
         SetBadge(null, Color.clear);
         SetLocked(false, null);

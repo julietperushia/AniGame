@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Doppelganger
   m_EditorClassIdentifier: Assembly-CSharp::Doppelganger
   talentName: Doppelganger
+  autoDescription: 1
   description: Whenever the enemy raises its ATK, DEF, SPD or max HP, or heals, you
-    gain 30% of that amount too.
+    gain 70% of that amount too.
+  copyPercent: 0.7

@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: Piercing Edge
   m_EditorClassIdentifier: Assembly-CSharp::PiercingEdge
   talentName: Piercing Edge
-  description: Your attacks ignore 30% of the enemy's DEF, and its damage reduction
-    (Endurance, Protector) only works half as well against you.
+  autoDescription: 1
+  description: Your normal attacks ignore 30% (Max 36%) of the enemy's DEF, and the
+    enemy's damage reduction (Endurance, Protector) loses 50% of its effect against
+    you.
   ignoreDef: 0.3
+  maxIgnore: 0.9
+  reductionPierce: 0.5

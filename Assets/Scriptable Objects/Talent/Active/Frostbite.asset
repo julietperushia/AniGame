@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Frostbite
   m_EditorClassIdentifier: Assembly-CSharp::Frostbite
   talentName: Frostbite
-  description: 'Lowers the enemy''s SPD by 15% (stacks up to 3 times) and has a 25%
-    chance to Freeze it: a frozen card skips its next turn.'
+  autoDescription: 1
+  description: 'Lower the enemy''s SPD by 15% (Max 18%) of its base SPD (stacks up
+    to 3 times), with a 25% (Max 30%) chance to Freeze it: a frozen card skips its
+    next turn and can''t evade until then. Mana cost: 100.'
   manaCost: 100
   spdPercent: 15
   maxStacks: 3

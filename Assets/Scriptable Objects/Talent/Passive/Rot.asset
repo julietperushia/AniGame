@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Rot
   m_EditorClassIdentifier: Assembly-CSharp::Rot
   talentName: Rot
-  description: The enemy's healing and lifesteal are 50% weaker for the whole battle.
+  autoDescription: 1
+  description: The enemy's healing and lifesteal are 50% (Max 60%) weaker for the
+    whole battle.
   reduction: 0.5

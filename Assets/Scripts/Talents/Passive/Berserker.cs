@@ -1,17 +1,19 @@
 using UnityEngine;
 
-/// <summary>Asset text: "While your health is lower than 30%, increase the ATK of all allied familiars by 30%".
-/// Fixed: the bonus is now removed again if you are healed back above the threshold.</summary>
 [CreateAssetMenu(menuName = "Talents/Passive/Berserker")]
 public class Berserker : PassiveTalent
 {
+    [Tooltip("Active while your HP is below this (0.3 = 30%).")]
     public float triggerHp = 0.3f;
+    [Tooltip("ATK bonus while active, in % of base ATK.")]
     public int atkBonus = 30;
 
     const string Key = "BerserkerBonus";
 
     public override string DefaultName => "Berserker";
-    public override string DefaultDescription => $"While your health is lower than {triggerHp * 100:0}%, increase your ATK by {atkBonus}%.";
+    public override string DefaultDescription =>
+        $"While your HP is below {P(triggerHp)}, your ATK is raised by {Pct(atkBonus)} of your base ATK. The bonus goes away if you heal back above {P(triggerHp)} " +
+        "(checked at the start of each of your turns).";
 
     public override void OnTurnStart(CardRuntime self, CardRuntime enemy)
     {

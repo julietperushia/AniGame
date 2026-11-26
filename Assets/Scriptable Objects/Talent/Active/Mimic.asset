@@ -13,8 +13,12 @@ MonoBehaviour:
   m_Name: Mimic
   m_EditorClassIdentifier: Assembly-CSharp::Mimic
   talentName: Mimic
-  description: 'Copies the enemy''s talent. An active talent: you cast it yourself.
-    A passive talent: you keep it for the rest of the battle; once you have it, later
-    casts heal you 10% max HP instead.'
+  autoDescription: 1
+  description: 'Copy one enemy talent per cast. First choice: Nothingness, if any
+    enemy has it (a trap that costs you HP). Next: an active talent of the strongest
+    enemy card, which you cast yourself at once. Otherwise: a passive talent of the
+    strongest enemy card, which you keep for the rest of the battle. Once Mimic has
+    learned a passive, every later cast heals you 10% (Max 12%) of your max HP instead.
+    Mana cost: 100.'
   manaCost: 100
   healPercent: 0.1

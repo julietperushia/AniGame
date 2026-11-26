@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Overload ATK
   m_EditorClassIdentifier: Assembly-CSharp::OverloadATK
   talentName: Overload ATK
-  description: When the battle starts, increase the ATK by 60% of all allied familiars.
-    Your ATK decreases by 8% every turn after that.
-  startBonus: 60
+  autoDescription: 1
+  description: 'When the battle starts, raise your ATK by 80% (Max 96%) of your base
+    ATK. At the start of each of your turns it drops by 8% of your base ATK, and
+    it keeps dropping below base: the longer the battle, the lower it gets.'
+  startBonus: 80
   decayPerTurn: 8
+  floorPercent: 0

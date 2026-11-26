@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: Soul Swap
   m_EditorClassIdentifier: Assembly-CSharp::SoulSwap
   talentName: Soul Swap
-  description: Costs 200 mana. If your HP% is lower than the enemy's, you swap HP%
-    with it. Once per battle.
-  manaCost: 100
+  autoDescription: 1
+  description: 'If your HP% is lower than the enemy''s, swap HP% with it (you get
+    its HP%, it gets yours). Usable once per battle. Your Mana bar grows to 200 at
+    the start of the battle so you can pay for it. Mana cost: 200.'
+  manaCost: 200
+  usesPerBattle: 1
+  dataVersion: 1

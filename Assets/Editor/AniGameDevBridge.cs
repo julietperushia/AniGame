@@ -142,13 +142,12 @@ public static class AniGameDevBridge
 
     /// <summary>Renders every root Canvas (scene + effect overlays, in sort order) offscreen
     /// (works while Unity is in the background).</summary>
-    static void RenderCanvas(string file)
+    static void RenderCanvas(string file, int w = 1920, int h = 1080)
     {
         var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
             .Where(c => c != null && c.isRootCanvas && c.isActiveAndEnabled)
             .OrderBy(c => c.sortingOrder).ToList();
         if (canvases.Count == 0) { Append("render: no Canvas in scene"); return; }
-        const int w = 1920, h = 1080;
         var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32);
         var camGo = new GameObject("BridgeRenderCamera");
         var cam = camGo.AddComponent<Camera>();
@@ -166,6 +165,15 @@ public static class AniGameDevBridge
                 canvases[i].renderMode = RenderMode.ScreenSpaceCamera;
                 canvases[i].worldCamera = cam;
                 canvases[i].planeDistance = 50 - i * 5;
+            }
+            // Let the canvas scalers adapt to this render size (protected CanvasScaler.Handle)
+            var handle = typeof(UnityEngine.UI.CanvasScaler).GetMethod("Handle", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            foreach (var c in canvases)
+            {
+                var ad = c.GetComponent<AdaptiveCanvasScaler>();
+                if (ad != null) ad.Apply();
+                var sc = c.GetComponent<UnityEngine.UI.CanvasScaler>();
+                if (sc != null && handle != null) handle.Invoke(sc, null);
             }
             Canvas.ForceUpdateCanvases();
             cam.Render();
@@ -193,6 +201,81 @@ public static class AniGameDevBridge
             rt.Release();
             UnityEngine.Object.DestroyImmediate(rt);
         }
+    }
+
+    /// <summary>
+    /// talenttest:PlayerTalents|EnemyTalents[|Rarity][|battles] - headless battles between two equal cards
+    /// (average Roll, Neutral) with the given talents. Reports results, rounds and the first battle's log.
+    /// </summary>
+    static string TalentTest(string spec)
+    {
+        var db = CardDatabase.Instance;
+        if (db == null) return "talenttest: no database";
+        var parts = (spec ?? "").Split('|');
+        var rarity = parts.Length > 2 && Enum.TryParse(parts[2], true, out CardRarity r) ? r : CardRarity.God;
+        int n = parts.Length > 3 && int.TryParse(parts[3], out int c) ? c : 30;
+        int pw = 0, ew = 0, dr = 0, rounds = 0, maxRounds = 0, events = 0;
+        var sb = new System.Text.StringBuilder();
+        CardRuntime Make(string names)
+        {
+            var inst = new CardInstance { uid = 1, rarity = rarity, build = new BuildData { element = CardElement.Neutral } };
+            var rt = CardRuntime.ForBuild(inst, inst.build);
+            rt.talents.Clear();
+            rt.talent = null;
+            foreach (var name in (names ?? "").Split(','))
+            {
+                if (string.IsNullOrWhiteSpace(name)) continue;
+                var t = db.FindTalent(name.Trim());
+                if (t == null) sb.AppendLine($"  unknown talent '{name}'");
+                rt.AddTalent(t);
+            }
+            return rt;
+        }
+        for (int i = 0; i < n; i++)
+        {
+            var p = Make(parts[0]);
+            var e = Make(parts.Length > 1 ? parts[1] : "");
+            var engine = new BattleEngine(p, e, i + 1);
+            var st = engine.RunToEnd();
+            if (st == BattleState.PlayerWon) pw++; else if (st == BattleState.EnemyWon) ew++; else dr++;
+            rounds += engine.Round; maxRounds = Mathf.Max(maxRounds, engine.Round); events += engine.Events.Count;
+            if (i == 0)
+                foreach (var ev in engine.Events.Take(140))
+                    if (!string.IsNullOrEmpty(ev.text) && ev.type != BattleEventType.TurnStart)
+                        sb.AppendLine("    " + System.Text.RegularExpressions.Regex.Replace(ev.text, "<.*?>", ""));
+        }
+        return $"talenttest {spec}: player {pw} / enemy {ew} / draw {dr} of {n}, avg rounds {rounds / (float)n:0.0} (max {maxRounds}), avg events {events / n}\n" + sb;
+    }
+
+    /// <summary>
+    /// teamsim:battles[|attackScale][|avg 0/1][|slots] - 3v3 simulation. slots = 6 comma-separated entries
+    /// "Active/Passive@Rarity" (any part may be empty = random). Full report in Logs/AniGameBridge/teamsim.txt.
+    /// </summary>
+    static string TeamSim(string spec)
+    {
+        var p = (spec ?? "").Split('|');
+        var s = new TeamSimSettings();
+        if (p.Length > 0 && int.TryParse(p[0], out int n)) s.battles = n;
+        if (p.Length > 1 && float.TryParse(p[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out float sc)) s.attackScale = sc;
+        if (p.Length > 2) s.averageRolls = p[2] == "1";
+        if (p.Length > 3)
+        {
+            var slots = p[3].Split(',');
+            for (int i = 0; i < 6 && i < slots.Length; i++)
+            {
+                var x = slots[i];
+                var at = x.Split('@');
+                if (at.Length > 1 && Enum.TryParse(at[1], true, out CardRarity r)) { s.slots[i].setRarity = true; s.slots[i].rarity = r; }
+                var tl = at[0].Split('/');
+                s.slots[i].talent = tl[0].Trim();
+                if (tl.Length > 1) s.slots[i].talent2 = tl[1].Trim();
+            }
+        }
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var report = TeamSimulator.Run(s);
+        var text = report.Summary() + "\n" + report.sampleLog;
+        File.WriteAllText(Path.Combine(Path.GetDirectoryName(StatusPath), "teamsim.txt"), System.Text.RegularExpressions.Regex.Replace(text, "<.*?>", ""));
+        return $"teamsim {spec} ({watch.ElapsedMilliseconds} ms)\n" + System.Text.RegularExpressions.Regex.Replace(report.Summary(false), "<.*?>", "");
     }
 
     /// <summary>ui:Type.Method[:arg] calls a (private) method on the first object of that type in the open scene (play mode testing).</summary>
@@ -255,8 +338,20 @@ public static class AniGameDevBridge
                 Append(AniGameSetup.BuildScenes());
                 break;
             case "render":
-                RenderCanvas(Path.Combine(Dir, (string.IsNullOrEmpty(arg) ? "render" : arg) + ".png"));
+            {
+                // render:name or render:name@WIDTHxHEIGHT (e.g. render:gacha@2130x1000 to check wide windows)
+                string rname = string.IsNullOrEmpty(arg) ? "render" : arg;
+                int rw = 1920, rh = 1080;
+                int at = rname.IndexOf('@');
+                if (at > 0)
+                {
+                    var dims = rname.Substring(at + 1).Split('x');
+                    if (dims.Length == 2) { int.TryParse(dims[0], out rw); int.TryParse(dims[1], out rh); }
+                    rname = rname.Substring(0, at);
+                }
+                RenderCanvas(Path.Combine(Dir, rname + ".png"), Mathf.Clamp(rw, 320, 4096), Mathf.Clamp(rh, 240, 4096));
                 break;
+            }
             case "tick":
                 ticking = arg != "off";
                 Append($"ticking={ticking}");
@@ -340,6 +435,139 @@ public static class AniGameDevBridge
             case "stop":
                 EditorApplication.isPlaying = false;
                 break;
+            case "rect":
+            {
+                // rect:ObjectName - logs a UI element's RectTransform (debug layout in play mode)
+                foreach (var t in UnityEngine.Object.FindObjectsByType<RectTransform>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                {
+                    if (t.name != arg) continue;
+                    var corners = new Vector3[4];
+                    t.GetWorldCorners(corners);
+                    var comps = string.Join(",", t.GetComponents<Component>().Select(c => c.GetType().Name));
+                    Append($"rect {t.name}: active={t.gameObject.activeInHierarchy} pos={t.anchoredPosition} size={t.sizeDelta} pivot={t.pivot} aMin={t.anchorMin} aMax={t.anchorMax} scale={t.localScale} world0={corners[0]} world2={corners[2]} parent={t.parent?.name} comps={comps}");
+                }
+                break;
+            }
+            case "talenttest":
+                Append(TalentTest(arg));
+                break;
+            case "teamsim":
+                Append(TeamSim(arg));
+                break;
+            case "talentsync":
+                Append(TalentDescriptionSync.SyncAll());
+                break;
+            case "talentdesc":
+            {
+                // talentdesc[:Name] - prints the description of one talent (or all)
+                foreach (string guid in AssetDatabase.FindAssets("t:Talent"))
+                {
+                    var t = AssetDatabase.LoadAssetAtPath<Talent>(AssetDatabase.GUIDToAssetPath(guid));
+                    if (t == null || (!string.IsNullOrEmpty(arg) && t.DisplayName != arg)) continue;
+                    Append($"[{(t.IsActive ? "A" : "P")}] {t.DisplayName} (auto={t.autoDescription}, synced={t.DescriptionInSync}): {t.Description}");
+                    if (!string.IsNullOrEmpty(arg)) { Append("  Common: " + t.DescriptionFor(CardRarity.Common)); Append("  God: " + t.DescriptionFor(CardRarity.God)); }
+                }
+                break;
+            }
+            case "quality":
+            {
+                // quality[:index] - shows the quality levels, or sets the editor's active one and saves the project settings
+                var names = QualitySettings.names;
+                if (int.TryParse(arg, out int q) && q >= 0 && q < names.Length)
+                {
+                    QualitySettings.SetQualityLevel(q, true);
+                    AssetDatabase.SaveAssets();
+                    EditorApplication.ExecuteMenuItem("File/Save Project");
+                }
+                Append($"quality: {QualitySettings.GetQualityLevel()} = {names[QualitySettings.GetQualityLevel()]} (texture limit {QualitySettings.globalTextureMipmapLimit}, AA {QualitySettings.antiAliasing}) of [{string.Join(", ", names)}]");
+                break;
+            }
+            case "statuspreview":
+            {
+                // statuspreview[:off] - shows a test card with many buffs/debuffs on the open canvas (no save changes)
+                var old = GameObject.Find("StatusPreview");
+                if (old != null) { if (Application.isPlaying) UnityEngine.Object.Destroy(old); else UnityEngine.Object.DestroyImmediate(old); }
+                if (arg == "off") { Append("statuspreview: removed"); break; }
+                var canvas = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None).FirstOrDefault(c => c.isRootCanvas && c.renderMode != RenderMode.WorldSpace);
+                var card = PlayerProfile.Data.cards.FirstOrDefault();
+                if (canvas == null || card == null) { Append("statuspreview: no canvas or card"); break; }
+                var view = CardView.Build(canvas.transform, "StatusPreview");
+                var rt = CardRuntime.ForBuild(card, card.build);
+                rt.silenceTurns = 2; rt.burnStacks = 2; rt.healingReduction = 0.75f; rt.poisonStacks = 1; rt.blindTurns = 1; rt.hypnoStacks = 1;
+                rt.defense = rt.baseDefense / 2; rt.attack = rt.baseAttack * 3 / 2;
+                rt.shield = 400; rt.shieldTurns = 2; rt.regenerationStacks = 2; rt.hasEndurance = true; rt.enduranceTurns = 3; rt.lifesteal = 20; rt.frozen = arg == "frozen";
+                view.Bind(rt);
+                view.SetVitals(rt.maxHealth * 6 / 10, rt.maxHealth, 40, 100, true, rt.maxHealth / 4); // HP 60% + a 25% barrier
+                if (!Application.isPlaying) foreach (var child in view.GetComponentsInChildren<Transform>(true)) child.gameObject.hideFlags = HideFlags.DontSave; // never saved into the scene
+                ((RectTransform)view.transform).anchoredPosition = Vector2.zero;
+                view.transform.SetAsLastSibling();
+                Append($"statuspreview: shown ({rt.StatusSummary()})");
+                break;
+            }
+            case "matrixtry":
+                // matrixtry:Talent.field=value;... - talent matrix with numbers changed in memory only (restored after)
+                Append(FloorCheck.MatrixTry(arg));
+                break;
+            case "floorcheck":
+                // floorcheck[:Talent1,Talent2] - the slot cards vs every campaign floor (headless): casts and full-bar turns with no talent
+                Append(FloorCheck.Run(arg));
+                break;
+            case "talentmatrix":
+            {
+                // talentmatrix[:battlesPerPair][|Rarity] - every talent vs every talent; CSVs in Logs/AniGameBridge/TalentMatrix
+                var tp = (arg ?? "").Split('|');
+                var ms = new TalentMatrixSettings();
+                if (tp.Length > 0 && int.TryParse(tp[0], out int per)) ms.battlesPerPair = per;
+                if (tp.Length > 1 && Enum.TryParse(tp[1], true, out CardRarity mr)) ms.rarity = mr;
+                var mres = TalentMatrix.Run(ms);
+                TalentMatrixWindow.Export(mres, Path.Combine(Path.GetDirectoryName(StatusPath), "TalentMatrix"));
+                Append(mres.SummaryText(12));
+                break;
+            }
+            case "hiddentest":
+                // hiddentest[:on|off] - the Test Mode switch for the Hidden Location (PlayerPrefs, not the save)
+                if (arg == "on" || arg == "off") PlayerProfile.HiddenTestMode = arg == "on";
+                Append($"hiddentest: {(PlayerProfile.HiddenTestMode ? "on" : "off")}");
+                break;
+            case "hiddengen":
+                // hiddengen[:refetch] - builds the Hidden Location (fetches characters from AniList the first time)
+                Append(HiddenLocationGenerator.Generate(arg == "refetch"));
+                break;
+            case "hiddensim":
+            {
+                // hiddensim[:battlesPerFloor] - every Hidden Location floor vs random teams of 3 max-stat God cards
+                var hs = new HiddenSimSettings();
+                if (int.TryParse(arg, out int hb)) hs.battlesPerFloor = hb;
+                var hr = HiddenSimulator.Run(hs);
+                string dir = Path.Combine(Path.GetDirectoryName(StatusPath), "HiddenSim");
+                Directory.CreateDirectory(dir);
+                File.WriteAllText(Path.Combine(dir, "hidden_floors.csv"), hr.FloorsCsv(), new System.Text.UTF8Encoding(true));
+                File.WriteAllText(Path.Combine(dir, "hidden_talents.csv"), hr.TalentsCsv(), new System.Text.UTF8Encoding(true));
+                File.WriteAllText(Path.Combine(dir, "hidden_samples.csv"), hr.SamplesCsv(), new System.Text.UTF8Encoding(true));
+                Append(hr.SummaryText());
+                break;
+            }
+            case "menu":
+                Append(EditorApplication.ExecuteMenuItem(arg) ? $"menu: {arg}" : $"menu: '{arg}' not found");
+                break;
+            case "click":
+            {
+                // click:GameObjectName - presses the first active Button with that name (play mode testing)
+                var btn = UnityEngine.Object.FindObjectsByType<UnityEngine.UI.Button>(FindObjectsSortMode.None).FirstOrDefault(b => b.name == arg && b.isActiveAndEnabled);
+                if (btn == null) Append($"click: no active button '{arg}'");
+                else { btn.onClick.Invoke(); Append($"click: {arg}"); }
+                break;
+            }
+            case "testbattle":
+            {
+                // testbattle:PlayerTalents|EnemyTalents (play mode): fights the next floor with those talents
+                var tp = (arg ?? "").Split('|');
+                GameSession.TestPlayerTalents = tp[0];
+                GameSession.TestEnemyTalents = tp.Length > 1 ? tp[1] : null;
+                GameSession.StartBattle(PlayerProfile.HighestUnlockedLocation, PlayerProfile.NextFloor(PlayerProfile.HighestUnlockedLocation));
+                Append($"testbattle: {arg}");
+                break;
+            }
             case "shot":
                 string file = Path.Combine(Dir, (string.IsNullOrEmpty(arg) ? "screenshot" : arg) + ".png");
                 ScreenCapture.CaptureScreenshot(file);

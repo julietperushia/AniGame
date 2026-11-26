@@ -1,19 +1,23 @@
 using UnityEngine;
 
-/// <summary>Asset text: "At the start of your first turn, increase your LIFESTEAL, restoring HP equal to 18% attack damage your allies deal,
-/// as well as increasing all healing effects by 23%. Every turn after that, increase your LIFESTEAL by 5%."
-/// (Lifesteal itself is applied by the battle engine after every normal attack.)</summary>
 [CreateAssetMenu(menuName = "Talents/Passive/Bloodthirster")]
 public class Bloodthirster : PassiveTalent
 {
+    [Tooltip("Lifesteal gained on your first turn (%).")]
     public int startLifesteal = 18;
+    [Tooltip("Healing received bonus gained on your first turn (0.23 = +23%).")]
     public float healingBonus = 0.23f;
+    [Tooltip("Healing received bonus can't go above this (0.5 = +50%).")]
     public float maxHealingBonus = 0.5f;
+    [Tooltip("Lifesteal gained every turn after the first (%).")]
     public int lifestealPerTurn = 5;
+    [Tooltip("Lifesteal can't go above this (%).")]
     public int maxLifesteal = 100;
 
     public override string DefaultName => "Bloodthirster";
-    public override string DefaultDescription => $"On your first turn gain {startLifesteal}% Lifesteal and +{healingBonus * 100:0}% healing. Every turn after that, +{lifestealPerTurn}% Lifesteal.";
+    public override string DefaultDescription =>
+        $"On your first turn gain {Pct(startLifesteal)} Lifesteal and +{PctF(healingBonus, maxHealingBonus)} healing received (max +{P(maxHealingBonus)}). " +
+        $"Every turn after that, gain +{Pct(lifestealPerTurn)} Lifesteal (max {maxLifesteal}%). Lifesteal heals you that % of the damage your normal attacks deal.";
 
     public override void OnTurnStart(CardRuntime self, CardRuntime enemy)
     {

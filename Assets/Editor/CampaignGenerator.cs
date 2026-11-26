@@ -421,7 +421,7 @@ public static class CampaignGenerator
     // ------------------------------------------------------------------ talents by character name
 
     /// <summary>Every talent asset, one per name, in a stable order (sorted by class name).</summary>
-    static List<Talent> TalentPool()
+    public static List<Talent> TalentPool()
     {
         var seen = new HashSet<string>();
         var list = new List<Talent>();
@@ -443,7 +443,7 @@ public static class CampaignGenerator
     }
 
     /// <summary>Same name = same talent. God: that talent plus one of the other kind (active + passive).</summary>
-    static void AssignTalents(Card card, string name, List<Talent> pool)
+    public static void AssignTalents(Card card, string name, List<Talent> pool)
     {
         card.talent = null;
         card.talent2 = null;

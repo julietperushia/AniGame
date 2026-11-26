@@ -13,6 +13,11 @@ MonoBehaviour:
   m_Name: Protector
   m_EditorClassIdentifier: Assembly-CSharp::Protector
   talentName: Protector
-  description: When your health drops below 30%, restore the HP of all allied familiars
-    by 20%, raise their DEF by 35%, and decrease all damage taken by 5%.
+  autoDescription: 1
+  description: 'The first time your HP is below 30% at the start of your turn: heal
+    20% (Max 24%) of your max HP, raise your DEF by 35% (Max 42%) of base DEF and
+    take 5% (Max 6%) less damage for the rest of the battle. Once per battle.'
   triggerHp: 0.3
+  healPercent: 20
+  defBonusPercent: 35
+  damageTakenReductionPercent: 5

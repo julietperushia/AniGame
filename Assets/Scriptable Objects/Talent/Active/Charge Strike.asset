@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: Charge Strike
   m_EditorClassIdentifier: Assembly-CSharp::ChargeStrike
   talentName: Charge Strike
-  description: Skips your attack this turn to charge up. Your next normal attack
-    deals triple damage and can't be evaded.
+  autoDescription: 1
+  description: 'Skip your attack this turn to charge up. Your next normal attack
+    deals 3x damage and can''t be evaded. Mana cost: 100.'
   manaCost: 100
+  damageMultiplier: 3
+  unevadable: 1

@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Final Gambit
   m_EditorClassIdentifier: Assembly-CSharp::FinalGambit
   talentName: Final Gambit
-  description: Sacrifice 25% of your current HP, then deal true damage equal to 2x
-    the HP you lost.
+  autoDescription: 1
+  description: 'Sacrifice 25% of your current HP (it never drops you below 1 HP),
+    then deal true damage equal to 1.6x (Max 1.92x) the HP you lost. Mana cost: 100.'
   manaCost: 100
   hpPercent: 0.25
-  multiplier: 2
+  multiplier: 1.6

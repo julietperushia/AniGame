@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Paralysis
   m_EditorClassIdentifier: Assembly-CSharp::Paralysis
   talentName: Paralysis
-  description: Gain a 40% chance to inflict a stack of Stun to enemy familiars, disabling
-    their next turn, as well as permanently decreasing their DEF by 10%.
+  autoDescription: 1
+  description: '40% (Max 48%) chance to Stun the enemy: it skips its next turn and
+    permanently loses 10% of its base DEF. Mana cost: 100.'
   manaCost: 100
   stunChance: 40
+  defLossPercent: 10

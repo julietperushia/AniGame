@@ -20,6 +20,23 @@ public class GameBalance : ScriptableObject
     [Tooltip("ATK gained per round of enrage (% of base ATK).")]
     public int enragePercent = 10;
 
+    [Header("3v3 team battles")]
+    [Tooltip("Normal attack damage x this in 3v3. Team ATK and DEF are the totals of 3 cards, which makes every hit about 3x a 1v1 hit, " +
+             "and 3 cards attack per round. 0.33 keeps 3v3 battles about as long as 1v1; 1 = no change (much shorter battles).")]
+    [Range(0.05f, 1f)] public float teamAttackScale = 0.33f;
+
+    [Header("Hidden Location (3v3)")]
+    [Tooltip("Cards of Mythic rarity or higher needed to unlock the Hidden Location.")]
+    public int hiddenUnlockCards = 3;
+    [Tooltip("Gold per win = this x LOC + Gold per floor x floor (first clear of a floor).")]
+    public int hiddenGoldPerLoc = 1500;
+    public int hiddenGoldPerFloor = 500;
+    [Tooltip("Replaying a floor you already cleared gives this % of the gold and no diamonds.")]
+    public int hiddenReplayGoldPercent = 25;
+    [Tooltip("Diamonds for the first clear of a floor = this x LOC + Diamonds per floor x floor.")]
+    public int hiddenDiamondsPerLoc = 20;
+    public int hiddenDiamondsPerFloor = 10;
+
     static GameBalance current;
 
     public static GameBalance Current

@@ -1,9 +1,12 @@
-using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Talents/Passive/Nothingness")]
 public class Nothingness : PassiveTalent
 {
+    [Tooltip("True damage the copier takes, in % of its max HP (0.3 = 30%).")]
+    public float copyPenalty = 0.3f;
+
     public override string DefaultName => "Nothingness";
-    public override string DefaultDescription => "This talent does nothing... unless the enemy copies it (Mimic): then the copier takes true damage equal to 30% of its max HP.";
+    public override string DefaultDescription =>
+        $"Does nothing by itself... but an enemy that copies it (Mimic) instantly takes true damage equal to {P(copyPenalty)} of its max HP.";
 }

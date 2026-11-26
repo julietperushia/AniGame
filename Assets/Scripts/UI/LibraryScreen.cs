@@ -174,7 +174,7 @@ public class LibraryScreen : MonoBehaviour
             rows.Add(new[] { CardStats.RarityName(r), $"x{GameRules.RarityMultiplier(t):0.00}", $"±{GameRules.MaxDeviation(t)}", $"+{(GameRules.TalentPower(t) - 1f) * 100f:0}%", CardStats.Power(r, zero).ToString(), t == GameRules.MaxTier ? "-" : Pct(GameRules.CardDropChance(r)) });
         }
         Add("Stats & Rarity", "Card stats", theme != null ? theme.Frame(CardRarity.Legendary) : null,
-            $"Every card is your character, so cards only differ by rarity and build. Each stat = (100 + Roll) x rarity multiplier. HP = HP stat x {GameRules.HpMultiplier} (the HP multiplier, set in GameBalance or Test Mode). Power = HP stat + ATK + DEF + SPD.",
+            $"Every card is your character, so cards only differ by rarity and build. Each stat = (100 + Roll) x rarity multiplier. HP = HP stat x {GameRules.HpMultiplier}. Power = HP stat + ATK + DEF + SPD.",
             rt => Table(rt, new[] { "Rarity", "Stats", "Roll", "Talent", "Power (Roll 0)", "Floor drop" }, rows, new[] { 210f, 130f, 110f, 120f, 200f, 160f }, true), 46f * 10 + 10f, "power hp atk def spd roll multiplier rarity tier");
         Add("Stats & Rarity", "Rarity order", theme != null ? theme.Frame(CardRarity.God) : null,
             string.Join("  >  ", Enumerable.Range(0, GameRules.MaxTier + 1).Select(t => $"<color=#{RColor((CardRarity)t)}>{CardStats.RarityName((CardRarity)t)}</color>")) +
@@ -191,7 +191,7 @@ public class LibraryScreen : MonoBehaviour
             "Main card + 2 fodder cards of the same rarity + Fusion Orbs. Success: the main card goes up one rarity and keeps its Roll, element and talent (every slot using it ranks up too). Fail: the 2 fodder and the orbs are lost, the main card stays. Locked or slotted cards can't be fodder. Mythic > God needs New Generation.",
             rt => Table(rt, new[] { "Fusion", "Success", "Fusion Orbs", "Fodder" }, frows, new[] { 380f, 180f, 200f, 150f }, false), 46f * 9 + 10f, "fodder orb success fail rank up");
         Add("Fusion", "Auto merge", theme != null ? theme.fusionOrbIcon : null,
-            "My Cards > AUTO MERGE fuses for you: pick the highest rarity you want and the most Fusion Orbs you are willing to spend. It shows the most it could cost before you confirm, then fuses lowest rarity first (slotted and locked cards are only ever upgraded, never used as fodder) and reports successes, fails, the cards you got and what your buffs saved.",
+            "Collection > AUTO MERGE fuses for you: pick the highest rarity you want and the most Fusion Orbs you are willing to spend. It shows the most it could cost before you confirm, then fuses lowest rarity first (slotted and locked cards are only ever upgraded, never used as fodder) and reports successes, fails, the cards you got and what your buffs saved.",
             null, 0f, "automatic merge fuse bulk");
         Add("Fusion", "Fusion buffs", theme != null ? theme.BuffIcon(Buffs.FusionFortune) : null,
             "Fusion Fortune: +3% success. Fusion Protection: a failed fusion costs only 1 fodder. Fusion Blessing: 3% chance to jump one more rarity (never into Mythic or God). Lucky Fusion: 5% + 5% per orb used chance to get 1 Fusion Orb back.");
@@ -205,11 +205,8 @@ public class LibraryScreen : MonoBehaviour
         Add("Rerolls", "Element and talent rerolls", theme != null ? theme.talentOrbIcon : null,
             $"No pop-up: the new roll shows on the card, so you can keep rerolling, then press SAVE TO SLOT. Uses 1 Element / Talent Orb if you have one (no gold). With no orb, it costs the orb's price in gold ({GameRules.ElementOrbPrice:N0} / {GameRules.TalentOrbPrice:N0}). Preview, then save to a slot or discard.", null, 0f, "orb element talent");
         Add("Fusion", "Card materials", theme != null ? theme.diamondIcon : null,
-            "My Cards > MATERIALS / EXCHANGE turns cards you don't need into materials: 1 card = 1 material of its rarity (Common Material, SR Material...). Materials take no space and count as fodder cards of their rarity: fusion and auto merge use them first. Exchange the selected card, every unlocked card up to a rarity, or switch on AUTO EXCHANGE so new cards from packs and drops become materials right away (also on the Gacha screen).",
+            "Collection > MATERIALS / EXCHANGE turns cards you don't need into materials: 1 card = 1 material of its rarity (Common Material, SR Material...). Materials take no space and count as fodder cards of their rarity: fusion and auto merge use them first. Exchange the selected card, every unlocked card up to a rarity, or switch on AUTO EXCHANGE so new cards from packs and drops become materials right away (also on the Gacha screen).",
             null, 0f, "material exchange space fodder auto exchange common sr");
-        Add("Battle", "HP multiplier", null,
-            $"HP = HP stat x the HP multiplier (now x{GameRules.HpMultiplier}). Damage doesn't change, so a higher multiplier makes battles longer; the round limit ({GameRules.MaxRounds}) and enrage start (round {GameRules.EnrageStartRound}) grow with it. Change it in Assets/Resources/GameBalance.asset, or with Test Mode on the main menu.",
-            null, 0f, "hp health multiplier long battle rounds enrage balance");
         Add("Rerolls", "Dismantling", theme != null ? theme.BuffIcon(Buffs.SalvageExpert) : null,
             "Unlocked by the Salvage Expert buff. Turns a card that is not locked or slotted into gold: half the stat reroll cost of its rarity (table above).", null, 0f, "salvage gold");
 
@@ -223,7 +220,7 @@ public class LibraryScreen : MonoBehaviour
             foreach (var t in db.talents.Where(x => x != null).OrderBy(x => x.DisplayName))
             {
                 Add("Talents", t.DisplayName, theme != null ? theme.TalentIcon(t) : null,
-                    $"{(t.IsActive ? "<color=#6FD3FF>ACTIVE</color> - fires when the mana bar is full, then the card still attacks." : "<color=#FFB23D>PASSIVE</color> - always on.")}  <color=#9AA4B5>Group: {TalentCatalog.Name(t.Category)}</color>\n{t.Description}\n<color=#9AA4B5>Any rarity can have it; rarity makes it stronger (+2.5% per tier, +20% at God).</color>",
+                    $"{(t.IsActive ? "<color=#6FD3FF>ACTIVE</color>" : "<color=#FFB23D>PASSIVE</color>")}  <color=#9AA4B5>Group: {TalentCatalog.Name(t.Category)}</color>\n{t.Description}\n<color=#9AA4B5>Any rarity can have it. A number with (Max ...) grows with rarity: +2.5% per tier, up to the Max value at God. Your cards show their own numbers.</color>",
                     null, 0f, (t.IsActive ? "active" : "passive") + " " + TalentCatalog.Name(t.Category));
                 entries[entries.Count - 1].talentType = t.IsActive ? 0 : 1;
                 entries[entries.Count - 1].talentCat = (int)t.Category;
@@ -255,10 +252,10 @@ public class LibraryScreen : MonoBehaviour
 
         // ---- Battle
         Add("Battle", "How a battle works", theme != null ? theme.Frame(CardRarity.Epic) : null,
-            "One card against one enemy. The faster card acts first each round. Damage = (100 x ATK x current ATK + 638,000) / (87 x DEF) x element bonus. Base crit 5% (x1.35 damage), base evasion rating 5 (4.8% evade chance). Mana fills every turn; an active talent fires when it is full. From round 20 both fighters get +10% ATK per round (enrage). After 50 rounds the battle is a draw.",
+            $"One card against one enemy. The faster card acts first each round. Damage = (100 x ATK x current ATK + 638,000) / (87 x DEF) x element bonus. Base crit 5% (x1.35 damage), base evasion rating 5 (4.8% evade chance). Mana fills every turn; an active talent fires when it is full. From round {GameRules.EnrageStartRound} both fighters get +{GameRules.EnragePercent}% ATK per round (enrage). After {GameRules.MaxRounds} rounds the battle is a draw.",
             null, 0f, "damage crit evasion mana enrage round formula");
         Add("Save Data", "Move your save to another PC", null,
-            $"Main menu > SAVE DATA > EXPORT SAVE FILE writes one .{SaveTransfer.Extension} file with everything: cards and builds, slots, buffs, currencies, orbs, stamina, LOC progress, stats, settings and your character's name and picture. Copy it to the other PC (USB, cloud drive, email), then SAVE DATA > IMPORT SAVE FILE there. Your old save on that PC is backed up first. Stamina keeps regenerating for the time in between.",
+            $"Main menu > SETTINGS > EXPORT / IMPORT SAVE > EXPORT SAVE FILE writes one .{SaveTransfer.Extension} file with everything: cards and builds, slots, buffs, currencies, orbs, stamina, LOC progress, stats, settings and your character's name and picture. Copy it to the other PC (USB, cloud drive, email), then SETTINGS > EXPORT / IMPORT SAVE > IMPORT SAVE FILE there. Your old save on that PC is backed up first. Stamina keeps regenerating for the time in between.",
             null, 0f, "export import backup transfer pc computer load file");
         Add("Save Data", "Save protection", theme != null ? theme.lockIcon : null,
             "Saves and exported files are signed. If a save file is edited outside the game, it is refused: the last valid save is restored (or a new game starts) and the edited file is kept as a backup. Edited .anisave files can't be imported.",

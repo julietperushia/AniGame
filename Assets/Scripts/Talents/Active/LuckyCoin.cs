@@ -1,23 +1,26 @@
 using UnityEngine;
 
-/// <summary>Asset text: "Roll a 20 sided dice. Your allied familiars gain the amount rolled x 3 HP/ATK/DEF/SPD at random."
-/// HP gains are x10 because HP is stored on the x10 scale.</summary>
 [CreateAssetMenu(menuName = "Talents/Active/LuckyCoin")]
 public class LuckyCoin : ActiveTalent
 {
+    [Tooltip("Sides of the dice (rolls 1 to this).")]
+    public int diceSides = 20;
+    [Tooltip("Stat points gained = roll x this.")]
     public int multiplier = 3;
 
     public override string DefaultName => "Lucky Coin";
-    public override string DefaultDescription => $"Roll a 20 sided dice. Gain the amount rolled x {multiplier} HP/ATK/DEF/SPD at random.";
+    public override string DefaultDescription =>
+        $"Roll a {diceSides}-sided dice and gain the roll x {Dec(multiplier)} in one random stat: ATK, DEF, SPD or HP (1 to {NumR(diceSides * (float)multiplier)} points). " +
+        "HP points count like the HP stat and are healed at once.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {
-        int roll = BattleRandom.Range(1, 21);
+        int roll = BattleRandom.Range(1, Mathf.Max(1, diceSides) + 1);
         int bonus = Mathf.RoundToInt(roll * Scaled((float)multiplier, self));
         switch (BattleRandom.Range(0, 4))
         {
             case 0:
-                int hp = bonus * 10;
+                int hp = bonus * GameRules.HpMultiplier;
                 self.maxHealth += hp;
                 BattleLog.Info($"<color=#7CFC6A>[Lucky Coin] Rolled {roll}! +{hp} Max HP</color>");
                 self.Heal(hp);

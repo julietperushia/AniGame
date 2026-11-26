@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Hex
   m_EditorClassIdentifier: Assembly-CSharp::HexTalent
   talentName: Hex
-  description: Swaps the enemy's ATK and DEF for 2 turns.
+  autoDescription: 1
+  description: 'Swap the enemy''s ATK and DEF for 2 turns. They swap back when the
+    Hex ends. Mana cost: 100.'
   manaCost: 100
   turns: 2

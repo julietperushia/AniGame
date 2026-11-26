@@ -119,6 +119,35 @@ public static class GameRules
     public static int EnrageStartRound => Mathf.Max(1, Mathf.RoundToInt(GameBalance.Current.enrageStartRound * RoundScale));
     public static int EnragePercent => Mathf.Max(0, GameBalance.Current.enragePercent);
 
+    // ---- Hidden Location (3v3): 20 LOCs x 3 floors, unlocked by owning 3 cards of Mythic or higher
+    public const int HiddenLocationCount = 20;
+    public const int HiddenFloorsPerLocation = 3;
+    public static int HiddenUnlockCards => Mathf.Max(1, GameBalance.Current.hiddenUnlockCards);
+    public const CardRarity HiddenUnlockRarity = CardRarity.Mythic;
+
+    /// <summary>Highest stat a player card of this tier can reach: max Roll, and every God Orb on a God card.</summary>
+    public static int MaxStat(int tier) => Stat(MaxDeviation(tier), tier, tier >= MaxTier ? GodOrbMaxStacks : 0);
+
+    /// <summary>Hidden Location enemy stat: the highest stat of its rarity x (100 + LOC)%, rounded.</summary>
+    public static int HiddenEnemyStat(CardRarity rarity, int location) =>
+        Mathf.RoundToInt(MaxStat(Tier(rarity)) * (100f + Mathf.Max(0, location)) / 100f);
+
+    /// <summary>Gold for a Hidden Location win (first clear of that floor, or a replay).</summary>
+    public static int HiddenGold(int location, int floor, bool firstClear)
+    {
+        var b = GameBalance.Current;
+        int gold = b.hiddenGoldPerLoc * location + b.hiddenGoldPerFloor * floor;
+        return firstClear ? gold : Mathf.Max(1, gold * b.hiddenReplayGoldPercent / 100);
+    }
+
+    /// <summary>Diamonds for the first clear of a Hidden Location floor (replays give none).</summary>
+    public static int HiddenDiamonds(int location, int floor) => GameBalance.Current.hiddenDiamondsPerLoc * location + GameBalance.Current.hiddenDiamondsPerFloor * floor;
+
+    /// <summary>3v3 simulator override for <see cref="TeamAttackScale"/> (0 or less = use GameBalance.asset).</summary>
+    public static float TeamAttackScaleOverride = -1f;
+    /// <summary>3v3: normal attack damage multiplier (team ATK/DEF are 3-card totals).</summary>
+    public static float TeamAttackScale => TeamAttackScaleOverride > 0f ? TeamAttackScaleOverride : Mathf.Clamp(GameBalance.Current.teamAttackScale, 0.05f, 1f);
+
     // ---- Evasion: diminishing returns
     // The card's evasion stat is a RATING with no upper limit. The real chance to evade a normal attack is
     // cap x (1 - e^(-rating / cap)): almost 1:1 at low ratings, then flattening toward the cap (never reached).

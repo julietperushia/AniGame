@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Amplifier ATK
   m_EditorClassIdentifier: Assembly-CSharp::AmplifierATK
   talentName: Amplifier ATK
-  description: Increase the ATK by 18%
+  autoDescription: 1
+  description: 'Permanently raise your ATK by 20% (Max 24%) of your base ATK. Every
+    cast stacks. Mana cost: 100.'
   manaCost: 100
-  atkBonus: 18
+  atkBonus: 20

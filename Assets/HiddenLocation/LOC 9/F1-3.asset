@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F1-3
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Willibald
+  cardImg: {fileID: 21300000, guid: e077bad8bc3805449b726d032af288ff, type: 3}
+  element: 0
+  rarity: 4
+  talent: {fileID: 11400000, guid: 666ad848cdd119040a963a6c30fe6b9f, type: 2}
+  talent2: {fileID: 0}
+  health: 1480
+  defense: 148
+  attack: 148
+  speed: 148
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 592
+  location: 9
+  floor: 1
+  floorCode: H9-1C
+  anime: Vinland Saga
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b20704-N5pntGOae3F4.jpg
+  characterId: b20704-N5pntGOae3F4
+  hidden: 1
+  teamSlot: 2

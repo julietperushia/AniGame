@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// "My Cards": a big showcase of the selected card or slot build, an upgrade panel (stats, element, talent, rerolls,
+/// "Collection": a big showcase of the selected card or slot build, an upgrade panel (stats, element, talent, rerolls,
 /// fusion, auto merge, God Orb, dismantle) and the collection grid with dropdown filters and the 3 build slots.
 /// Rerolls never pop up: the new roll is shown on the card and stays unsaved until SAVE TO SLOT, so you can keep rolling.
 /// </summary>
@@ -65,6 +65,27 @@ public class CollectionScreen : MonoBehaviour
     public Button fusionCloseButton;
     public Text fusionResult;
 
+    [Header("Reroll pop-up")]
+    public GameObject rerollPanel;
+    public CardView rerollCurrentView;
+    public CardView rerollNewView;
+    public Text rerollNoRoll;
+    public Text rerollCompare;
+    public Button rrStatsButton, rrElementButton, rrTalentButton, rrGodOrbButton;
+    public Image rrStatsIcon, rrElementIcon, rrTalentIcon, rrGodOrbIcon;
+    public Text rrStatsCost, rrElementCost, rrTalentCost, rrGodOrbCost;
+    public Button[] rrSaveButtons = new Button[3];
+    public Button rrDiscardButton;
+    public Button rrCloseButton;
+    public Text rrMessage;
+
+    [Header("Unsaved roll dialog")]
+    public GameObject unsavedPanel;
+    public Text unsavedBody;
+    public Button[] unsavedSaveButtons = new Button[3];
+    public Button unsavedDiscardButton;
+    public Button unsavedCancelButton;
+
     [Header("Materials")]
     public Button materialsButton;
     public GameObject materialsPanel;
@@ -107,6 +128,7 @@ public class CollectionScreen : MonoBehaviour
     float mergeConfirmUntil;
     bool exchangeConfirm;
     float exchangeConfirmUntil;
+    System.Action afterUnsaved;   // what to do once the unsaved roll is saved or refused
     readonly List<CardInstance> fodderSelection = new List<CardInstance>();
 
     BuildData ShownBuild => pendingBuild ?? viewBuild;
@@ -115,7 +137,7 @@ public class CollectionScreen : MonoBehaviour
 
     void Start()
     {
-        backButton.onClick.AddListener(() => GameSession.LoadScene(SceneNames.MainMenu));
+        backButton.onClick.AddListener(() => GuardUnsaved(() => GameSession.LoadScene(SceneNames.MainMenu)));
         FillDropdowns();
         rarityFilter.onValueChanged.AddListener(v => { rarityIndex = v - 1; RebuildGrid(); });
         elementFilter.onValueChanged.AddListener(v => { elementIndex = v - 1; RebuildGrid(); });
@@ -127,10 +149,11 @@ public class CollectionScreen : MonoBehaviour
         }
         lockButton.onClick.AddListener(ToggleLock);
         makeMainButton.onClick.AddListener(MakeMain);
+        SetupRename();
         discardButton.onClick.AddListener(() => { if (pendingBuild != null) { pendingBuild = null; Message("New roll discarded."); RefreshDetail(); } });
-        rerollStatsButton.onClick.AddListener(() => Reroll(0));
-        rerollElementButton.onClick.AddListener(() => Reroll(1));
-        rerollTalentButton.onClick.AddListener(() => Reroll(2));
+        rerollStatsButton.onClick.AddListener(() => OpenReroll(0));
+        rerollElementButton.onClick.AddListener(() => OpenReroll(1));
+        rerollTalentButton.onClick.AddListener(() => OpenReroll(2));
         fusionButton.onClick.AddListener(OpenFusion);
         autoMergeButton.onClick.AddListener(OpenAutoMerge);
         godOrbButton.onClick.AddListener(UseGodOrb);
@@ -158,6 +181,36 @@ public class CollectionScreen : MonoBehaviour
             exchangeTarget.onValueChanged.AddListener(_ => { exchangeConfirm = false; RefreshMaterials(); });
         }
         messageText.text = "";
+        if (rerollPanel != null)
+        {
+            rerollPanel.SetActive(false);
+            rrStatsButton.onClick.AddListener(() => Reroll(0));
+            rrElementButton.onClick.AddListener(() => Reroll(1));
+            rrTalentButton.onClick.AddListener(() => Reroll(2));
+            rrGodOrbButton.onClick.AddListener(UseGodOrb);
+            for (int i = 0; i < rrSaveButtons.Length; i++)
+            {
+                int s = i;
+                rrSaveButtons[i].onClick.AddListener(() => { SaveShownToSlot(s); RefreshReroll(); });
+            }
+            rrDiscardButton.onClick.AddListener(() => { pendingBuild = null; rrMessage.text = "New roll discarded."; RefreshDetail(); RefreshReroll(); });
+            rrCloseButton.onClick.AddListener(RequestCloseReroll);
+        }
+        if (unsavedPanel != null)
+        {
+            unsavedPanel.SetActive(false);
+            for (int i = 0; i < unsavedSaveButtons.Length; i++)
+            {
+                int s = i;
+                unsavedSaveButtons[i].onClick.AddListener(() =>
+                {
+                    SaveShownToSlot(s);
+                    if (pendingBuild == null) ResolveUnsaved(); // saved
+                });
+            }
+            unsavedDiscardButton.onClick.AddListener(RefuseUnsaved);
+            unsavedCancelButton.onClick.AddListener(() => { afterUnsaved = null; unsavedPanel.SetActive(false); });
+        }
 
         int active = PlayerProfile.ActiveSlot;
         var slot = PlayerProfile.GetSlot(active);
@@ -179,6 +232,45 @@ public class CollectionScreen : MonoBehaviour
     }
 
     void Message(string text) => messageText.text = text;
+
+    // ---------------------------------------------------------------- rename (click the card's name)
+
+    void SetupRename()
+    {
+        if (showcaseView == null || showcaseView.nameText == null) return;
+        var nt = showcaseView.nameText;
+        nt.raycastTarget = true;
+        var btn = nt.GetComponent<Button>();
+        if (btn == null) btn = nt.gameObject.AddComponent<Button>();
+        btn.targetGraphic = nt;
+        var c = btn.colors;
+        c.normalColor = Color.white;
+        c.highlightedColor = new Color(1f, 0.85f, 0.45f);
+        c.pressedColor = new Color(0.85f, 0.7f, 0.4f);
+        c.selectedColor = Color.white;
+        btn.colors = c;
+        btn.onClick.AddListener(OpenRename);
+        TooltipTrigger.Add(nt, "<b>Rename</b>\nClick to give this card its own name. Each saved copy (the card and every slot) keeps its own name.");
+    }
+
+    void OpenRename()
+    {
+        if (selected == null || viewBuild == null) return;
+        string copy = viewSlot >= 0 ? $"the copy in slot {viewSlot + 1}" : $"card #{selected.uid}";
+        TextPrompt.Show(transform, "RENAME CARD", $"Only {copy} changes. Other saved copies keep their names.",
+                        PlayerProfile.CardName(selected, viewBuild), PlayerProfile.MaxCardNameLength,
+                        ApplyRename, "DEFAULT NAME", () => ApplyRename(""));
+    }
+
+    void ApplyRename(string text)
+    {
+        if (selected == null || viewBuild == null) return;
+        PlayerProfile.RenameBuild(viewBuild, text);
+        if (pendingBuild != null) pendingBuild.name = viewBuild.name; // an unsaved roll keeps the new name when it is saved
+        Message(string.IsNullOrEmpty(viewBuild.name) ? $"Name set back to {PlayerProfile.CardName(selected, viewBuild)}." : $"Renamed to {viewBuild.name}.");
+        SfxSynth.Play("buff", 0.5f);
+        RefreshAll();
+    }
 
     void RefreshAll()
     {
@@ -234,13 +326,13 @@ public class CollectionScreen : MonoBehaviour
             tile.SetInstance(card);
             var slots = Enumerable.Range(0, GameRules.SlotCount).Where(i => PlayerProfile.GetSlot(i).unlocked && PlayerProfile.GetSlot(i).cardUid == card.uid).Select(i => (i + 1).ToString()).ToList();
             if (slots.Count > 0) tile.SetBadge("SLOT " + string.Join(",", slots), UIFactory.Accent);
-            tile.button.onClick.AddListener(() => ViewCard(card));
+            tile.button.onClick.AddListener(() => GuardUnsaved(() => ViewCard(card)));
             tile.SetSelected(card == selected && viewSlot < 0);
         }
         var counts = PlayerProfile.Data.cards.GroupBy(c => c.rarity).OrderByDescending(g => g.Key)
             .Select(g => $"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor(g.Key))}>{g.Count()} {CardStats.RarityShort(g.Key)}</color>");
         countText.text = $"{list.Count} shown / {PlayerProfile.Data.cards.Count} cards    " + string.Join("  ", counts);
-        titleText.text = "MY CARDS";
+        titleText.text = "COLLECTION";
     }
 
     // ---------------------------------------------------------------- slots
@@ -272,7 +364,7 @@ public class CollectionScreen : MonoBehaviour
                 tile.SetBadge(i == active ? "MAIN" : $"SLOT {i + 1}", i == active ? UIFactory.Accent2 : UIFactory.Accent);
             }
             tile.SetSelected(viewSlot == i);
-            tile.button.onClick.AddListener(() => OnSlotClicked(index));
+            tile.button.onClick.AddListener(() => GuardUnsaved(() => OnSlotClicked(index)));
         }
     }
 
@@ -479,6 +571,11 @@ public class CollectionScreen : MonoBehaviour
         }
         ViewSlot(index);
         Message($"<color=#7CFC6A>{(wasPending ? "New roll" : "Build")} saved to slot {index + 1}.</color>");
+        if (rrMessage != null && rerollPanel != null && rerollPanel.activeSelf)
+        {
+            rrMessage.text = $"<color=#7CFC6A>Saved to slot {index + 1}! Keep rolling or close.</color>";
+            UIFx.BurstAt((RectTransform)rrSaveButtons[index].transform, UIFactory.Good, 0.6f, false);
+        }
     }
 
     void MakeMain()
@@ -506,11 +603,18 @@ public class CollectionScreen : MonoBehaviour
         string err = kind == 0 ? PlayerProfile.RerollStats(selected, ShownBuild, out result)
                    : kind == 1 ? PlayerProfile.RerollElement(selected, ShownBuild, out result)
                    : PlayerProfile.RerollTalent(selected, ShownBuild, out result);
-        if (err != null) { Message($"<color=#FF6B6B>{err}.</color>"); return; }
+        if (err != null)
+        {
+            Message($"<color=#FF6B6B>{err}.</color>");
+            if (rrMessage != null) rrMessage.text = $"<color=#FF6B6B>{err}.</color>";
+            return;
+        }
         SfxSynth.Play("skill", 0.6f, 1f + Random.Range(-0.05f, 0.1f));
         pendingBuild = result;
         Message(kind == 0 ? "New stats rolled." : kind == 1 ? "New element rolled." : "New talent rolled.");
         RefreshDetail();
+        RefreshReroll();
+        if (rrMessage != null) rrMessage.text = kind == 0 ? "New stats rolled." : kind == 1 ? "New element rolled." : "New talent(s) rolled.";
         RerollFx(kind, result);
     }
 
@@ -518,10 +622,11 @@ public class CollectionScreen : MonoBehaviour
     void RerollFx(int kind, BuildData result)
     {
         var color = kind == 0 ? UIFactory.Gold : kind == 1 ? ElementSystem.GetColor(result.element) : new Color(0.75f, 0.45f, 1f);
-        showcaseView.Pulse(0.3f, 0.06f);
-        showcaseView.Flash(new Color(1f, 1f, 1f, 0.55f), 0.35f);
+        var view = rerollPanel != null && rerollPanel.activeSelf ? rerollNewView : showcaseView;
+        view.Pulse(0.3f, 0.06f);
+        view.Flash(new Color(1f, 1f, 1f, 0.55f), 0.35f);
         var o = UIFx.Overlay;
-        var at = UIFx.LocalPos(o, (RectTransform)showcaseView.transform);
+        var at = UIFx.LocalPos(o, (RectTransform)view.transform);
         UIFx.Ring(o, at, UIFactory.WithAlpha(color, 0.85f), 80f, 520f, 0.45f);
         UIFx.Sparks(o, at, color, 18, 700f, 30f, 0.55f, 500f);
         if (kind == 0) { foreach (var v in statValues) if (v != null) UIFx.PopScale(v.rectTransform, 1.6f, 0.3f); }
@@ -535,6 +640,7 @@ public class CollectionScreen : MonoBehaviour
     void OpenFusion()
     {
         if (selected == null) return;
+        if (pendingBuild != null) { GuardUnsaved(OpenFusion); return; }
         if (!GameRules.CanFuseFrom(selected.Tier)) { Message("God is the maximum rarity."); return; }
         DropPending();
         fodderSelection.Clear();
@@ -652,6 +758,135 @@ public class CollectionScreen : MonoBehaviour
         }
     }
 
+    // ---------------------------------------------------------------- reroll pop-up (focus on rolling)
+
+    void OpenReroll(int kind)
+    {
+        if (selected == null || rerollPanel == null) { Reroll(kind); return; }
+        rrMessage.text = "";
+        rerollPanel.SetActive(true);
+        rerollPanel.transform.SetAsLastSibling();
+        if (unsavedPanel != null) unsavedPanel.transform.SetAsLastSibling();
+        UIFx.PopIn((RectTransform)rerollPanel.transform.GetChild(0), 0f, 0.25f, 0.85f);
+        RefreshReroll();
+        Reroll(kind);
+    }
+
+    void RequestCloseReroll() => GuardUnsaved(CloseReroll);
+
+    void RefuseUnsaved()
+    {
+        pendingBuild = null;
+        Message("New roll discarded.");
+        ResolveUnsaved();
+    }
+
+    void CloseReroll()
+    {
+        if (rerollPanel != null) rerollPanel.SetActive(false);
+        RefreshAll();
+    }
+
+    void RefreshReroll()
+    {
+        if (rerollPanel == null || !rerollPanel.activeSelf) return;
+        if (selected == null || viewBuild == null) { rerollPanel.SetActive(false); return; }
+        bool has = pendingBuild != null;
+        rerollCurrentView.ShowInstance(selected, viewBuild);
+        rerollNewView.gameObject.SetActive(has);
+        rerollNoRoll.gameObject.SetActive(!has);
+        if (has) rerollNewView.ShowInstance(selected, pendingBuild);
+        rerollCompare.text = CompareText(viewBuild, pendingBuild);
+
+        var d = PlayerProfile.Data;
+        int tier = selected.Tier;
+        bool god = tier >= GameRules.MaxTier;
+        SetCost(rrStatsIcon, rrStatsCost, ItemKind.Gold, $"{PlayerProfile.StatRerollPrice(tier):N0}");
+        if (d.elementOrbs > 0) SetCost(rrElementIcon, rrElementCost, ItemKind.ElementOrb, $"1 / {d.elementOrbs}");
+        else SetCost(rrElementIcon, rrElementCost, ItemKind.Gold, $"{PlayerProfile.OrbRerollGoldPrice(OrbType.Element):N0}");
+        if (d.talentOrbs > 0) SetCost(rrTalentIcon, rrTalentCost, ItemKind.TalentOrb, $"1 / {d.talentOrbs}");
+        else SetCost(rrTalentIcon, rrTalentCost, ItemKind.Gold, $"{PlayerProfile.OrbRerollGoldPrice(OrbType.Talent):N0}");
+        UIFactory.ButtonLabel(rrTalentButton).text = god ? "REROLL BOTH TALENTS" : "REROLL TALENT";
+        rrGodOrbButton.interactable = PlayerProfile.CanUseGodOrb(selected) == null;
+        SetCost(rrGodOrbIcon, rrGodOrbCost, ItemKind.GodOrb, $"1 / {d.godOrbs}");
+        UIFactory.ButtonLabel(rrGodOrbButton).text = god ? "GOD ORB" : "GOD ORB  <size=14>God only</size>";
+
+        for (int i = 0; i < rrSaveButtons.Length; i++)
+        {
+            var slot = PlayerProfile.GetSlot(i);
+            rrSaveButtons[i].interactable = has && slot.unlocked;
+            UIFactory.ButtonLabel(rrSaveButtons[i]).text = !slot.unlocked ? $"S{i + 1} LOCKED" : $"SAVE TO S{i + 1}" + (i == PlayerProfile.ActiveSlot ? " <size=14>MAIN</size>" : "");
+        }
+        rrDiscardButton.interactable = has;
+    }
+
+    string CompareText(BuildData from, BuildData to)
+    {
+        var db = CardDatabase.Instance;
+        var r = selected.rarity;
+        int g = selected.godBonus;
+        string Diff(int a, int b) => b > a ? $"<color=#7CFC6A>+{b - a:N0}</color>" : b < a ? $"<color=#FF6B6B>{b - a:N0}</color>" : "<color=#9AA4B5>=</color>";
+        string Roll(int v) => v > 0 ? $"<color=#7CFC6A>+{v}</color>" : v < 0 ? $"<color=#FF6B6B>{v}</color>" : "0";
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"<b><color=#FFD54F>{(to != null ? "CURRENT  >  NEW ROLL" : "CURRENT BUILD")}</color></b>   <color=#9AA4B5>Roll range ±{GameRules.MaxDeviation(selected.Tier)}</color>");
+        string[] names = { "HP", "ATK", "DEF", "SPD" };
+        int[] a = { CardStats.HpOf(r, from, g), CardStats.AtkOf(r, from, g), CardStats.DefOf(r, from, g), CardStats.SpdOf(r, from, g) };
+        int[] ra = { from.hp, from.atk, from.def, from.spd };
+        for (int i = 0; i < 4; i++)
+        {
+            if (to == null) { sb.AppendLine($"<color=#9AA4B5>{names[i]}</color>  <b>{a[i]:N0}</b>  <size=17>Roll {Roll(ra[i])}</size>"); continue; }
+            int[] b = { CardStats.HpOf(r, to, g), CardStats.AtkOf(r, to, g), CardStats.DefOf(r, to, g), CardStats.SpdOf(r, to, g) };
+            int[] rb = { to.hp, to.atk, to.def, to.spd };
+            sb.AppendLine($"<color=#9AA4B5>{names[i]}</color>  {a[i]:N0}  >  <b>{b[i]:N0}</b>  {Diff(a[i], b[i])}   <size=17>Roll {Roll(ra[i])} > {Roll(rb[i])}</size>");
+        }
+        sb.AppendLine($"<color=#9AA4B5>POWER</color>  {CardStats.Power(selected, from)}" + (to != null ? $"  >  <b>{CardStats.Power(selected, to)}</b>  {Diff(CardStats.Power(selected, from), CardStats.Power(selected, to))}" : ""));
+        string El(CardElement e) => $"<color=#{ColorUtility.ToHtmlStringRGB(ElementSystem.GetColor(e))}>{ElementSystem.DisplayName(e)}</color>";
+        sb.AppendLine();
+        sb.AppendLine($"<color=#9AA4B5>ELEMENT</color>  {El(from.element)}" + (to != null && to.element != from.element ? $"  >  <b>{El(to.element)}</b>  <color=#FF6FA8>NEW</color>" : ""));
+        var showT = to ?? from;
+        var t1 = db != null ? db.FindTalent(showT.talent) : null;
+        var t2 = db != null && selected.Tier >= GameRules.MaxTier ? db.FindTalent(showT.talent2) : null;
+        bool talentChanged = to != null && (to.talent != from.talent || to.talent2 != from.talent2);
+        sb.AppendLine($"<color=#9AA4B5>TALENT</color>  " + (talentChanged ? $"{from.talent}{(string.IsNullOrEmpty(from.talent2) ? "" : " + " + from.talent2)}  >  " : "") +
+                      $"<b>{t1?.DisplayName ?? "-"}{(t2 != null ? " + " + t2.DisplayName : "")}</b>" + (talentChanged ? "  <color=#FF6FA8>NEW</color>" : ""));
+        if (t1 != null) sb.AppendLine($"<size=16><color=#C9CEDA>{t1.DisplayName}: {t1.DescriptionFor(selected.rarity)}</color></size>");
+        if (t2 != null) sb.AppendLine($"<size=16><color=#C9CEDA>{t2.DisplayName}: {t2.DescriptionFor(selected.rarity)}</color></size>");
+        return sb.ToString();
+    }
+
+    // ---------------------------------------------------------------- unsaved roll dialog
+
+    /// <summary>Runs <paramref name="action"/> now, or first asks to save / refuse the unsaved new roll.</summary>
+    void GuardUnsaved(System.Action action)
+    {
+        if (pendingBuild == null || unsavedPanel == null) { action?.Invoke(); return; }
+        afterUnsaved = action;
+        unsavedPanel.SetActive(true);
+        unsavedPanel.transform.SetAsLastSibling();
+        UIFx.PopIn((RectTransform)unsavedPanel.transform.GetChild(0), 0f, 0.22f, 0.8f);
+        SfxSynth.Play("miss", 0.5f);
+        unsavedBody.text = $"Your new roll for this {CardStats.RarityName(selected.rarity)} card is not saved.\n" +
+                           $"Power {CardStats.Power(selected, viewBuild)} > <b>{CardStats.Power(selected, pendingBuild)}</b>   " +
+                           $"Element {ElementSystem.DisplayName(pendingBuild.element)}   Talent {pendingBuild.talent}{(string.IsNullOrEmpty(pendingBuild.talent2) ? "" : " + " + pendingBuild.talent2)}\n" +
+                           "<color=#C9C3D8>Save it to a slot, or refuse it (the roll is lost).</color>";
+        for (int i = 0; i < unsavedSaveButtons.Length; i++)
+        {
+            var slot = PlayerProfile.GetSlot(i);
+            unsavedSaveButtons[i].interactable = slot.unlocked;
+            UIFactory.ButtonLabel(unsavedSaveButtons[i]).text = slot.unlocked ? $"SAVE TO S{i + 1}" + (i == PlayerProfile.ActiveSlot ? " <size=14>MAIN</size>" : "") : $"S{i + 1} LOCKED";
+        }
+    }
+
+    void ResolveUnsaved()
+    {
+        unsavedPanel.SetActive(false);
+        var next = afterUnsaved;
+        afterUnsaved = null;
+        RefreshDetail();
+        RefreshReroll();
+        next?.Invoke();
+    }
+
     // ---------------------------------------------------------------- talent info
 
     void ShowTalentInfo(Talent t1, Talent t2, int tier, UITheme theme)
@@ -667,7 +902,8 @@ public class CollectionScreen : MonoBehaviour
         talentDesc.fontSize = two ? 14 : 16;
         talentDesc.resizeTextMaxSize = talentDesc.fontSize;
         talentName.text = TalentHeader(t1, bonus);
-        talentDesc.text = t1 != null ? t1.Description : "<color=#9AA4B5>No talent</color>";
+        float power = GameRules.TalentPower(tier); // the card's own numbers at its rarity
+        talentDesc.text = t1 != null ? t1.DescriptionFor(power) : "<color=#9AA4B5>No talent</color>";
         talentIcon2.gameObject.SetActive(two);
         talentName2.gameObject.SetActive(two);
         talentDesc2.gameObject.SetActive(two);
@@ -676,7 +912,7 @@ public class CollectionScreen : MonoBehaviour
         talentIcon2.enabled = talentIcon2.sprite != null;
         TooltipTrigger.Add(talentIcon2, IconInfo.Talent(t2, selected.rarity));
         talentName2.text = TalentHeader(t2, bonus);
-        talentDesc2.text = t2.Description;
+        talentDesc2.text = t2.DescriptionFor(power);
     }
 
     static void Place(RectTransform rt, float x, float y, float size) => UIFactory.TopLeft(rt, x, y, size, size);
@@ -693,7 +929,7 @@ public class CollectionScreen : MonoBehaviour
 
     void OpenMaterials()
     {
-        DropPending();
+        if (pendingBuild != null) { GuardUnsaved(OpenMaterials); return; }
         exchangeConfirm = false;
         materialsResult.text = "";
         var opts = new List<Dropdown.OptionData>();
@@ -797,7 +1033,7 @@ public class CollectionScreen : MonoBehaviour
 
     void OpenAutoMerge()
     {
-        DropPending();
+        if (pendingBuild != null) { GuardUnsaved(OpenAutoMerge); return; }
         var theme = UITheme.Instance;
         mergeTarget.ClearOptions();
         var opts = new List<Dropdown.OptionData>();
@@ -912,8 +1148,10 @@ public class CollectionScreen : MonoBehaviour
             UIFx.Puff(o, at, new Color(0.7f, 0.65f, 0.5f), 1.4f);
             showcaseView.Shake(0.4f, 12f);
         }
+        if (rrMessage != null) rrMessage.text = success ? $"<color=#FFE9A3>GOD ORB WORKED! +{selected.godBonus}% to every stat.</color>" : "<color=#FF6B6B>The God Orb faded... no effect this time.</color>";
         Message(success ? $"<color=#FFE9A3>GOD ORB WORKED! +{selected.godBonus}% to every stat.</color>" : "<color=#FF6B6B>The God Orb faded... no effect this time.</color>");
         RefreshAll();
+        RefreshReroll();
     }
 
     void DismantleSelected()
@@ -991,7 +1229,7 @@ public class CollectionScreen : MonoBehaviour
         var screen = canvas.gameObject.AddComponent<CollectionScreen>();
         var theme = UIFactory.Theme;
         AnimeBackground.Build(canvas, "cards", new Color(0.95f, 0.4f, 0.7f, 0.7f), new Color(0.1f, 0.06f, 0.18f), out _);
-        UIFactory.CreateTopBarWithCurrency(canvas, "MY CARDS", out screen.backButton, out screen.titleText);
+        UIFactory.CreateTopBarWithCurrency(canvas, "COLLECTION", out screen.backButton, out screen.titleText);
         var panelColor = new Color(0.06f, 0.05f, 0.12f, 0.95f);
 
         // ---------- showcase (left)
@@ -1144,7 +1382,107 @@ public class CollectionScreen : MonoBehaviour
         BuildFusion(canvas, screen);
         BuildAutoMerge(canvas, screen);
         BuildMaterials(canvas, screen);
+        BuildReroll(canvas, screen);
+        BuildUnsaved(canvas, screen);
         return screen;
+    }
+
+    static void BuildReroll(RectTransform canvas, CollectionScreen screen)
+    {
+        var dim = UIFactory.CreateImage(canvas, "RerollPanel", new Color(0, 0, 0, 0.82f), null, false, true);
+        UIFactory.Stretch(dim.rectTransform);
+        screen.rerollPanel = dim.gameObject;
+        var panel = UIFactory.CreatePanel(dim.transform, "Panel", new Color(0.08f, 0.06f, 0.16f, 1f), true);
+        UIFactory.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1780, 940));
+        UIFactory.AddOutline(panel, UIFactory.WithAlpha(UIFactory.Gold, 0.6f), 3f);
+        var theme = UIFactory.Theme;
+        if (theme != null && theme.lightRays != null)
+        {
+            var rays = UIFactory.CreateImage(panel.transform, "Rays", new Color(1f, 0.85f, 0.6f, 0.06f), theme.lightRays);
+            UIFactory.Place(rays.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(-480, 0), new Vector2(1300, 1300));
+        }
+        var title = UIFactory.CreateText(panel.transform, "Title", "REROLL", 46, UIFactory.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+        UIFactory.TopLeft(title.rectTransform, 40, 18, 400, 60);
+        UIFactory.AddShadow(title, UIFactory.ShadowColor, 3f);
+        var sub = UIFactory.CreateText(panel.transform, "Sub", "Roll as many times as you like. Nothing changes until you save the new roll to a slot.", 20, UIFactory.TextDim, TextAnchor.MiddleLeft);
+        UIFactory.TopLeft(sub.rectTransform, 260, 30, 1000, 40);
+
+        var curLabel = UIFactory.CreateText(panel.transform, "CurLabel", "CURRENT", 24, UIFactory.TextDim, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopLeft(curLabel.rectTransform, 40, 92, 330, 34);
+        screen.rerollCurrentView = CardView.Build(panel.transform, "Current");
+        var crt = (RectTransform)screen.rerollCurrentView.transform;
+        UIFactory.Place(crt, new Vector2(0f, 1f), new Vector2(205, -134), new Vector2(CardView.Width, CardView.Height));
+        crt.pivot = new Vector2(0.5f, 1f);
+        crt.anchoredPosition = new Vector2(205, -134);
+        crt.localScale = Vector3.one * 0.8f;
+
+        var arrow = UIFactory.CreateImage(panel.transform, "Arrow", UIFactory.Gold, theme != null ? theme.arrow : null);
+        arrow.preserveAspect = true;
+        UIFactory.TopLeft(arrow.rectTransform, 384, 360, 64, 40);
+
+        var newLabel = UIFactory.CreateText(panel.transform, "NewLabel", "NEW ROLL", 24, UIFactory.Accent2, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopLeft(newLabel.rectTransform, 462, 92, 330, 34);
+        screen.rerollNewView = CardView.Build(panel.transform, "New");
+        var nrt = (RectTransform)screen.rerollNewView.transform;
+        UIFactory.Place(nrt, new Vector2(0f, 1f), new Vector2(627, -134), new Vector2(CardView.Width, CardView.Height));
+        nrt.pivot = new Vector2(0.5f, 1f);
+        nrt.anchoredPosition = new Vector2(627, -134);
+        nrt.localScale = Vector3.one * 0.8f;
+        screen.rerollNoRoll = UIFactory.CreateText(panel.transform, "NoRoll", "No new roll yet.\nPress a reroll button.", 24, UIFactory.TextDim, TextAnchor.MiddleCenter, FontStyle.Italic);
+        UIFactory.TopLeft(screen.rerollNoRoll.rectTransform, 467, 134, 320, 496);
+
+        var cmp = UIFactory.CreateImage(panel.transform, "CompareBox", new Color(1f, 1f, 1f, 0.04f), theme != null ? theme.roundedSmall : null, true);
+        UIFactory.TopLeft(cmp.rectTransform, 840, 92, 900, 452);
+        screen.rerollCompare = UIFactory.CreateText(panel.transform, "Compare", "", 22, UIFactory.TextMain, TextAnchor.UpperLeft);
+        UIFactory.TopLeft(screen.rerollCompare.rectTransform, 862, 104, 860, 430);
+        UIFactory.BestFit(screen.rerollCompare, 12);
+
+        screen.rrStatsButton = ActionButton(panel.transform, "RR Stats", "REROLL STATS", new Color(0.85f, 0.55f, 0.15f), 840, 560, 440, 60, out screen.rrStatsIcon, out screen.rrStatsCost);
+        screen.rrElementButton = ActionButton(panel.transform, "RR Element", "REROLL ELEMENT", new Color(0.2f, 0.6f, 0.45f), 1300, 560, 440, 60, out screen.rrElementIcon, out screen.rrElementCost);
+        screen.rrTalentButton = ActionButton(panel.transform, "RR Talent", "REROLL TALENT", new Color(0.75f, 0.55f, 0.15f), 840, 630, 440, 60, out screen.rrTalentIcon, out screen.rrTalentCost);
+        screen.rrGodOrbButton = ActionButton(panel.transform, "RR GodOrb", "GOD ORB", new Color(0.75f, 0.62f, 0.25f), 1300, 630, 440, 60, out screen.rrGodOrbIcon, out screen.rrGodOrbCost);
+
+        float sw = (900 - 2 * 14) / 3f;
+        for (int i = 0; i < 3; i++)
+        {
+            screen.rrSaveButtons[i] = UIFactory.CreateButton(panel.transform, $"RR Save {i + 1}", $"SAVE TO S{i + 1}", UIFactory.Accent2, 22);
+            UIFactory.TopLeft((RectTransform)screen.rrSaveButtons[i].transform, 840 + i * (sw + 14), 712, sw, 64);
+        }
+        screen.rrDiscardButton = UIFactory.CreateButton(panel.transform, "RR Discard", "DISCARD NEW ROLL", new Color(0.45f, 0.2f, 0.25f), 20);
+        UIFactory.TopLeft((RectTransform)screen.rrDiscardButton.transform, 840, 790, 440, 58);
+        screen.rrCloseButton = UIFactory.CreateButton(panel.transform, "RR Close", "CLOSE", UIFactory.PanelLight, 22);
+        UIFactory.TopLeft((RectTransform)screen.rrCloseButton.transform, 1300, 790, 440, 58);
+        screen.rrMessage = UIFactory.CreateText(panel.transform, "Message", "", 22, UIFactory.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopLeft(screen.rrMessage.rectTransform, 40, 870, 1700, 50);
+        UIFactory.BestFit(screen.rrMessage, 12);
+        dim.gameObject.SetActive(false);
+    }
+
+    static void BuildUnsaved(RectTransform canvas, CollectionScreen screen)
+    {
+        var dim = UIFactory.CreateImage(canvas, "UnsavedPanel", new Color(0, 0, 0, 0.75f), null, false, true);
+        UIFactory.Stretch(dim.rectTransform);
+        screen.unsavedPanel = dim.gameObject;
+        var panel = UIFactory.CreatePanel(dim.transform, "Panel", new Color(0.12f, 0.06f, 0.12f, 1f), true);
+        UIFactory.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 470));
+        UIFactory.AddOutline(panel, UIFactory.WithAlpha(UIFactory.Accent2, 0.8f), 3f);
+        var title = UIFactory.CreateText(panel.transform, "Title", "YOU HAVE NOT SAVED YOUR CARD", 38, UIFactory.Accent2, TextAnchor.MiddleCenter, FontStyle.Bold);
+        UIFactory.TopStrip(title.rectTransform, 20, 56, 20, 20);
+        UIFactory.AddShadow(title, UIFactory.ShadowColor, 3f);
+        screen.unsavedBody = UIFactory.CreateText(panel.transform, "Body", "", 22, UIFactory.TextMain, TextAnchor.MiddleCenter);
+        UIFactory.TopStrip(screen.unsavedBody.rectTransform, 86, 140, 40, 40);
+        UIFactory.BestFit(screen.unsavedBody, 12);
+        float sw = (900 - 2 * 14) / 3f;
+        for (int i = 0; i < 3; i++)
+        {
+            screen.unsavedSaveButtons[i] = UIFactory.CreateButton(panel.transform, $"Save {i + 1}", $"SAVE TO S{i + 1}", UIFactory.Accent, 22);
+            UIFactory.TopLeft((RectTransform)screen.unsavedSaveButtons[i].transform, 40 + i * (sw + 14), 246, sw, 70);
+        }
+        screen.unsavedDiscardButton = UIFactory.CreateButton(panel.transform, "Refuse", "DON'T SAVE", new Color(0.55f, 0.18f, 0.22f), 22);
+        UIFactory.TopLeft((RectTransform)screen.unsavedDiscardButton.transform, 40, 344, 443, 70);
+        screen.unsavedCancelButton = UIFactory.CreateButton(panel.transform, "Cancel", "KEEP ROLLING", UIFactory.PanelLight, 22);
+        UIFactory.TopLeft((RectTransform)screen.unsavedCancelButton.transform, 497, 344, 443, 70);
+        dim.gameObject.SetActive(false);
     }
 
     static void BuildMaterials(RectTransform canvas, CollectionScreen screen)

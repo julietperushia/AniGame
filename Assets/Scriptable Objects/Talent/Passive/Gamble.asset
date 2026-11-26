@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: Gamble
   m_EditorClassIdentifier: Assembly-CSharp::Gamble
   talentName: Gamble
-  description: At the start of battle you gain 2 random talents (1 active and 1 passive)
-    that work at 60% strength.
+  autoDescription: 1
+  description: At the start of the battle you draw 1 random active and 1 random passive
+    talents that you don't have yet. They work at 60% strength for this battle.
   strength: 0.6
+  activeCount: 1
+  passiveCount: 1

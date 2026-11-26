@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F2-3
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Maki Zenin
+  cardImg: {fileID: 21300000, guid: 8a079b29829c65947bdcd8cac06e70b7, type: 3}
+  element: 4
+  rarity: 5
+  talent: {fileID: 11400000, guid: a1478e34354bc4c42b74e1e4482534cb, type: 2}
+  talent2: {fileID: 0}
+  health: 1610
+  defense: 161
+  attack: 161
+  speed: 161
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 644
+  location: 12
+  floor: 2
+  floorCode: H12-2C
+  anime: Jujutsu Kaisen
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b134167-5TCytk45YByD.png
+  characterId: b134167-5TCytk45YByD
+  hidden: 1
+  teamSlot: 2

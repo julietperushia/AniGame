@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: True Sight
   m_EditorClassIdentifier: Assembly-CSharp::TrueSight
   talentName: True Sight
-  description: The enemy loses 30% of its evasion rating, and you gain 30% of what
-    it lost as evasion rating.
+  autoDescription: 1
+  description: 'The enemy loses 30% (Max 36%) of its evasion rating, and you gain
+    70% of the rating it lost. Mana cost: 100.'
   manaCost: 100
   stealPercent: 0.3
+  gainPercent: 0.7
+  maxSteal: 0.95

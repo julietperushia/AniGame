@@ -53,17 +53,39 @@ public class GachaScreen : MonoBehaviour
         oddsCloseButton.onClick.AddListener(() => oddsPanel.SetActive(false));
         revealAllButton.onClick.AddListener(RevealAll);
         openAgainButton.onClick.AddListener(() => { if (lastPack != null) Open(lastPack); });
-        revealCloseButton.onClick.AddListener(() => { revealPanel.SetActive(false); Refresh(); });
+        revealCloseButton.onClick.AddListener(CloseReveal);
         revealCardsButton.onClick.AddListener(() => GameSession.LoadScene(SceneNames.Collection));
         oddsPanel.SetActive(false);
         revealPanel.SetActive(false);
         messageText.text = "";
         BuildAutoExchangeToggle();
+        BuildRevealCloseX();
         PlayerProfile.Changed += Refresh;
         Refresh();
     }
 
     void OnDestroy() => PlayerProfile.Changed -= Refresh;
+
+    /// <summary>Closes the pack result (CLOSE, the X in the corner or Escape). Cards not flipped yet are shown first.</summary>
+    void CloseReveal()
+    {
+        if (revealRoutine != null) { StopCoroutine(revealRoutine); revealRoutine = null; }
+        revealPanel.SetActive(false);
+        oddsPanel.SetActive(false);
+        Refresh();
+    }
+
+    /// <summary>A big X at the top right of the pack result, plus Escape, so it can always be closed.</summary>
+    void BuildRevealCloseX()
+    {
+        if (revealPanel == null) return;
+        var x = UIFactory.CreateButton(revealPanel.transform, "CloseX", "X", new Color(0.75f, 0.2f, 0.3f), 34);
+        UIFactory.Place((RectTransform)x.transform, new Vector2(1f, 1f), new Vector2(-70f, -70f), new Vector2(84f, 84f));
+        x.onClick.AddListener(CloseReveal);
+        TooltipTrigger.Add(x.image, "Close (Esc)");
+        revealPanel.AddComponent<PromptKeys>().onEscape = () => { if (revealPanel.activeSelf) CloseReveal(); };
+        if (oddsPanel != null) oddsPanel.AddComponent<PromptKeys>().onEscape = () => oddsPanel.SetActive(false);
+    }
 
     void Refresh()
     {
@@ -150,18 +172,20 @@ public class GachaScreen : MonoBehaviour
         sb.AppendLine("\n<color=#9AA4B5>Every card is your own character at that rarity, with a random Roll, element and talent.</color>");
         oddsText.text = sb.ToString();
         oddsPanel.SetActive(true);
+        oddsPanel.transform.SetAsLastSibling();
     }
 
     // ---------------------------------------------------------------- open + reveal
 
-    // ---------------------------------------------------------------- auto exchange (quick toggle; full settings in My Cards > MATERIALS)
+    // ---------------------------------------------------------------- auto exchange (quick toggle; full settings in Collection > MATERIALS)
 
     Button autoExchangeQuick;
 
     void BuildAutoExchangeToggle()
     {
         autoExchangeQuick = UIFactory.CreateButton(transform, "AutoExchangeQuick", "", UIFactory.PanelLight, 18);
-        UIFactory.Place((RectTransform)autoExchangeQuick.transform, new Vector2(1f, 0f), new Vector2(-190, 148), new Vector2(300, 56));
+        // Same row as the COLLECTION button (bottom right), left of it
+        UIFactory.Place((RectTransform)autoExchangeQuick.transform, new Vector2(1f, 0f), new Vector2(-525, 64), new Vector2(340, 72));
         autoExchangeQuick.onClick.AddListener(() =>
         {
             // OFF -> up to Common -> Uncommon -> Rare -> Super Rare -> OFF
@@ -171,7 +195,7 @@ public class GachaScreen : MonoBehaviour
             else PlayerProfile.SetAutoExchange(false, d.autoExchangeMaxTier);
             RefreshAutoExchangeToggle();
         });
-        TooltipTrigger.Add(autoExchangeQuick.image, "<b>Auto exchange</b>\nNew cards up to the chosen rarity become materials right away (fusion fodder that takes no space). Click to change; more options in My Cards > MATERIALS.");
+        TooltipTrigger.Add(autoExchangeQuick.image, "<b>Auto exchange</b>\nNew cards up to the chosen rarity become materials right away (fusion fodder that takes no space). Click to change; more options in Collection > MATERIALS.");
         RefreshAutoExchangeToggle();
     }
 
@@ -201,6 +225,7 @@ public class GachaScreen : MonoBehaviour
     {
         if (revealRoutine != null) StopCoroutine(revealRoutine);
         revealPanel.SetActive(true);
+        revealPanel.transform.SetAsLastSibling(); // above the buttons added at runtime (AUTO EXCHANGE sat on top of CLOSE)
         revealTitle.text = pack.name.ToUpperInvariant();
         revealTitle.color = CardStats.RarityColor(pack.guaranteed);
         UIFactory.Clear(revealRow);
@@ -543,11 +568,11 @@ public class GachaScreen : MonoBehaviour
         }
 
         screen.infoText = UIFactory.CreateText(canvas, "Info", "", 22, UIFactory.TextMain, TextAnchor.MiddleLeft);
-        UIFactory.Place(screen.infoText.rectTransform, new Vector2(0f, 0f), new Vector2(60, 30), new Vector2(1100, 90));
+        UIFactory.Place(screen.infoText.rectTransform, new Vector2(0f, 0f), new Vector2(60, 30), new Vector2(960, 90));
         screen.infoText.rectTransform.pivot = new Vector2(0f, 0f);
         screen.messageText = UIFactory.CreateText(canvas, "Message", "", 26, UIFactory.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
-        UIFactory.Place(screen.messageText.rectTransform, new Vector2(0.5f, 0f), new Vector2(200, 60), new Vector2(700, 50));
-        screen.myCardsButton = UIFactory.CreateButton(canvas, "MyCards", "MY CARDS", UIFactory.Accent, 26);
+        UIFactory.Place(screen.messageText.rectTransform, new Vector2(0.5f, 0f), new Vector2(-60, 150), new Vector2(1000, 50));
+        screen.myCardsButton = UIFactory.CreateButton(canvas, "MyCards", "COLLECTION", UIFactory.Accent, 26);
         UIFactory.Place((RectTransform)screen.myCardsButton.transform, new Vector2(1f, 0f), new Vector2(-190, 64), new Vector2(300, 72));
 
         BuildReveal(canvas, screen);
@@ -597,7 +622,7 @@ public class GachaScreen : MonoBehaviour
         UIFactory.Place((RectTransform)screen.revealAllButton.transform, new Vector2(0.5f, 0f), new Vector2(0, 140), new Vector2(300, 70));
         screen.openAgainButton = UIFactory.CreateButton(dim.transform, "OpenAgain", "OPEN AGAIN", UIFactory.Accent2, 26);
         UIFactory.Place((RectTransform)screen.openAgainButton.transform, new Vector2(0.5f, 0f), new Vector2(-360, 60), new Vector2(400, 76));
-        screen.revealCardsButton = UIFactory.CreateButton(dim.transform, "MyCards", "MY CARDS", UIFactory.Accent, 26);
+        screen.revealCardsButton = UIFactory.CreateButton(dim.transform, "MyCards", "COLLECTION", UIFactory.Accent, 26);
         UIFactory.Place((RectTransform)screen.revealCardsButton.transform, new Vector2(0.5f, 0f), new Vector2(40, 60), new Vector2(300, 76));
         screen.revealCloseButton = UIFactory.CreateButton(dim.transform, "Close", "CLOSE", UIFactory.PanelLight, 26);
         UIFactory.Place((RectTransform)screen.revealCloseButton.transform, new Vector2(0.5f, 0f), new Vector2(380, 60), new Vector2(260, 76));

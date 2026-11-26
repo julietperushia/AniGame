@@ -1,14 +1,16 @@
 using UnityEngine;
 
-/// <summary>Anigame: "Every round, deal 2% of the enemy familiars' max HP as damage, and heal for 175% of the damage dealt".</summary>
 [CreateAssetMenu(menuName = "Talents/Passive/LifeSap")]
 public class LifeSap : PassiveTalent
 {
+    [Tooltip("Damage at the start of each of your turns, in % of the enemy's max HP.")]
     public int damagePercent = 2;
+    [Tooltip("Heal, in % of the damage dealt (175 = 1.75x).")]
     public int healMultiplier = 175;
 
     public override string DefaultName => "Life Sap";
-    public override string DefaultDescription => $"Every turn, deal {damagePercent}% of the enemy's max HP as damage and heal for {healMultiplier}% of the damage dealt.";
+    public override string DefaultDescription =>
+        $"At the start of each of your turns, deal damage equal to {PctF(damagePercent / 100f)} of the enemy's max HP and heal {healMultiplier}% of the damage dealt.";
 
     public override void OnTurnStart(CardRuntime self, CardRuntime enemy)
     {

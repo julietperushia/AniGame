@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F3-1
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Tanjirou Kamado
+  cardImg: {fileID: 21300000, guid: e202f4efa47b02f4a87afb946add42bb, type: 3}
+  element: 2
+  rarity: 5
+  talent: {fileID: 11400000, guid: 1e148cdecebd50e46a6a3dc9b9413bfd, type: 2}
+  talent2: {fileID: 0}
+  health: 1600
+  defense: 160
+  attack: 160
+  speed: 160
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 640
+  location: 11
+  floor: 3
+  floorCode: H11-3A
+  anime: 'Demon Slayer: Kimetsu no Yaiba'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b126071-BTNEc1nRIv68.png
+  characterId: b126071-BTNEc1nRIv68
+  hidden: 1
+  teamSlot: 0

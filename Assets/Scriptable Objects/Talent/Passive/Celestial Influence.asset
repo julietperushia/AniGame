@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: Celestial Influence
   m_EditorClassIdentifier: Assembly-CSharp::CelestialInfluence
   talentName: Celestial Influence
-  description: Start off the battle with 40% increased Mana Regen, while decreasing
-    enemy familiars' Mana Regen by 14%.
+  autoDescription: 1
+  description: Start the battle with +40% (Max 48%) Mana Regeneration, while the
+    enemy's Mana Regeneration is reduced by 40% (Max 48%).
+  regenBonusPercent: 40
+  penaltyPercent: 40

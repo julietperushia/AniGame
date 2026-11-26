@@ -3,10 +3,11 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Talents/Active/AmplifierATK")]
 public class AmplifierATK : ActiveTalent
 {
+    [Tooltip("ATK gained per cast, in % of base ATK.")]
     public int atkBonus = 14;
 
     public override string DefaultName => "Amplifier ATK";
-    public override string DefaultDescription => $"Permanently increase your ATK by {atkBonus}% of base ATK. Stacks every cast.";
+    public override string DefaultDescription => $"Permanently raise your ATK by {Pct(atkBonus)} of your base ATK. Every cast stacks.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

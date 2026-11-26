@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Chaotic
   m_EditorClassIdentifier: Assembly-CSharp::Chaotic
   talentName: Chaotic
+  autoDescription: 0
   description: 'While this card is in battle, stat changes are reversed for both
-    fighters: anything that would raise ATK, DEF, SPD or max HP lowers it instead,
-    and anything that would lower it raises it.'
+    sides: anything that would raise ATK, DEF, SPD or max HP lowers it instead, and
+    anything that would lower it raises it.'

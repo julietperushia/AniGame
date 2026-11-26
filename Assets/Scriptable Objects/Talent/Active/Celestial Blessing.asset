@@ -13,8 +13,14 @@ MonoBehaviour:
   m_Name: Celestial Blessing
   m_EditorClassIdentifier: Assembly-CSharp::CelestialBlessing
   talentName: Celestial Blessing
-  description: Increase your max Mana by 50 (up to 600 total) and Mana Regeneration
-    by 18%, and heal allied familiars equal to 2x your max Mana.
+  autoDescription: 1
+  description: 'Raise your max Mana by 50 (up to 600; not while silenced) and your
+    Mana Regeneration by 18% (Max 22%), then heal HP equal to 2x (Max 2.4x) your
+    max Mana. It fires again every time you have 100 Mana: the bigger bar stores
+    extra Mana and makes each heal bigger. Mana cost: 100.'
   manaCost: 100
   maxManaLimit: 600
+  maxManaIncrease: 50
   manaRegenBonus: 18
+  healPerMaxMana: 2
+  needsFullBar: 0

@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: Lucky Coin
   m_EditorClassIdentifier: Assembly-CSharp::LuckyCoin
   talentName: Lucky Coin
-  description: Roll a 20 sided dice. Your allied familiars gain the amount rolled
-    x 3 HP/ATK/DEF/SPD at random.
+  autoDescription: 1
+  description: 'Roll a 20-sided dice and gain the roll x 3 (Max 3.6) in one random
+    stat: ATK, DEF, SPD or HP (1 to 60 (Max 72) points). HP points count like the
+    HP stat and are healed at once. Mana cost: 100.'
   manaCost: 100
+  diceSides: 20
+  multiplier: 3

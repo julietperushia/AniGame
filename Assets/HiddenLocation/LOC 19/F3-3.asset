@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F3-3
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Trunks
+  cardImg: {fileID: 21300000, guid: aafd903428b92e54ca8d8a7fa56e14d6, type: 3}
+  element: 7
+  rarity: 8
+  talent: {fileID: 11400000, guid: ce8f3742887cc44438d1698e2ba9f07d, type: 2}
+  talent2: {fileID: 11400000, guid: 1babccfa641b4ea4eb0da3f8c05a38b8, type: 2}
+  health: 2420
+  defense: 242
+  attack: 242
+  speed: 242
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 968
+  location: 19
+  floor: 3
+  floorCode: H19-3C
+  anime: Dragon Ball Z
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b2707-YKWmn4q87oF8.png
+  characterId: b2707-YKWmn4q87oF8
+  hidden: 1
+  teamSlot: 2

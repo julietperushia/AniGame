@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: Balancing Strike
   m_EditorClassIdentifier: Assembly-CSharp::BalancingStrike
   talentName: Balancing Strike
-  description: If your HP % is lower than the enemy's HP %, deal 15% of your base
-    HP as True damage. Otherwise, this skill deals 5% of your base HP as True damage.
+  autoDescription: 1
+  description: 'Deal true damage equal to 15% (Max 18%) of your max HP if your HP%
+    is lower than the enemy''s; otherwise 5% (Max 6%) of your max HP. Mana cost:
+    100.'
   manaCost: 100
+  lowHpPercent: 0.15
+  highHpPercent: 0.05

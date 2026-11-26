@@ -1,13 +1,15 @@
-using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Talents/Active/Assassinate")]
 public class Assassinate : ActiveTalent
 {
+    [Tooltip("Damage of the hit, as a multiple of a normal attack (1.3 = 130%).")]
     public float atkPercent = 1.3f;
 
     public override string DefaultName => "Assassinate";
-    public override string DefaultDescription => $"A guaranteed critical hit for {atkPercent * 100:0}% of a normal attack that can't be evaded. It uses your crit damage.";
+    public override string DefaultDescription =>
+        $"Strike once for {PctF(atkPercent)} of a normal attack. The hit is always a critical hit (your crit damage applies) and can't be evaded. " +
+        "It counts as a normal attack, so lifesteal and on-hit effects work.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

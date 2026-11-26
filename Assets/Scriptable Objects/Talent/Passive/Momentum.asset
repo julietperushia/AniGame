@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Momentum
   m_EditorClassIdentifier: Assembly-CSharp::Momentum
   talentName: Momentum
-  description: Every attack that lands gives +6% ATK, up to 5 stacks. Getting evaded
-    (or missing) resets it.
+  autoDescription: 1
+  description: Every normal attack that deals damage gives a stack of +6% (Max 7.2%)
+    attack damage, up to 5 stacks (+30% (Max 36%)). Missing or getting evaded resets
+    all stacks.
   atkPerStack: 0.06
   maxStacks: 5

@@ -13,6 +13,13 @@ MonoBehaviour:
   m_Name: Dexterity Drive
   m_EditorClassIdentifier: Assembly-CSharp::DexterityDrive
   talentName: Dexterity Drive
-  description: Deal damage equal to 5% of your SPD, and deal additional damage according
-    to the difference between your SPD and enemy's SPD.
+  autoDescription: 1
+  description: 'Raise your SPD by 10% (Max 12%) of your base SPD for the rest of
+    the battle, then deal damage of your element equal to 10% (Max 12%) of your SPD,
+    plus 3 (Max 4) damage for every point of SPD you have above the enemy. Element
+    advantage applies. Every cast makes you faster, so the hits keep growing. Mana
+    cost: 100.'
   manaCost: 100
+  speedGainPercent: 10
+  spdPercent: 0.1
+  damagePerSpeedPoint: 3

@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Trick Room DEF
   m_EditorClassIdentifier: Assembly-CSharp::TrickRoomDEF
   talentName: Trick Room DEF
-  description: If the enemy familiars' DEF is higher than yours, your allies gain
-    DEF equal to 60% of the difference between the two DEF's, and simultaneously
-    reduce their DEF by the same amount.
+  autoDescription: 1
+  description: 'If the enemy''s DEF is higher than yours, take 80% (Max 96%) of the
+    difference: you gain that much DEF and the enemy loses it. No effect if your
+    DEF is already higher. Mana cost: 100.'
   manaCost: 100
-  swapPercent: 60
+  swapPercent: 80

@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>Title screen: Play, My Cards, Gacha, Shop, Reset, Quit. Shows the build slots and resources.</summary>
+/// <summary>Title screen: Play, Collection, Gacha, Shop, Reset, Quit. Shows the build slots and resources.</summary>
 public class MainMenuScreen : MonoBehaviour
 {
     public Text titleText;
@@ -75,7 +75,7 @@ public class MainMenuScreen : MonoBehaviour
         var db = CardDatabase.Instance;
         if (db == null || db.LocationCount == 0)
         {
-            subtitleText.text = "<color=#FF6B6B>Card database missing - run Tools > AniGame > Build Everything</color>";
+            subtitleText.text = "<color=#FF6B6B>The game data could not be loaded. Please reinstall the game.</color>";
             playButton.interactable = false;
         }
         else
@@ -93,7 +93,8 @@ public class MainMenuScreen : MonoBehaviour
         if (logo != null && logo.enabled) UIFx.Bob(logo.rectTransform, 7f, 1.2f);
         UIFx.GlowBehind((RectTransform)playButton.transform, new Color(1f, 0.45f, 0.75f, 0.6f), 34f, 0.25f, 0.75f);
         BuildShowcase();
-        TestModePanel.AddButton(transform, () => { RefreshProfile(); BuildShowcase(); });
+        BuildHiddenButton();
+        TestModePanel.AddButton(transform, () => { RefreshProfile(); BuildShowcase(); BuildHiddenButton(); });
         StartCoroutine(RefreshLoop());
         StartCoroutine(TitleAnimation());
     }
@@ -122,6 +123,36 @@ public class MainMenuScreen : MonoBehaviour
             rt.anchoredPosition = basePos + new Vector2(0f, Mathf.Sin(Time.unscaledTime * 1.2f) * 6f);
             yield return null;
         }
+    }
+
+    Button hiddenButton;
+
+    /// <summary>HIDDEN LOCATION (3v3) next to SETTINGS: locked until the player owns 3 cards of Mythic or higher.</summary>
+    void BuildHiddenButton()
+    {
+        if (saveDataButton == null) return;
+        var settingsRt = (RectTransform)saveDataButton.transform;
+        UIFactory.TopLeft(settingsRt, 0, 430, 255, 56);
+        if (hiddenButton == null)
+        {
+            hiddenButton = UIFactory.CreateButton(settingsRt.parent, "HiddenButton", "HIDDEN LOCATION", new Color(0.45f, 0.2f, 0.6f), 21);
+            UIFactory.TopLeft((RectTransform)hiddenButton.transform, 265, 430, 255, 56);
+            hiddenButton.onClick.AddListener(() =>
+            {
+                if (PlayerProfile.HiddenUnlocked) GameSession.LoadScene(SceneNames.HiddenLocation);
+                else
+                {
+                    SfxSynth.Play("fail", 0.6f);
+                    subtitleText.text = $"<color=#C9A2FF>HIDDEN LOCATION: own {GameRules.HiddenUnlockCards} cards of Mythic rarity or higher to open it (you have {PlayerProfile.HighRarityCards}).</color>";
+                }
+            });
+        }
+        bool open = PlayerProfile.HiddenUnlocked;
+        UIFactory.ButtonLabel(hiddenButton).text = open ? "HIDDEN LOCATION" : $"HIDDEN LOCATION  <size=15>{PlayerProfile.HighRarityCards}/{GameRules.HiddenUnlockCards} MYTHIC+</size>";
+        hiddenButton.image.color = open ? new Color(0.55f, 0.22f, 0.75f) : new Color(0.25f, 0.2f, 0.32f);
+        TooltipTrigger.Add(hiddenButton.image, open
+            ? "<b>Hidden Location</b>\n3v3 battles: your 3 build slots fight teams of 3 from 20 legendary anime. 20 LOCs, 3 floors each."
+            : $"<b>Hidden Location</b> (locked)\nOwn {GameRules.HiddenUnlockCards} cards of Mythic rarity or higher to open 3v3 battles against 20 legendary anime.");
     }
 
     void RefreshProfile()
@@ -175,7 +206,9 @@ public class MainMenuScreen : MonoBehaviour
     {
         if (savePanel == null) return;
         savePanel.SetActive(false);
-        saveDataButton.onClick.AddListener(() => { savePanel.SetActive(true); saveMessageText.text = ""; CancelImport(); RefreshSaveInfo(); });
+        // The menu button opens SETTINGS; export / import lives inside it
+        UIFactory.ButtonLabel(saveDataButton).text = "SETTINGS";
+        saveDataButton.onClick.AddListener(() => SettingsPanel.Open(transform, OpenSavePanel));
         saveCloseButton.onClick.AddListener(() => savePanel.SetActive(false));
         exportButton.onClick.AddListener(ExportSave);
         importButton.onClick.AddListener(() =>
@@ -188,6 +221,16 @@ public class MainMenuScreen : MonoBehaviour
         });
         importPathButton.onClick.AddListener(() => AskImport(importPathInput.text));
         openFolderButton.onClick.AddListener(SaveTransfer.OpenSaveFolder);
+    }
+
+    /// <summary>Settings > EXPORT / IMPORT SAVE.</summary>
+    public void OpenSavePanel()
+    {
+        savePanel.SetActive(true);
+        savePanel.transform.SetAsLastSibling();
+        saveMessageText.text = "";
+        CancelImport();
+        RefreshSaveInfo();
     }
 
     void RefreshSaveInfo()
@@ -285,7 +328,7 @@ public class MainMenuScreen : MonoBehaviour
         UIFactory.AddShadow(screen.titleText, new Color(0.35f, 0.2f, 0.9f, 0.85f), 9f);
 
         screen.subtitleText = UIFactory.CreateText(canvas, "Subtitle", "", 28, new Color(1f, 0.92f, 0.97f), TextAnchor.MiddleLeft);
-        UIFactory.Place(screen.subtitleText.rectTransform, new Vector2(0f, 1f), new Vector2(118, -280), new Vector2(1200, 50));
+        UIFactory.Place(screen.subtitleText.rectTransform, new Vector2(0f, 1f), new Vector2(118, -256), new Vector2(1200, 50));
         UIFactory.AddShadow(screen.subtitleText, UIFactory.ShadowColor, 2f);
 
         var topRow = UIFactory.CreateRect("TopRow", canvas);
@@ -296,7 +339,7 @@ public class MainMenuScreen : MonoBehaviour
         UIFactory.Place(menu, new Vector2(0f, 0.5f), new Vector2(110, -60), new Vector2(520, 520));
         screen.playButton = UIFactory.CreateButton(menu, "PlayButton", "PLAY", new Color(1f, 0.35f, 0.62f), 40);
         UIFactory.TopStrip((RectTransform)screen.playButton.transform, 0, 96);
-        screen.cardsButton = UIFactory.CreateButton(menu, "CardsButton", "MY CARDS", UIFactory.Accent, 32);
+        screen.cardsButton = UIFactory.CreateButton(menu, "CardsButton", "COLLECTION", UIFactory.Accent, 32);
         UIFactory.TopStrip((RectTransform)screen.cardsButton.transform, 108, 76);
         screen.gachaButton = UIFactory.CreateButton(menu, "GachaButton", "GACHA", new Color(1f, 0.62f, 0.15f), 28);
         UIFactory.TopLeft((RectTransform)screen.gachaButton.transform, 0, 196, 255, 70);
@@ -312,7 +355,7 @@ public class MainMenuScreen : MonoBehaviour
         UIFactory.TopLeft((RectTransform)screen.resetButton.transform, 176, 360, 168, 60);
         screen.quitButton = UIFactory.CreateButton(menu, "QuitButton", "QUIT", UIFactory.PanelLight, 21);
         UIFactory.TopLeft((RectTransform)screen.quitButton.transform, 352, 360, 168, 60);
-        screen.saveDataButton = UIFactory.CreateButton(menu, "SaveDataButton", "SAVE DATA  (EXPORT / IMPORT)", new Color(0.2f, 0.45f, 0.4f), 21);
+        screen.saveDataButton = UIFactory.CreateButton(menu, "SaveDataButton", "SETTINGS", new Color(0.2f, 0.45f, 0.4f), 21);
         UIFactory.TopLeft((RectTransform)screen.saveDataButton.transform, 0, 430, 520, 56);
 
         var profilePanel = UIFactory.CreatePanel(canvas, "ProfilePanel", new Color(0.05f, 0.04f, 0.12f, 0.82f), false);
@@ -326,7 +369,7 @@ public class MainMenuScreen : MonoBehaviour
         UIFactory.Place(teamLabel.rectTransform, new Vector2(1f, 0.5f), new Vector2(-355, 380), new Vector2(350, 40));
         UIFactory.AddShadow(teamLabel, UIFactory.ShadowColor, 2f);
 
-        screen.versionText = UIFactory.CreateText(canvas, "Version", "AniGame  |  single-card system  |  Unity 6", 20, UIFactory.TextDim, TextAnchor.LowerRight);
+        screen.versionText = UIFactory.CreateText(canvas, "Version", $"AniGame  v{Application.version}", 20, UIFactory.TextDim, TextAnchor.LowerRight);
         UIFactory.Place(screen.versionText.rectTransform, new Vector2(1f, 0f), new Vector2(-24, 16), new Vector2(700, 30));
         BuildSavePanel(canvas, screen);
         return screen;

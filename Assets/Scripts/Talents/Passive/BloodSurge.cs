@@ -1,23 +1,25 @@
 using UnityEngine;
 
-/// <summary>Anigame: "When your health becomes low, increase the LIFESTEAL of all allies by 45%."</summary>
 [CreateAssetMenu(menuName = "Talents/Passive/BloodSurge")]
 public class BloodSurge : PassiveTalent
 {
+    [Tooltip("Triggers when your HP is at or below this at the start of your turn (0.3 = 30%).")]
     public float threshold = 0.3f;
+    [Tooltip("Lifesteal gained (% of your normal attack damage healed back).")]
     public int lifestealBonus = 45;
 
+    const string Key = "BloodSurgeApplied";
+
     public override string DefaultName => "Blood Surge";
-    public override string DefaultDescription => $"When your health drops below {threshold * 100:0}%, gain +{lifestealBonus}% Lifesteal for the rest of the battle.";
+    public override string DefaultDescription =>
+        $"The first time your HP is at or below {P(threshold)} at the start of your turn, gain +{Pct(lifestealBonus)} Lifesteal for the rest of the battle " +
+        "(you heal that % of the damage your normal attacks deal).";
 
     public override void OnTurnStart(CardRuntime self, CardRuntime enemy)
     {
-        bool applied = self.GetTalentState("BloodSurgeApplied", false);
-        if (!applied && self.healthPercent <= threshold)
-        {
-            self.lifesteal += Scaled(lifestealBonus, self);
-            self.SetTalentState("BloodSurgeApplied", true);
-            BattleLog.Passive(self, $"<color=#FF6B8B>[Blood Surge] {self.DisplayName} Lifesteal +{lifestealBonus}%</color>");
-        }
+        if (self.GetTalentState(Key, false) || self.healthPercent > threshold) return;
+        self.lifesteal += Scaled(lifestealBonus, self);
+        self.SetTalentState(Key, true);
+        BattleLog.Passive(self, $"<color=#FF6B8B>[Blood Surge] {self.DisplayName} Lifesteal +{lifestealBonus}%</color>");
     }
 }

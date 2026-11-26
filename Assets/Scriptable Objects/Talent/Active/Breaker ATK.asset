@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Breaker ATK
   m_EditorClassIdentifier: Assembly-CSharp::BreakerATK
   talentName: Breaker ATK
-  description: Decrease the ATK of all enemy familiars by 20%.
+  autoDescription: 1
+  description: 'Lower the enemy''s ATK by 18% (Max 22%) of its base ATK. Every cast
+    stacks. Mana cost: 100.'
   manaCost: 100
-  atkReduction: 20
+  atkReduction: 18

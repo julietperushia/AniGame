@@ -1,17 +1,19 @@
 using UnityEngine;
 
-/// <summary>Asset text: "When the battle starts, decrease the ATK of enemy familiars by 50%. Their ATK increases by 6% every turn after that."
-/// Fixed: per-battle state moved out of the shared ScriptableObject, and the recovery stops once the debuff is gone.</summary>
 [CreateAssetMenu(menuName = "Talents/Passive/Grievous Limiter")]
 public class GrievousLimiter : PassiveTalent
 {
+    [Tooltip("Enemy ATK lost when the battle starts, in % of its base ATK.")]
     public int startReduction = 40;
+    [Tooltip("ATK the enemy gets back at the start of each of your turns, in % of its base ATK.")]
     public int recoveryPerTurn = 5;
 
     const string Key = "GrievousRemaining";
 
     public override string DefaultName => "Grievous Limiter";
-    public override string DefaultDescription => $"When the battle starts, decrease the enemy's ATK by {startReduction}%. It recovers {recoveryPerTurn}% every turn after that.";
+    public override string DefaultDescription =>
+        $"When the battle starts, lower the enemy's ATK by {Pct(startReduction)} of its base ATK. It gets back {recoveryPerTurn}% of its base ATK at the start of each of your turns " +
+        "until the whole debuff is gone.";
 
     public override void OnBattleStart(CardRuntime self, CardRuntime enemy)
     {

@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Mana Reaver
   m_EditorClassIdentifier: Assembly-CSharp::ManaReaver
   talentName: Mana Reaver
-  description: Absorb up to 20% Mana from enemy familiars, and deal True damage equal
-    to the Mana absorbed x10
+  autoDescription: 1
+  description: 'Absorb 20% (Max 24%) of the enemy''s current Mana (you gain it) and
+    deal true damage equal to the absorbed Mana x 10. Mana cost: 100.'
   manaCost: 100
   manaStealPercent: 20
+  damagePerMana: 10

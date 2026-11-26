@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F3-2
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Zoro Roronoa
+  cardImg: {fileID: 21300000, guid: 59afbc29956170d4d8ba77de4debb482, type: 3}
+  element: 3
+  rarity: 2
+  talent: {fileID: 11400000, guid: 50615731e2803ec4fadcf6fe583a2663, type: 2}
+  talent2: {fileID: 0}
+  health: 1260
+  defense: 126
+  attack: 126
+  speed: 126
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 504
+  location: 5
+  floor: 3
+  floorCode: H5-3B
+  anime: One Piece
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b62-S7oAeA9WInjV.png
+  characterId: b62-S7oAeA9WInjV
+  hidden: 1
+  teamSlot: 1

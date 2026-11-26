@@ -1,66 +1,73 @@
 using UnityEngine;
 
 /// <summary>
-/// Utility class for managing status effects in battle.
-/// Numbers follow the Anigame talent texts (dbgames.info):
-///  Burn  - 5% max HP true damage per stack per turn (max 4 stacks), healing received -75%.
-///          (Asset text says 10%; at 10% per stack Blaze won 76% of balanced fights, so it was halved and capped.)
-///  Stun  - skip the next turn, DEF permanently -10%.
-///  Poison - 5 + 5% max HP true damage per stack, 10% miss chance +5% per turn it lasts.
+/// Status effects in battle. Every number comes from the talent that applies the status (its ScriptableObject
+/// fields), passed in here and stored on the target; the defaults below are only used when nothing is passed.
 /// </summary>
 public static class StatusEffects
 {
     public const float BurnPercentPerStack = 0.05f;
     public const int MaxBurnStacks = 4;
 
-    /// <summary>Apply Burn status: 5% max HP true damage per stack per turn (max 4), reduces healing by 75%.</summary>
-    public static void ApplyBurn(CardRuntime target, int stacks = 1, float percentPerStack = BurnPercentPerStack)
+    /// <summary>Apply Burn status: 5% max HP true damage per stack per turn (max 4), reduces healing by 75%.
+    /// Each tick can miss (missBase% with one stack, +missPerStack% per extra stack); a miss removes every stack.</summary>
+    public static void ApplyBurn(CardRuntime target, int stacks = 1, float percentPerStack = BurnPercentPerStack,
+                                 int maxStacks = MaxBurnStacks, float healingCut = 0.75f, int missBase = 15, int missPerStack = 5)
     {
         if (target.ResistsDebuff()) return;
+        target.burnMissBase = missBase;
+        target.burnMissPerStack = missPerStack;
         target.burnPercent = target.burnStacks > 0 ? Mathf.Max(target.burnPercent, percentPerStack) : percentPerStack;
-        target.burnStacks = Mathf.Min(MaxBurnStacks, target.burnStacks + stacks);
-        target.healingReduction = 0.75f;
+        target.burnStacks = Mathf.Min(Mathf.Max(1, maxStacks), target.burnStacks + Mathf.Max(1, stacks));
+        target.healingReduction = Mathf.Clamp01(healingCut);
         BattleLog.Status(target, $"<color=#FF8A3D>{target.DisplayName} is burning! (x{target.burnStacks})</color>");
     }
 
-    /// <summary>Apply Poison status: deals 5 + 5% max HP true damage per turn. 10% base miss chance +5% per turn.</summary>
-    public static void ApplyPoison(CardRuntime target, int stacks = 1, float percentPerStack = 0.05f)
+    /// <summary>Apply Poison status: deals 5 + 5% max HP true damage per stack per turn.
+    /// Each tick can miss (missBase% with one stack, +missPerStack% per extra stack); a miss removes every stack.</summary>
+    public static void ApplyPoison(CardRuntime target, int stacks = 1, float percentPerStack = 0.05f,
+                                   int flatDamage = 5, int missBase = 15, int missPerStack = 5)
     {
         if (target.ResistsDebuff()) return;
+        target.poisonFlat = flatDamage;
+        target.poisonMissBase = missBase;
+        target.poisonMissPerStack = missPerStack;
         target.poisonPercent = target.poisonStacks > 0 ? Mathf.Max(target.poisonPercent, percentPerStack) : percentPerStack;
         target.poisonStacks += stacks;
-        target.poisonTurns = 0; // Reset turn counter
         BattleLog.Status(target, $"<color=#7CFC6A>{target.DisplayName} is poisoned! (x{target.poisonStacks})</color>");
     }
 
     /// <summary>Apply Stun: skips next turn, permanently reduces DEF by 10%.</summary>
-    public static void ApplyStun(CardRuntime target)
+    public static void ApplyStun(CardRuntime target, int defLossPercent = 10)
     {
         if (target.ResistsDebuff()) return;
         target.isStunned = true;
-        int defReduction = target.baseDefense * 10 / 100;
+        int defReduction = target.baseDefense * Mathf.Max(0, defLossPercent) / 100;
         target.defense -= defReduction;
         target.baseDefense -= defReduction; // Permanent reduction
         BattleLog.Status(target, $"<color=#FFE14D>{target.DisplayName} is stunned! DEF -{defReduction} permanently</color>");
     }
 
     /// <summary>Apply Silence: prevents talent usage for the given turns and caps mana at 100.</summary>
-    public static void ApplySilence(CardRuntime target, int turns = 3, bool capMana = true)
+    public static void ApplySilence(CardRuntime target, int turns = 3, bool capMana = true, int manaCap = 100)
     {
         if (target.ResistsDebuff()) return;
         target.silenceTurns = Mathf.Max(target.silenceTurns, turns);
         if (capMana)
         {
-            target.maxMana = 100;
-            target.mana = Mathf.Min(target.mana, 100);
+            // 3v3: the cap is per card, so a team keeps its starting pool scaled the same way
+            int cap = target.IsTeam ? Mathf.RoundToInt(target.basePool * manaCap / 100f) : manaCap;
+            target.maxMana = Mathf.Min(target.maxMana, cap);
+            target.mana = Mathf.Min(target.mana, target.maxMana);
         }
         BattleLog.Status(target, $"<color=#C78BFF>{target.DisplayName} is silenced for {turns} turns!</color>");
     }
 
     /// <summary>Apply Endurance: reduces normal attack damage by 65% for the given turns.</summary>
-    public static void ApplyEndurance(CardRuntime target, int turns = 3, float reflectPercent = 0.35f)
+    public static void ApplyEndurance(CardRuntime target, int turns = 3, float reflectPercent = 0.35f, float reduction = 0.65f)
     {
         target.enduranceReflect = reflectPercent;
+        target.enduranceReduction = Mathf.Clamp01(reduction);
         target.hasEndurance = true;
         target.enduranceTurns = Mathf.Max(target.enduranceTurns, turns);
         BattleLog.Status(target, $"<color=#6FD3FF>{target.DisplayName} braces with Endurance ({turns} turns)</color>");
@@ -74,18 +81,22 @@ public static class StatusEffects
         BattleLog.Status(target, $"<color=#81D4FA>{target.DisplayName} is frozen solid!</color>");
     }
 
-    /// <summary>Sleep: skips up to <paramref name="turns"/> turns; a normal attack wakes it (+40% on that hit).</summary>
-    public static void ApplySleep(CardRuntime target, int turns = 2)
+    /// <summary>Sleep: skips <paramref name="turns"/> turns (attacks don't wake it). While it sleeps, normal attacks on it deal
+    /// <paramref name="damageCut"/> less and the opponent's Mana Regeneration is multiplied by <paramref name="casterRegen"/>.</summary>
+    public static void ApplySleep(CardRuntime target, int turns = 2, float damageCut = 0.3f, float casterRegen = 0.5f)
     {
         if (target.ResistsDebuff()) return;
+        target.sleepDamageCut = Mathf.Clamp01(damageCut);
+        target.sleepCasterRegen = Mathf.Max(0f, casterRegen);
         target.sleepTurns = Mathf.Max(target.sleepTurns, turns);
         BattleLog.Status(target, $"<color=#9FA8DA>{target.DisplayName} falls asleep...</color>");
     }
 
     /// <summary>Blind: the target's normal attacks have a 50% chance to miss.</summary>
-    public static void ApplyBlind(CardRuntime target, int turns = 2)
+    public static void ApplyBlind(CardRuntime target, int turns = 2, int missChance = 50)
     {
         if (target.ResistsDebuff()) return;
+        target.blindMissChance = missChance;
         target.blindTurns = Mathf.Max(target.blindTurns, turns);
         BattleLog.Status(target, $"<color=#B0BEC5>{target.DisplayName} is blinded for {turns} turns!</color>");
     }
@@ -115,7 +126,7 @@ public static class StatusEffects
     }
 
     /// <summary>Hypnotize: +1 stack (+20% chance to hit itself). Not while immune after a trigger.</summary>
-    public static void ApplyHypnotize(CardRuntime target)
+    public static void ApplyHypnotize(CardRuntime target, int stacks = 1, int chancePerStack = 20, float selfDamage = 0.5f, int immuneTurns = 2)
     {
         if (target.hypnoImmuneTurns > 0)
         {
@@ -123,9 +134,20 @@ public static class StatusEffects
             return;
         }
         if (target.ResistsDebuff()) return;
-        target.hypnoStacks++;
-        BattleLog.Status(target, $"<color=#BA68C8>{target.DisplayName} is hypnotized (x{target.hypnoStacks}, {20 * target.hypnoStacks}% to hit itself)</color>");
+        target.hypnoChancePerStack = chancePerStack;
+        target.hypnoSelfDamage = selfDamage;
+        target.hypnoImmuneAfter = immuneTurns;
+        target.hypnoStacks += Mathf.Max(1, stacks);
+        BattleLog.Status(target, $"<color=#BA68C8>{target.DisplayName} is hypnotized (x{target.hypnoStacks}, {chancePerStack * target.hypnoStacks}% to hit itself)</color>");
     }
+
+    /// <summary>Chance (%) the next Burn tick misses and removes every stack.</summary>
+    public static int BurnMissChance(CardRuntime card) =>
+        Mathf.Clamp(card.burnMissBase + card.burnMissPerStack * Mathf.Max(0, card.burnStacks - 1), 0, 100);
+
+    /// <summary>Chance (%) the next Poison tick misses and removes every stack.</summary>
+    public static int PoisonMissChance(CardRuntime card) =>
+        Mathf.Clamp(card.poisonMissBase + card.poisonMissPerStack * Mathf.Max(0, card.poisonStacks - 1), 0, 100);
 
     /// <summary>Removes every negative effect (Purify). Returns how many were removed.</summary>
     public static int Cleanse(CardRuntime card)
@@ -162,6 +184,16 @@ public static class StatusEffects
     /// </summary>
     public static bool ProcessStatusEffects(CardRuntime card)
     {
+        if (!TickStatuses(card)) return false;
+        return ConsumeSkip(card);
+    }
+
+    /// <summary>
+    /// Regeneration, Burn, Poison and the shield / immunity / silence / endurance countdowns.
+    /// 1v1: every turn. 3v3: once per round per team (on its first card's turn). Returns false if the card died.
+    /// </summary>
+    public static bool TickStatuses(CardRuntime card)
+    {
         // Regeneration (heal first)
         if (card.regenerationStacks > 0)
         {
@@ -169,27 +201,39 @@ public static class StatusEffects
             card.Heal(healAmount);
         }
 
-        // Burn damage
+        // Burn damage (a miss puts the fire out: every stack is removed)
         if (card.burnStacks > 0 && card.IsAlive)
         {
-            int burnDamage = Mathf.Max(1, Mathf.RoundToInt(card.maxHealth * card.burnPercent * card.burnStacks));
-            card.TakeTrueDamage(burnDamage, DamageKind.Burn);
-        }
-
-        // Poison damage (with miss chance)
-        if (card.poisonStacks > 0 && card.IsAlive)
-        {
-            int missChance = 10 + (card.poisonTurns * 5); // 10% base + 5% per turn
-            if (!BattleRandom.Chance(missChance))
+            int missChance = BurnMissChance(card);
+            if (BattleRandom.Chance(missChance))
             {
-                int poisonDamage = 5 + Mathf.RoundToInt(card.maxHealth * card.poisonPercent * card.poisonStacks);
-                card.TakeTrueDamage(poisonDamage, DamageKind.Poison);
+                BattleLog.Status(card, $"<color=#FF8A3D>The burn fizzles out on {card.DisplayName}! All {card.burnStacks} stacks removed ({missChance}% chance)</color>");
+                card.burnStacks = 0;
+                card.healingReduction = 0f;
             }
             else
             {
-                BattleLog.Status(card, $"<color=#7CFC6A>Poison missed {card.DisplayName} ({missChance}% chance)</color>");
+                int burnDamage = Mathf.Max(1, Mathf.RoundToInt(card.maxHealth * card.burnPercent * card.burnStacks));
+                card.TakeTrueDamage(burnDamage, DamageKind.Burn);
             }
-            card.poisonTurns++;
+        }
+
+        // Poison damage (a miss cures it: every stack is removed)
+        if (card.poisonStacks > 0 && card.IsAlive)
+        {
+            int missChance = PoisonMissChance(card);
+            if (BattleRandom.Chance(missChance))
+            {
+                BattleLog.Status(card, $"<color=#7CFC6A>The poison misses {card.DisplayName} and wears off! All {card.poisonStacks} stacks removed ({missChance}% chance)</color>");
+                card.poisonStacks = 0;
+                card.poisonTurns = 0;
+            }
+            else
+            {
+                int poisonDamage = card.poisonFlat + Mathf.RoundToInt(card.maxHealth * card.poisonPercent * card.poisonStacks);
+                card.TakeTrueDamage(poisonDamage, DamageKind.Poison);
+                card.poisonTurns++;
+            }
         }
 
         if (!card.IsAlive) return false;
@@ -221,8 +265,14 @@ public static class StatusEffects
                 BattleLog.Status(card, $"{card.DisplayName}'s Endurance faded");
             }
         }
+        return true;
+    }
 
-        // Stun / Freeze / Sleep
+    /// <summary>Stun / Freeze / Sleep: returns false (and sets skipReason) if this turn is skipped.
+    /// 3v3: called for every card turn, so a Stun only skips the team's next card.</summary>
+    public static bool ConsumeSkip(CardRuntime card)
+    {
+        card.skipReason = null;
         if (card.isStunned)
         {
             card.isStunned = false; // Clear stun after skipping turn

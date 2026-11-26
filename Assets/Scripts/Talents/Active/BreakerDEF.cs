@@ -1,13 +1,13 @@
 using UnityEngine;
 
-/// <summary>Anigame: "Decrease the DEF of all enemy familiars by 20%".</summary>
 [CreateAssetMenu(menuName = "Talents/Active/BreakerDEF")]
 public class BreakerDEF : ActiveTalent
 {
+    [Tooltip("Enemy DEF lost per cast, in % of its base DEF.")]
     public int defReduction = 20;
 
     public override string DefaultName => "Breaker DEF";
-    public override string DefaultDescription => $"Decrease the enemy's DEF by {defReduction}% of its base DEF.";
+    public override string DefaultDescription => $"Lower the enemy's DEF by {Pct(defReduction)} of its base DEF. Every cast stacks.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

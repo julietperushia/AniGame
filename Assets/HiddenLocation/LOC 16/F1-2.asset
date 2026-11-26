@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F1-2
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Tenga Onigawara
+  cardImg: {fileID: 21300000, guid: 8a72131ed70ac6b4c8c440e2a21b299c, type: 3}
+  element: 1
+  rarity: 7
+  talent: {fileID: 11400000, guid: 3cc0e599e9bbcb74f831b91bd92de210, type: 2}
+  talent2: {fileID: 0}
+  health: 1870
+  defense: 187
+  attack: 187
+  speed: 187
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 748
+  location: 16
+  floor: 1
+  floorCode: H16-1B
+  anime: Mob Psycho 100
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b89619-gX9t6L2puNte.png
+  characterId: b89619-gX9t6L2puNte
+  hidden: 1
+  teamSlot: 1

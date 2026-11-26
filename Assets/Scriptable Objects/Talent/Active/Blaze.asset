@@ -13,7 +13,16 @@ MonoBehaviour:
   m_Name: Blaze
   m_EditorClassIdentifier: Assembly-CSharp::Blaze
   talentName: Blaze
-  description: Inflict a stack of Burn to enemy familiars, dealing 5% True damage
-    per turn per stack (max 4 stacks), as well as reducing all healing effects on
-    them by 75%.
+  autoDescription: 1
+  description: 'Inflict a stack of Burn. At the start of each of its turns a burning
+    enemy takes true damage equal to 5% (Max 6%) of its max HP per stack (max 5 stacks
+    = 25% (Max 30%)), and all healing it receives is reduced by 85%. Each tick can
+    miss: 10% with one stack, +5% for every extra stack (max 30%). A miss puts the
+    fire out and removes every stack. Mana cost: 100.'
   manaCost: 100
+  stacksPerCast: 1
+  burnPercent: 0.05
+  maxStacks: 5
+  healingCut: 0.85
+  missBase: 10
+  missPerStack: 5

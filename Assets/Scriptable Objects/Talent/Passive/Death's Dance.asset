@@ -13,7 +13,13 @@ MonoBehaviour:
   m_Name: Death's Dance
   m_EditorClassIdentifier: Assembly-CSharp::DeathsDance
   talentName: Death's Dance
-  description: 20% of all damage you take is stored instead of hitting your HP. If
-    the stored damage ever reaches your current HP, you fall at once. Each evade
-    removes 30% of the stored damage; each critical hit you land removes 15%.
-  storeRate: 0.2
+  autoDescription: 1
+  description: 40% (Max 48%) of all damage you take is stored instead of hitting
+    your HP. If the stored damage ever reaches your current HP, you fall at once.
+    Each evade removes 30% of the stored damage; each of your attacks that hits removes
+    10%, and a critical hit removes another 15%.
+  storeRate: 0.4
+  maxStoreRate: 48
+  evadeClear: 0.3
+  attackClear: 0.1
+  critClear: 0.15

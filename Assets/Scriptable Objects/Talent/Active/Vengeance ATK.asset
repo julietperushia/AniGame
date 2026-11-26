@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: Vengeance ATK
   m_EditorClassIdentifier: Assembly-CSharp::VengeanceATK
   talentName: Vengeance ATK
-  description: Deal damage to all enemy familiars equal to 11% of their ATK.
+  autoDescription: 1
+  description: 'Deal true damage equal to 18% (Max 21.6%) of the enemy''s ATK: the
+    stronger its ATK, the harder this hits. Mana cost: 100.'
   manaCost: 100
+  percent: 0.18

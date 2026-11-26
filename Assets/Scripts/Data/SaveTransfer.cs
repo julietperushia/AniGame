@@ -128,7 +128,7 @@ public static class SaveTransfer
             string current = db != null ? db.dataVersion : null;
             if (!string.IsNullOrEmpty(current) && save.dataVersion != current)
             {
-                warning = "This save was made with a different campaign sheet; your cards and buffs are kept, but floor progress may not match the new LOCs.";
+                warning = "This save was made with a different version of the game. Your cards and buffs are kept, but floor progress may not match.";
                 save.dataVersion = current;
             }
 

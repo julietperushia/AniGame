@@ -19,6 +19,7 @@ public class LocationMapScreen : MonoBehaviour
     public ScrollRect floorScroll;
     public CardView enemyPreview;
     public Text enemyInfo;
+    public Text enemyTalentInfo;
     public Button fightButton;
     public Text messageText;
     public Button[] slotButtons = new Button[3];
@@ -47,7 +48,7 @@ public class LocationMapScreen : MonoBehaviour
         var db = CardDatabase.Instance;
         if (db == null || db.LocationCount == 0)
         {
-            locationHeader.text = "Card database missing - run Tools > AniGame > Build Everything";
+            locationHeader.text = "The game data could not be loaded. Please reinstall the game.";
             fightButton.interactable = false;
             return;
         }
@@ -166,12 +167,11 @@ public class LocationMapScreen : MonoBehaviour
 
         bool unlocked = PlayerProfile.IsFloorUnlocked(selectedLocation, floor);
         bool cleared = PlayerProfile.IsFloorCleared(selectedLocation, floor);
-        string talent = card.talent != null ? "Hover the talent picture on the card to see what it does." : "No talent";
+        if (enemyTalentInfo != null) enemyTalentInfo.text = TalentText(card);
         float drop = card.rarity == CardRarity.God ? 0f : PlayerProfile.CardDropChance(card) * 100f;
         enemyInfo.text =
             (string.IsNullOrEmpty(card.anime) ? "" : $"<color=#FFD54F>{card.anime}</color>\n") +
             $"<b>LOC {selectedLocation} - Floor {floor}</b>   {(cleared ? "<color=#7CFC6A>Cleared</color>" : unlocked ? "<color=#FF6FA8>Not cleared</color>" : "<color=#6A6480>Locked</color>")}\n" +
-            $"<color=#C9C3D8>{talent}</color>\n" +
             $"<color=#FFD54F>Win: +{GameRules.FloorGold(selectedLocation, floor):N0} gold  |  {drop:0.#}% {PlayerProfile.CharacterName} card  |  {GameRules.FusionOrbDropChance * 100f:0}% Fusion Orb" +
             (card.rarity == CardRarity.God ? $"  |  {GameRules.GodOrbEnemyDrop * 100f:0}% God Orb" : "") + "</color>" +
             (!cleared && unlocked ? $"\n<color=#7CFC6A>First clear: +{GameRules.StaminaNewFloor} stamina</color>" : "");
@@ -180,6 +180,24 @@ public class LocationMapScreen : MonoBehaviour
         UIFactory.ButtonLabel(fightButton).text = unlocked ? $"FIGHT  (-{PlayerProfile.StaminaCost} STAMINA)" : "LOCKED - clear the floor before it";
         messageText.text = "";
         RefreshSlots();
+    }
+
+    /// <summary>The enemy's talent(s) written out: name, type, group and what it does.</summary>
+    static string TalentText(Card card)
+    {
+        var list = new System.Collections.Generic.List<Talent>();
+        if (card.talent != null) list.Add(card.talent);
+        if (card.talent2 != null && card.talent2 != card.talent) list.Add(card.talent2);
+        if (list.Count == 0) return "<color=#9AA4B5>No talent</color>";
+        int bonus = Mathf.RoundToInt((GameRules.TalentPower(GameRules.Tier(card.rarity)) - 1f) * 100f);
+        var sb = new System.Text.StringBuilder(list.Count > 1 ? "<color=#FFD54F><b>TALENTS</b></color>\n" : "<color=#FFD54F><b>TALENT</b></color>\n");
+        foreach (var t in list)
+        {
+            string type = t.IsActive ? "<color=#6FD3FF>ACTIVE</color>" : "<color=#FFB23D>PASSIVE</color>";
+            sb.Append($"<b>{t.DisplayName}</b>\n<size=15>{type} <color=#9AA4B5>· {TalentCatalog.Name(t.Category)}</color>{(bonus > 0 ? $" <color=#7CFC6A>+{bonus}%</color>" : "")}</size>\n");
+            sb.Append($"<size=16><color=#D5D9E3>{t.DescriptionFor(card.rarity)}</color></size>\n");
+        }
+        return sb.ToString().TrimEnd();
     }
 
     void RefreshSlots()
@@ -224,7 +242,7 @@ public class LocationMapScreen : MonoBehaviour
     {
         if (PlayerProfile.SlotRuntime(PlayerProfile.ActiveSlot) == null)
         {
-            messageText.text = "<color=#FF6B6B>Put a card in a build slot first (My Cards).</color>";
+            messageText.text = "<color=#FF6B6B>Put a card in a build slot first (Collection).</color>";
             return;
         }
         if (!PlayerProfile.TrySpendStamina(PlayerProfile.StaminaCost))
@@ -273,8 +291,15 @@ public class LocationMapScreen : MonoBehaviour
 
         screen.enemyPreview = CardView.Build(right.transform, "EnemyPreview");
         var ep = (RectTransform)screen.enemyPreview.transform;
-        UIFactory.Place(ep, new Vector2(0.5f, 1f), new Vector2(0, -22), new Vector2(CardView.Width, CardView.Height));
+        UIFactory.Place(ep, new Vector2(0f, 1f), new Vector2(18, -22), new Vector2(CardView.Width, CardView.Height));
         ep.localScale = Vector3.one * 0.66f;
+
+        // The enemy's talents, written out next to the card (not only on hover)
+        var talentBox = UIFactory.CreateImage(right.transform, "TalentBox", new Color(1f, 1f, 1f, 0.05f), UIFactory.Theme != null ? UIFactory.Theme.roundedSmall : null, true);
+        UIFactory.TopLeft(talentBox.rectTransform, 292, 22, 266, 410);
+        screen.enemyTalentInfo = UIFactory.CreateText(right.transform, "EnemyTalent", "", 19, UIFactory.TextMain, TextAnchor.UpperLeft);
+        UIFactory.TopLeft(screen.enemyTalentInfo.rectTransform, 304, 32, 244, 392);
+        UIFactory.BestFit(screen.enemyTalentInfo, 10);
 
         screen.enemyInfo = UIFactory.CreateText(right.transform, "EnemyInfo", "", 19, UIFactory.TextMain, TextAnchor.UpperLeft);
         UIFactory.TopStrip(screen.enemyInfo.rectTransform, 436, 160, 22, 22);
@@ -297,7 +322,7 @@ public class LocationMapScreen : MonoBehaviour
         screen.messageText = UIFactory.CreateText(right.transform, "Message", "", 19, UIFactory.TextMain);
         UIFactory.Place(screen.messageText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 196), new Vector2(520, 36));
 
-        screen.cardsButton = UIFactory.CreateButton(right.transform, "CardsButton", "MY CARDS", UIFactory.Accent, 22);
+        screen.cardsButton = UIFactory.CreateButton(right.transform, "CardsButton", "COLLECTION", UIFactory.Accent, 22);
         UIFactory.Place((RectTransform)screen.cardsButton.transform, new Vector2(0.5f, 0f), new Vector2(0, 24), new Vector2(520, 62));
         return screen;
     }

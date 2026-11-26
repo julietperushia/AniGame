@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Dominance
   m_EditorClassIdentifier: Assembly-CSharp::Dominance
   talentName: Dominance
-  description: While your HP % is greater than or equal to the enemy's HP %, increase
-    the ATK of allies by 20%.
-  atkBonus: 20
+  autoDescription: 1
+  description: While your HP% is greater than or equal to the enemy's, your ATK is
+    raised by 40% (Max 48%) of your base ATK (checked at the start of each of your
+    turns).
+  atkBonus: 40

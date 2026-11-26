@@ -3,11 +3,14 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Talents/Active/BalancingStrike")]
 public class BalancingStrike : ActiveTalent
 {
+    [Tooltip("True damage in % of your max HP when your HP% is lower than the enemy's (0.15 = 15%).")]
     public float lowHpPercent = 0.15f;
+    [Tooltip("True damage in % of your max HP otherwise (0.05 = 5%).")]
     public float highHpPercent = 0.05f;
 
     public override string DefaultName => "Balancing Strike";
-    public override string DefaultDescription => $"Deal true damage equal to {lowHpPercent * 100:0}% of your max HP if your HP% is lower than the enemy's, otherwise {highHpPercent * 100:0}%.";
+    public override string DefaultDescription =>
+        $"Deal true damage equal to {PctF(lowHpPercent)} of your max HP if your HP% is lower than the enemy's; otherwise {PctF(highHpPercent)} of your max HP.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

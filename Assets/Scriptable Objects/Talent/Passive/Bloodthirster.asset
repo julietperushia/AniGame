@@ -13,6 +13,12 @@ MonoBehaviour:
   m_Name: Bloodthirster
   m_EditorClassIdentifier: Assembly-CSharp::Bloodthirster
   talentName: Bloodthirster
-  description: At the start of your first turn, increase your LIFESTEAL, restoring
-    HP equal to 18% attack damage your allies deal, as well as increasing all healing
-    effects by 23%. Every turn after that, increase your LIFESTEAL by 5%.
+  autoDescription: 1
+  description: On your first turn gain 18% (Max 22%) Lifesteal and +23% (Max 27.6%)
+    healing received (max +50%). Every turn after that, gain +5% (Max 6%) Lifesteal
+    (max 100%). Lifesteal heals you that % of the damage your normal attacks deal.
+  startLifesteal: 18
+  healingBonus: 0.23
+  maxHealingBonus: 0.5
+  lifestealPerTurn: 5
+  maxLifesteal: 100

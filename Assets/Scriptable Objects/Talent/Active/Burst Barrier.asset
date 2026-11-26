@@ -13,9 +13,14 @@ MonoBehaviour:
   m_Name: Burst Barrier
   m_EditorClassIdentifier: Assembly-CSharp::BurstBarrier
   talentName: Burst Barrier
-  description: Raises a barrier worth 15% of your max HP for 3 turns; it absorbs
-    all damage first. If it breaks, it explodes for true damage of 50% of your ATK.
+  autoDescription: 1
+  description: 'Raise a barrier worth 10% (Max 12%) of your max HP for 3 turns. It
+    absorbs all damage before your HP. If it breaks, it explodes and deals true damage
+    equal to 25% (Max 30%) of your ATK to the enemy; if it lasts, it fades without
+    exploding. While the barrier is up, your Mana Regeneration is reduced by 50%.
+    Casting again refreshes the time and keeps the bigger barrier. Mana cost: 100.'
   manaCost: 100
-  shieldPercent: 0.15
+  shieldPercent: 0.1
   turns: 3
-  burstAtkPercent: 0.5
+  burstAtkPercent: 0.25
+  manaRegenCut: 0.5

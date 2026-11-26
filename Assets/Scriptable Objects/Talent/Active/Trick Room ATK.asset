@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Trick Room ATK
   m_EditorClassIdentifier: Assembly-CSharp::TrickRoomATK
   talentName: Trick Room ATK
-  description: If the enemy familiars' ATK is higher than yours, your allies gain
-    ATK equal to 60% of the difference between the two ATK's, and simultaneously
-    reduce their ATK by the same amount.
+  autoDescription: 1
+  description: 'If the enemy''s ATK is higher than yours, take 80% (Max 96%) of the
+    difference: you gain that much ATK and the enemy loses it. No effect if your
+    ATK is already higher. Mana cost: 100.'
   manaCost: 100
-  swapPercent: 60
+  swapPercent: 80

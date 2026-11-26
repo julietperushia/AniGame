@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Life Sap
   m_EditorClassIdentifier: Assembly-CSharp::LifeSap
   talentName: Life Sap
-  description: Every round, deal 2% of the enemy familiars' max HP as damage, and
-    heal for 175% of the damage dealt.
+  autoDescription: 1
+  description: At the start of each of your turns, deal damage equal to 2% (Max 2.4%)
+    of the enemy's max HP and heal 175% of the damage dealt.
   damagePercent: 2
   healMultiplier: 175

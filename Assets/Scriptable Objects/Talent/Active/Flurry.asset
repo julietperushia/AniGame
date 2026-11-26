@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: Flurry
   m_EditorClassIdentifier: Assembly-CSharp::Flurry
   talentName: Flurry
-  description: Strikes 3 times for 45% of a normal attack each. Every hit can crit
-    on its own and counts as attack damage (evasion, lifesteal and on-hit effects
-    apply).
+  autoDescription: 1
+  description: 'Strike 3 times for 45% (Max 54%) of a normal attack each (135% (Max
+    162%) in total). Every hit can crit and be evaded on its own, and counts as a
+    normal attack (lifesteal and on-hit effects apply). Mana cost: 100.'
   manaCost: 100
   hits: 3
   atkPercent: 0.45

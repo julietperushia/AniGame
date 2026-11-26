@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Amplifier DEF
   m_EditorClassIdentifier: Assembly-CSharp::AmplifierDEF
   talentName: Amplifier DEF
-  description: Increase the DEF by 20%
+  autoDescription: 1
+  description: 'Permanently raise your DEF by 20% (Max 24%) of your base DEF. Every
+    cast stacks. Mana cost: 100.'
   manaCost: 100
   defBonus: 20

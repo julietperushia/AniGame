@@ -13,8 +13,14 @@ MonoBehaviour:
   m_Name: Dispel
   m_EditorClassIdentifier: Assembly-CSharp::Dispel
   talentName: Dispel
-  description: Strips every buff and stack from the enemy (stat boosts, Precision,
-    Evasion, Regeneration, timed buffs, Endurance, shields, lifesteal). Deals true
-    damage of 10% of your ATK for each one removed.
+  autoDescription: 1
+  description: 'Strip every buff from the enemy: raised ATK / DEF / SPD, timed buffs,
+    crit rate above 5%, crit damage above 135%, Precision''s evasion pierce, evasion
+    rating above 5, Regeneration stacks, Endurance, barriers, lifesteal, debuff immunity
+    and Momentum. Then deal true damage equal to 10% (Max 12%) of your ATK for each
+    buff removed (every Regeneration stack counts). Mana cost: 100.'
   manaCost: 100
   atkPercentPerStack: 0.1
+  critRateFloor: 5
+  critDamageFloor: 135
+  evasionFloor: 5

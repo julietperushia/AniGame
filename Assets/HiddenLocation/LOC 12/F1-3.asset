@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F1-3
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Toge Inumaki
+  cardImg: {fileID: 21300000, guid: fece74bcbb6ff154cbca94bacce109fd, type: 3}
+  element: 2
+  rarity: 5
+  talent: {fileID: 11400000, guid: e3991f5922b4ef04f9788487d8dad53c, type: 2}
+  talent2: {fileID: 0}
+  health: 1610
+  defense: 161
+  attack: 161
+  speed: 161
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 644
+  location: 12
+  floor: 1
+  floorCode: H12-1C
+  anime: Jujutsu Kaisen
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b157115-kdhRYQdVhH95.png
+  characterId: b157115-kdhRYQdVhH95
+  hidden: 1
+  teamSlot: 2

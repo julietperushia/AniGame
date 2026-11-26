@@ -30,6 +30,18 @@ public class CardRuntime
     /// <summary>The other fighter (set by the battle engine).</summary>
     public CardRuntime opponent;
 
+    // ---- 3v3 teams: this runtime is the team's shared pool (HP, ATK, DEF, mana, evasion, statuses)
+    /// <summary>The cards of this team (null in 1v1).</summary>
+    public List<TeamMember> members;
+    /// <summary>The card acting right now (3v3).</summary>
+    public TeamMember currentMember;
+    public string nameOverride;
+    public int baseCrit = 5, baseCritDamage = 135;
+    readonly Dictionary<Talent, TeamMember> talentOwner = new Dictionary<Talent, TeamMember>();
+    public bool IsTeam => members != null && members.Count > 0;
+    /// <summary>3v3: the team's starting mana pool (100 per card, more for 200-mana actives).</summary>
+    public int basePool = 100;
+
     public CardRarity rarity;
     public CardElement element;
     /// <summary>Talent strength multiplier from rarity (1.0 at Common ... 1.2 at God).</summary>
@@ -86,19 +98,35 @@ public class CardRuntime
     public float debuffResistChance; // Gigantify: chance to shrug off each debuff
     public bool frozen;              // Frostbite: skips the next turn
     public int sleepTurns;           // Sleep: skips turns until hit
-    public int blindTurns;           // Blind: 50% miss on normal attacks
+    public int blindTurns;           // Blind: chance to miss each normal attack
+    public int blindMissChance = 50;
     public int hexTurns;             // Hex: ATK and DEF swapped
-    public int hypnoStacks;          // Hypnotize: +20% chance per stack to hit itself
+    public int hypnoStacks;          // Hypnotize: chance per stack to hit itself
     public int hypnoImmuneTurns;
-    public bool silenceManaBoost;    // Silence talent: mana fills twice as fast while silenced
+    public int hypnoChancePerStack = 20;
+    public float hypnoSelfDamage = 0.5f;
+    public int hypnoImmuneAfter = 2;
+    public float sleepDamageCut = 0.3f;   // Sleep: normal attacks on this sleeping card deal this much less (0.3 = -30%)
+    public float sleepCasterRegen = 0.5f; // Sleep: the opponent's Mana Regeneration multiplier while this card sleeps
+    public int poisonFlat = 5;           // Poison: flat damage per tick
+    public int poisonMissBase = 15;      // Poison: chance (%) a tick misses with one stack; a miss removes every stack
+    public int poisonMissPerStack = 5;   // Poison: miss chance added per stack after the first
+    public int burnMissBase = 15;        // Burn: same rule as Poison
+    public int burnMissPerStack = 5;
+    public float shieldManaRegen = 1f;   // Burst Barrier: Mana Regeneration multiplier while the barrier is up (0.5 = half)
+    public float enduranceReduction = 0.65f; // Endurance: normal attack damage blocked
+    public float silenceManaMultiplier = 1f; // Silence talent: mana gain multiplier while silenced
     public float healTakenMultiplier = 1f; // Rot: healing and lifesteal received
-    public bool greedy;              // Greedy: the opponent's healing heals this card instead
-    public bool doppelganger;        // Doppelganger: copies 30% of the opponent's stat gains and heals
+    public float greedyPercent;      // Greedy: share of the opponent's healing that heals this card instead
+    public float doppelgangerPercent;// Doppelganger: share of the opponent's stat gains and heals copied
     public bool gutsReady;           // Guts: survive one lethal hit
+    public int gutsHp = 1;
+    public int gutsAtkBonus = 30;
+    public int gutsTurns = 3;
     public float damageStoreRate;    // Death's Dance: part of the damage taken is stored instead
     public int storedDamage;
     public float defIgnore;          // Piercing Edge: part of the enemy DEF ignored
-    public bool reductionPierce;     // Piercing Edge: enemy damage reduction halved
+    public float reductionPierce;    // Piercing Edge: share of the enemy's damage reduction ignored (0.5 = half)
     public float slayerPercent;      // Slayer: + enemy max HP per attack
     public float infernusPercent;    // Infernus: part of attack damage dealt as true damage
     public float infernusHeal;
@@ -108,10 +136,16 @@ public class CardRuntime
     public float hasteChance;        // Haste: extra attack when faster
     public bool counterStance;       // Counter Stance: hit back after evading
     public float counterDamage = 0.4f;
-    public bool chargeStrikeReady;   // Charge Strike: next attack x3, can't be evaded
+    public bool chargeStrikeReady;   // Charge Strike: next attack xN, can't be evaded
+    public float chargeStrikeMultiplier = 3f;
+    public bool chargeStrikeUnevadable = true;
     public bool skipAttackThisTurn;
-    public bool chargeAttackPassive; // Charge Attack: store attacks until 30% HP
+    public bool chargeAttackPassive; // Charge Attack: store attacks while above a HP threshold
+    public float chargeAttackThreshold = 0.3f;
+    public int chargeAttackMax = 4;
+    public float chargeAttackRelease = 1.3f;
     public int chargeStored;
+    public int chargeCount;
     public string skipReason;
 
     // Player buffs (set by PlayerProfile.ApplyCombatBuffs)
@@ -141,8 +175,16 @@ public class CardRuntime
     public int TotalDefense => Mathf.Max(1, defense + bonusDefense);
     public int TotalSpeed => Mathf.Max(1, speed);
     public bool IsAlive => health > 0;
-    public string DisplayName => baseCard != null ? baseCard.DisplayName : "???";
-    public CardElement Element => element;
+    public string DisplayName => !string.IsNullOrEmpty(nameOverride) ? nameOverride : baseCard != null ? baseCard.DisplayName : "???";
+    /// <summary>Attacking element: the acting card's element in 3v3.</summary>
+    public CardElement Element => currentMember != null ? currentMember.element : element;
+    /// <summary>Crit of the attack being made: in 3v3 the acting card's own crit plus the team's crit buffs.</summary>
+    public int ActingCritRate => currentMember != null ? Mathf.Clamp(currentMember.critRate + (critRate - baseCrit), 0, 100) : critRate;
+    public int ActingCritDamage => currentMember != null ? currentMember.critDamage + (critDamage - baseCritDamage) : critDamage;
+    /// <summary>SPD of the acting card (3v3) or of this fighter.</summary>
+    public int ActingSpeed => currentMember != null ? currentMember.Speed(this) : TotalSpeed;
+    /// <summary>Name for the log: "Card (Team)" in 3v3.</summary>
+    public string ActorName => currentMember != null ? currentMember.name : DisplayName;
     public int Tier => GameRules.Tier(rarity);
 
     CardRuntime() { }
@@ -180,6 +222,7 @@ public class CardRuntime
             rarity = card.rarity,
             element = build.element,
             talent = db != null ? db.FindTalent(build.talent) : null,
+            nameOverride = string.IsNullOrWhiteSpace(build.name) ? null : build.name, // the name the player gave this copy
         };
         rt.talentPower = GameRules.TalentPower(rt.Tier);
         rt.AddTalent(rt.talent);
@@ -192,6 +235,89 @@ public class CardRuntime
         rt.critDamage = 135;
         rt.evasion = 5;
         return rt;
+    }
+
+    /// <summary>
+    /// A 3v3 team: HP, ATK and DEF are the totals of the 3 cards; evasion is shared (average rating);
+    /// SPD stays per card (the team's SPD is the average, used as the reference for SPD changes).
+    /// The mana pool holds 100 per card (more for cards whose active costs more). All talents are global.
+    /// </summary>
+    public static CardRuntime ForTeam(string name, List<TeamMember> cards)
+    {
+        var rt = new CardRuntime { nameOverride = name, members = cards };
+        int hp = 0, atk = 0, def = 0, spd = 0, eva = 0, pool = 0;
+        var best = CardRarity.Common;
+        for (int i = 0; i < cards.Count; i++)
+        {
+            var c = cards[i];
+            c.index = i;
+            hp += c.hp; atk += c.atk; def += c.def; spd += c.baseSpeed; eva += c.evasion;
+            pool += c.PoolShare;
+            if (c.rarity > best) best = c.rarity;
+        }
+        int n = Mathf.Max(1, cards.Count);
+        rt.rarity = best;
+        rt.element = cards.Count > 0 ? cards[0].element : CardElement.Neutral;
+        rt.talentPower = GameRules.TalentPower(rt.Tier);
+        rt.SetBaseStats(hp, atk, def, Mathf.RoundToInt(spd / (float)n));
+        rt.mana = 0;
+        rt.maxMana = Mathf.Max(100, pool);
+        rt.basePool = rt.maxMana;
+        rt.critRate = rt.baseCrit;
+        rt.critDamage = rt.baseCritDamage;
+        rt.evasion = Mathf.RoundToInt(eva / (float)n);
+        foreach (var c in cards)
+            for (int i = 0; i < c.talents.Count; i++)
+            {
+                var t = c.talents[i];
+                if (t == null) continue;
+                if (rt.talentOwner.ContainsKey(t))
+                {
+                    // A passive another card already has is global anyway: it applies once.
+                    // Two cards with the same active each keep their own copy.
+                    if (!(t is ActiveTalent)) continue;
+                    t = DuplicateOf(t, rt);
+                    c.talents[i] = t;
+                }
+                rt.talentOwner[t] = c;
+                rt.AddTalent(t);
+            }
+        return rt;
+    }
+
+    static readonly Dictionary<Talent, List<Talent>> duplicates = new Dictionary<Talent, List<Talent>>();
+
+    /// <summary>A reusable copy of a shared talent asset (talent state is kept per CardRuntime, so copies are safe to reuse).</summary>
+    static Talent DuplicateOf(Talent t, CardRuntime team)
+    {
+        if (!duplicates.TryGetValue(t, out var list)) duplicates[t] = list = new List<Talent>();
+        foreach (var d in list) if (d != null && !team.talentOwner.ContainsKey(d)) return d;
+        var copy = UnityEngine.Object.Instantiate(t);
+        copy.name = t.name;
+        copy.hideFlags = HideFlags.DontSave;
+        list.Add(copy);
+        return copy;
+    }
+
+    /// <summary>The card that owns a talent (3v3), or null.</summary>
+    public TeamMember OwnerOf(Talent t) => t != null && talentOwner.TryGetValue(t, out var m) ? m : null;
+
+    /// <summary>Strength of one talent: its owner's rarity (3v3) or this card's, times its scale (Gamble 60%).</summary>
+    public float PowerOf(Talent t)
+    {
+        var owner = OwnerOf(t);
+        return GameRules.TalentPower(owner != null ? owner.Tier : Tier) * ScaleOf(t);
+    }
+
+    /// <summary>The next active talent of a card (3v3: only that card's actives; cards with several take turns).</summary>
+    public ActiveTalent NextActiveOf(TeamMember m, CardRuntime enemy = null)
+    {
+        if (m == null) return NextActive(enemy);
+        var list = new List<ActiveTalent>();
+        foreach (var t in talents) if (t is ActiveTalent a && OwnerOf(t) == m) list.Add(a);
+        if (list.Count == 0) return null;
+        if (enemy != null && list.Count > 1) m.nextActive += PickUsable(list, m.nextActive, enemy);
+        return list[m.nextActive % list.Count];
     }
 
     void SetBaseStats(int hp, int atk, int def, int spd)
@@ -217,21 +343,26 @@ public class CardRuntime
     public void Heal(int amount, bool redirected)
     {
         if (!IsAlive || amount <= 0) return;
-        // Greedy: the opponent takes this healing instead
-        if (!redirected && opponent != null && opponent.greedy && opponent.IsAlive)
+        // Greedy: the opponent takes (part of) this healing instead
+        if (!redirected && opponent != null && opponent.greedyPercent > 0f && opponent.IsAlive)
         {
-            BattleLog.Status(opponent, $"<color=#FFD54F>[Greedy] {opponent.DisplayName} steals the healing!</color>");
-            opponent.Heal(amount, true);
-            return;
+            int stolen = Mathf.Clamp(Mathf.RoundToInt(amount * opponent.greedyPercent), 0, amount);
+            if (stolen > 0)
+            {
+                BattleLog.Status(opponent, $"<color=#FFD54F>[Greedy] {opponent.DisplayName} steals the healing!</color>");
+                opponent.Heal(stolen, true);
+                amount -= stolen;
+                if (amount <= 0) return;
+            }
         }
         float multiplier = (1f + healingBonus) * (1f - healingReduction) * Mathf.Max(0f, healTakenMultiplier);
         int actualHeal = Mathf.Max(0, Mathf.RoundToInt(amount * multiplier)); // Can't heal if reduction >= 100%
         int before = health;
         health = Mathf.Min(maxHealth, health + actualHeal);
         BattleLog.Healed(this, health - before);
-        // Doppelganger: the opponent copies 30% of every heal
-        if (!redirected && health > before && opponent != null && opponent.doppelganger && opponent.IsAlive)
-            opponent.Heal(Mathf.Max(1, Mathf.RoundToInt((health - before) * 0.3f)), true);
+        // Doppelganger: the opponent copies part of every heal
+        if (!redirected && health > before && opponent != null && opponent.doppelgangerPercent > 0f && opponent.IsAlive)
+            opponent.Heal(Mathf.Max(1, Mathf.RoundToInt((health - before) * opponent.doppelgangerPercent)), true);
     }
 
     /// <summary>Deals damage to the card, applying flat damage reduction (min 1).</summary>
@@ -252,28 +383,43 @@ public class CardRuntime
         return ApplyDamage(actualDamage, kind);
     }
 
-    /// <summary>Shield, Death's Dance and Guts, then the HP loss itself.</summary>
+    /// <summary>Shield (penetration: what the barrier can't hold goes on to the HP), Death's Dance and Guts, then the HP loss.</summary>
     int ApplyDamage(int amount, DamageKind kind)
     {
+        int burst = 0;
         if (shield > 0 && amount > 0)
         {
             int absorbed = Mathf.Min(shield, amount);
             shield -= absorbed;
             amount -= absorbed;
-            BattleLog.Status(this, $"<color=#6FD3FF>{DisplayName}'s barrier absorbs {absorbed}</color>");
-            if (shield <= 0)
+            if (shield > 0)
+                BattleLog.Status(this, $"<color=#6FD3FF>{DisplayName}'s barrier absorbs {absorbed} ({shield} left)</color>");
+            else
             {
                 shieldTurns = 0;
-                if (shieldBurst > 0 && opponent != null && opponent.IsAlive)
-                {
-                    int burst = shieldBurst;
-                    shieldBurst = 0;
-                    BattleLog.Status(this, $"<color=#6FD3FF>[Burst Barrier] The barrier explodes!</color>");
-                    opponent.TakeTrueDamage(burst, DamageKind.Skill);
-                }
+                burst = shieldBurst;
+                shieldBurst = 0;
+                BattleLog.Status(this, amount > 0
+                    ? $"<color=#6FD3FF>{DisplayName}'s barrier absorbs {absorbed} and breaks! {amount} damage goes through</color>"
+                    : $"<color=#6FD3FF>{DisplayName}'s barrier absorbs {absorbed} and breaks!</color>");
             }
-            if (amount <= 0) return 0;
+            if (amount <= 0) { Explode(burst); return 0; }
         }
+        int taken = ApplyHpDamage(amount, kind);
+        Explode(burst); // the excess hits first, then the broken barrier explodes
+        return taken;
+    }
+
+    /// <summary>Burst Barrier: a broken barrier deals its stored true damage to the opponent.</summary>
+    void Explode(int burst)
+    {
+        if (burst <= 0 || opponent == null || !opponent.IsAlive) return;
+        BattleLog.Status(this, $"<color=#6FD3FF>[Burst Barrier] The barrier explodes!</color>");
+        opponent.TakeTrueDamage(burst, DamageKind.Skill);
+    }
+
+    int ApplyHpDamage(int amount, DamageKind kind)
+    {
         if (damageStoreRate > 0f)
         {
             int stored = Mathf.RoundToInt(amount * damageStoreRate);
@@ -284,9 +430,9 @@ public class CardRuntime
         if (gutsReady && actualDamage >= health)
         {
             gutsReady = false;
-            actualDamage = health - 1;
-            AddTimedBuff(30, 0, 3);
-            BattleLog.Status(this, $"<color=#FF8A3D>[Guts] {DisplayName} refuses to fall! +30% ATK for 3 turns</color>");
+            actualDamage = Mathf.Max(0, health - Mathf.Max(1, gutsHp));
+            AddTimedBuff(gutsAtkBonus, 0, gutsTurns);
+            BattleLog.Status(this, $"<color=#FF8A3D>[Guts] {DisplayName} refuses to fall! +{gutsAtkBonus}% ATK for {gutsTurns} turns</color>");
         }
         health -= actualDamage;
         BattleLog.Damaged(this, actualDamage, kind);
@@ -359,7 +505,9 @@ public class CardRuntime
     /// <summary>Adds mana scaled by <see cref="manaRegen"/> (doubled while silenced by the Silence talent).</summary>
     public void GainManaWithRegen(int amount)
     {
-        float boost = silenceTurns > 0 && silenceManaBoost ? 2f : 1f;
+        float boost = silenceTurns > 0 ? Mathf.Max(0f, silenceManaMultiplier) : 1f;
+        if (shield > 0) boost *= Mathf.Max(0f, shieldManaRegen);                                     // Burst Barrier
+        if (opponent != null && opponent.sleepTurns > 0) boost *= Mathf.Max(0f, opponent.sleepCasterRegen); // Sleep caster
         GainMana(Mathf.RoundToInt(amount * Mathf.Max(0, manaRegen) / 100f * boost));
     }
 
@@ -370,6 +518,7 @@ public class CardRuntime
     {
         if (t == null || talents.Contains(t)) return;
         talents.Add(t);
+        if (IsTeam && currentMember != null && !talentOwner.ContainsKey(t)) talentOwner[t] = currentMember; // learned in battle
         if (talent == null) talent = t;
         if (!Mathf.Approximately(scale, 1f)) talentScale[t] = scale;
     }
@@ -396,11 +545,33 @@ public class CardRuntime
     }
 
     /// <summary>The active talent to try this turn (cards with several actives take turns between them).</summary>
-    public ActiveTalent NextActive()
+    public ActiveTalent NextActive() => NextActive(null);
+
+    /// <summary>
+    /// The active talent to try this turn. With the enemy given, an active that can't be cast any more (Soul Swap after
+    /// its uses) is passed over, so it doesn't block the card's other actives for the rest of the battle.
+    /// </summary>
+    public ActiveTalent NextActive(CardRuntime enemy)
     {
         var list = new List<ActiveTalent>(Actives());
         if (list.Count == 0) return null;
+        if (enemy == null || list.Count == 1) return list[nextActive % list.Count];
+        int pick = PickUsable(list, nextActive, enemy);
+        nextActive += pick;
         return list[nextActive % list.Count];
+    }
+
+    /// <summary>Steps from <paramref name="start"/> to the first active that can be cast (0 if none can).</summary>
+    int PickUsable(List<ActiveTalent> list, int start, CardRuntime enemy)
+    {
+        for (int k = 0; k < list.Count; k++)
+        {
+            var a = list[(start + k) % list.Count];
+            bool can = false;
+            try { can = a.CanActivate(this, enemy); } catch (System.Exception ex) { Debug.LogException(ex); }
+            if (can) return k;
+        }
+        return 0;
     }
 
     public void AdvanceActive() => nextActive++;

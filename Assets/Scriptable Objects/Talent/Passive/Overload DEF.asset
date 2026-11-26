@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Overload DEF
   m_EditorClassIdentifier: Assembly-CSharp::OverloadDEF
   talentName: Overload DEF
-  description: When the battle starts, increase the DEF by 60% of all allied familiars.
-    Your DEF decreases by 8% every turn after that.
-  startBonus: 60
+  autoDescription: 1
+  description: 'When the battle starts, raise your DEF by 80% (Max 96%) of your base
+    DEF. At the start of each of your turns it drops by 8% of your base DEF, and
+    it keeps dropping below base: the longer the battle, the lower it gets.'
+  startBonus: 80
   decayPerTurn: 8
+  floorPercent: 0

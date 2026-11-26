@@ -1,15 +1,18 @@
 using UnityEngine;
 
-/// <summary>Asset text: "Increase your CRIT by 18% and ATK by 12%. Whenever you inflict a CRIT, heal for 50% of the damage dealt."</summary>
 [CreateAssetMenu(menuName = "Talents/Passive/Lethal Clarity")]
 public class LethalClarity : PassiveTalent
 {
+    [Tooltip("Crit rate gained (% points).")]
     public int critBonus = 12;
+    [Tooltip("ATK gained, in % of base ATK.")]
     public int atkBonus = 12;
+    [Tooltip("Heal after landing a critical hit, in % of the damage dealt.")]
     public int healPercent = 45;
 
     public override string DefaultName => "Lethal Clarity";
-    public override string DefaultDescription => $"+{critBonus}% crit rate and +{atkBonus}% ATK. Whenever you land a critical hit, heal for {healPercent}% of the damage dealt.";
+    public override string DefaultDescription =>
+        $"+{Pct(critBonus)} crit rate and +{Pct(atkBonus)} ATK. Whenever you land a critical hit, heal {Pct(healPercent)} of the damage dealt.";
 
     public override void OnBattleStart(CardRuntime self, CardRuntime enemy)
     {
@@ -21,8 +24,6 @@ public class LethalClarity : PassiveTalent
     public override void OnAfterAttack(CardRuntime self, CardRuntime enemy)
     {
         if (self.lastAttackWasCrit && self.lastDamageDealt > 0)
-        {
             self.Heal(self.lastDamageDealt * Scaled(healPercent, self) / 100);
-        }
     }
 }

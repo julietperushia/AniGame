@@ -13,7 +13,11 @@ MonoBehaviour:
   m_Name: Precision
   m_EditorClassIdentifier: Assembly-CSharp::Precision
   talentName: Precision
-  description: 'Increase your CRIT by 16% and your CRIT DMG by 25% (stacks every cast). Once active, your critical hits ignore the enemy''s evasion.'
+  autoDescription: 1
+  description: 'Gain +16% (Max 19%) crit rate (max 100%) and +25% (Max 30%) crit
+    damage. Every cast stacks. From the first cast on, your critical hits can''t
+    be evaded. Mana cost: 100.'
   manaCost: 100
   critRateBonus: 16
   critDamageBonus: 25
+  maxCritRate: 100

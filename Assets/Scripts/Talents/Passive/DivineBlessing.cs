@@ -3,12 +3,15 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Talents/Passive/Divine Blessing")]
 public class DivineBlessing : PassiveTalent
 {
+    [Tooltip("ATK bonus (%).")]
     public int atkBonus = 30;
+    [Tooltip("DEF bonus (%).")]
     public int defBonus = 30;
+    [Tooltip("Turns the blessing lasts.")]
     public int duration = 5;
 
     public override string DefaultName => "Divine Blessing";
-    public override string DefaultDescription => $"Start the battle with Divine Blessing: +{atkBonus}% ATK and +{defBonus}% DEF for {duration} turns.";
+    public override string DefaultDescription => $"Start the battle blessed: +{Pct(atkBonus)} ATK and +{Pct(defBonus)} DEF for your first {N(duration, "turn")}.";
 
     public override void OnBattleStart(CardRuntime self, CardRuntime enemy)
     {

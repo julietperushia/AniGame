@@ -1,13 +1,13 @@
 using UnityEngine;
 
-/// <summary>Anigame: "Decrease the ATK of all enemy familiars by 20%".</summary>
 [CreateAssetMenu(menuName = "Talents/Active/BreakerATK")]
 public class BreakerATK : ActiveTalent
 {
+    [Tooltip("Enemy ATK lost per cast, in % of its base ATK.")]
     public int atkReduction = 20;
 
     public override string DefaultName => "Breaker ATK";
-    public override string DefaultDescription => $"Decrease the enemy's ATK by {atkReduction}% of its base ATK.";
+    public override string DefaultDescription => $"Lower the enemy's ATK by {Pct(atkReduction)} of its base ATK. Every cast stacks.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

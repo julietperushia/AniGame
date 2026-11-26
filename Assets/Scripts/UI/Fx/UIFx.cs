@@ -77,6 +77,7 @@ public static class UIFx
                 scaler.referenceResolution = new Vector2(1920, 1080);
                 scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
                 scaler.matchWidthOrHeight = 0.5f;
+                go.AddComponent<AdaptiveCanvasScaler>();
                 overlay = (RectTransform)go.transform;
                 if (!sceneHooked)
                 {

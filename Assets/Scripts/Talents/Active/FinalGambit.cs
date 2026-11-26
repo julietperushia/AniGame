@@ -1,14 +1,16 @@
-using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Talents/Active/FinalGambit")]
 public class FinalGambit : ActiveTalent
 {
+    [Tooltip("Part of your CURRENT HP you sacrifice (0.25 = 25%).")]
     public float hpPercent = 0.25f;
+    [Tooltip("True damage = the HP you lost x this.")]
     public float multiplier = 2f;
 
     public override string DefaultName => "Final Gambit";
-    public override string DefaultDescription => $"Sacrifice {hpPercent * 100:0}% of your current HP, then deal true damage equal to {multiplier:0.#}x the HP you lost.";
+    public override string DefaultDescription =>
+        $"Sacrifice {P(hpPercent)} of your current HP (it never drops you below 1 HP), then deal true damage equal to {Mul(multiplier)} the HP you lost.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

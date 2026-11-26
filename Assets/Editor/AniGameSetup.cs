@@ -29,7 +29,7 @@ public static class AniGameSetup
     const string TalentFolder = "Assets/Scriptable Objects/Talent";
     public const string ReportPath = "Logs/AniGame_Report.txt";
 
-    static readonly string[] SceneOrder = { SceneNames.MainMenu, SceneNames.Character, SceneNames.LocationMap, SceneNames.Collection, SceneNames.Gacha, SceneNames.Shop, SceneNames.Buffs, SceneNames.Library, SceneNames.Battle };
+    static readonly string[] SceneOrder = { SceneNames.MainMenu, SceneNames.Character, SceneNames.LocationMap, SceneNames.Collection, SceneNames.Gacha, SceneNames.Shop, SceneNames.Buffs, SceneNames.Library, SceneNames.Battle, SceneNames.HiddenLocation, SceneNames.TeamBattle };
 
     // ------------------------------------------------------------------ menu
 
@@ -213,7 +213,8 @@ public static class AniGameSetup
             string folder = $"{TalentFolder}/{(talent.IsActive ? "Active" : "Passive")}";
             CardImporter.CreateFolderRecursive(folder);
             talent.talentName = talent.DefaultName;
-            talent.description = talent.DefaultDescription;
+            talent.autoDescription = true;
+            talent.SyncDescription();
             string path = AssetDatabase.GenerateUniqueAssetPath($"{folder}/{talent.DefaultName}.asset");
             AssetDatabase.CreateAsset(talent, path);
             existing.Add(talent);
@@ -224,7 +225,7 @@ public static class AniGameSetup
         {
             bool dirty = false;
             if (string.IsNullOrEmpty(t.talentName)) { t.talentName = t.DefaultName; dirty = true; }
-            if (string.IsNullOrEmpty(t.description)) { t.description = t.DefaultDescription; dirty = true; }
+            if (t.SyncDescription()) dirty = true; // auto descriptions follow the numbers
             if (dirty) { EditorUtility.SetDirty(t); filled++; }
         }
         AssetDatabase.SaveAssets();
@@ -449,6 +450,8 @@ public static class AniGameSetup
         BuildScene(SceneNames.Buffs, c => BuffsScreen.BuildLayout(c));
         BuildScene(SceneNames.Library, c => LibraryScreen.BuildLayout(c));
         BuildScene(SceneNames.Battle, c => BattleScreen.BuildLayout(c));
+        BuildScene(SceneNames.HiddenLocation, c => HiddenLocationScreen.BuildLayout(c));
+        BuildScene(SceneNames.TeamBattle, c => TeamBattleScreen.BuildLayout(c));
 
         // Build settings: our scenes first, keep any other scenes that were already listed.
         var list = new List<EditorBuildSettingsScene>();
@@ -485,6 +488,7 @@ public static class AniGameSetup
         scaler.referenceResolution = new Vector2(1920, 1080);
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
+        canvasGo.AddComponent<AdaptiveCanvasScaler>(); // match height on wide windows, width on narrow ones
 
         build((RectTransform)canvasGo.transform);
 

@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: Double Edged Strike
   m_EditorClassIdentifier: Assembly-CSharp::DoubleEdgedStrike
   talentName: Double Edged Strike
-  description: Deal damage equal to 18% of your ATK, and take 1/4 of the damage dealt
-    to yourself.
+  autoDescription: 1
+  description: 'Deal damage of your element equal to 18% (Max 21.6%) of your ATK.
+    You take 1/4 of the damage dealt as recoil (true damage). Element advantage applies.
+    Mana cost: 100.'
   manaCost: 100
+  atkPercent: 0.18
+  recoilDivisor: 4

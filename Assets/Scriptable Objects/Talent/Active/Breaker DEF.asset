@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Breaker DEF
   m_EditorClassIdentifier: Assembly-CSharp::BreakerDEF
   talentName: Breaker DEF
-  description: Decrease the DEF of all enemy familiars by 20%.
+  autoDescription: 1
+  description: 'Lower the enemy''s DEF by 18% (Max 22%) of its base DEF. Every cast
+    stacks. Mana cost: 100.'
   manaCost: 100
-  defReduction: 20
+  defReduction: 18

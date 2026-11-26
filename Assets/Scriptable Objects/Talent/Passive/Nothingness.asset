@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Nothingness
   m_EditorClassIdentifier: Assembly-CSharp::Nothingness
   talentName: Nothingness
-  description: 'This talent does nothing... unless the enemy copies it (Mimic): then
-    the copier takes true damage equal to 30% of its max HP.'
+  autoDescription: 1
+  description: Does nothing by itself... but an enemy that copies it (Mimic) instantly
+    takes true damage equal to 30% of its max HP.
+  copyPenalty: 0.3

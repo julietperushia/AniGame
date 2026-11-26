@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F2-2
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Sougo Okita
+  cardImg: {fileID: 21300000, guid: 9d97aace0156c414cb7fdbc2e39650d4, type: 3}
+  element: 6
+  rarity: 7
+  talent: {fileID: 11400000, guid: 363dd06ad3480d3409043e2260f4901a, type: 2}
+  talent2: {fileID: 0}
+  health: 1850
+  defense: 185
+  attack: 185
+  speed: 185
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 740
+  location: 15
+  floor: 2
+  floorCode: H15-2B
+  anime: Gintama
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b2282-X0uYqwmwxiPo.png
+  characterId: b2282-X0uYqwmwxiPo
+  hidden: 1
+  teamSlot: 1

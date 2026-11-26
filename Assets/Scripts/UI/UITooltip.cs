@@ -96,8 +96,9 @@ public static class IconInfo
     {
         if (t == null) return "No talent";
         int bonus = Mathf.RoundToInt((GameRules.TalentPower(GameRules.Tier(rarity)) - 1f) * 100f);
-        string kind = t.IsActive ? "<color=#6FD3FF>ACTIVE</color> (when mana is full)" : "<color=#FFB23D>PASSIVE</color> (always on)";
-        return $"<b>{t.DisplayName}</b>  {kind}\n{t.Description}" + (bonus > 0 ? $"\n<color=#7CFC6A>+{bonus}% from {CardStats.RarityName(rarity)} rarity</color>" : "");
+        string kind = t.IsActive ? "<color=#6FD3FF>ACTIVE</color>" : "<color=#FFB23D>PASSIVE</color>";
+        return $"<b>{t.DisplayName}</b>  {kind}\n{t.DescriptionFor(rarity)}" +
+               (bonus > 0 ? $"\n<color=#7CFC6A>Numbers include +{bonus}% from {CardStats.RarityName(rarity)} rarity</color>" : "");
     }
 
     public static string Element(CardElement e)

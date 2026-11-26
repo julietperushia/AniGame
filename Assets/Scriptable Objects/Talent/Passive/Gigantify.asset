@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Gigantify
   m_EditorClassIdentifier: Assembly-CSharp::Gigantify
   talentName: Gigantify
-  description: +18% max HP, and a 15% chance to shrug off each debuff (statuses and
-    stat drops).
+  autoDescription: 1
+  description: +18% (Max 22%) max HP, and a 15% (Max 18%) chance to shrug off each
+    debuff (statuses and stat drops from the enemy).
   hpBonus: 18
   resist: 0.15
+  maxResist: 0.9

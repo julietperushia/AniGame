@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Haste
   m_EditorClassIdentifier: Assembly-CSharp::Haste
   talentName: Haste
-  description: +15% SPD. While you are faster than the enemy, each turn has a 20%
-    chance to attack twice.
+  autoDescription: 1
+  description: +15% (Max 18%) SPD. While your SPD is higher than the enemy's, each
+    of your turns has a 20% (Max 24%) chance to attack a second time.
   spdBonus: 15
   doubleChance: 0.2

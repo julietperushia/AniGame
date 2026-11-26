@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F1-2
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Jinzouningen 18-gou
+  cardImg: {fileID: 21300000, guid: d75a14336e048b94e80fb3bbc50630f2, type: 3}
+  element: 4
+  rarity: 8
+  talent: {fileID: 11400000, guid: add3380d0448380439b92120ae052364, type: 2}
+  talent2: {fileID: 11400000, guid: e5fd0d3aebcfbca4fb6bd03740545560, type: 2}
+  health: 2420
+  defense: 242
+  attack: 242
+  speed: 242
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 968
+  location: 19
+  floor: 1
+  floorCode: H19-1B
+  anime: Dragon Ball Z
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b4318-HfIy9rOIOZXM.png
+  characterId: b4318-HfIy9rOIOZXM
+  hidden: 1
+  teamSlot: 1

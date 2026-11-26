@@ -42,6 +42,8 @@ public class CardView : MonoBehaviour
     public CanvasGroup group;
 
     public CardRuntime Runtime { get; private set; }
+    /// <summary>3v3: the card of the team this view shows (Runtime is then the whole team).</summary>
+    public TeamMember Member { get; private set; }
     Card shownCard;
 
     Coroutine flashRoutine;
@@ -54,10 +56,13 @@ public class CardView : MonoBehaviour
     public void ShowInstance(CardInstance card, BuildData build)
     {
         Runtime = null;
+        Member = null;
         if (card == null || build == null) { gameObject.SetActive(false); return; }
         gameObject.SetActive(true);
         var rt = CardRuntime.ForBuild(card, build);
         ApplyIdentity(rt.baseCard, card.rarity, build.element, rt.talent, $"POWER {CardStats.Power(card, build)}", rt.talents.Count > 1 ? rt.talents[1] : null);
+        nameText.text = PlayerProfile.CardName(card, build);
+        ClearStatusIcons();
         hpBar.Set(rt.maxHealth, rt.maxHealth, true);
         manaBar.Set(0, rt.maxMana, true);
         SetStats(rt);
@@ -70,10 +75,12 @@ public class CardView : MonoBehaviour
     public void ShowEnemy(Card card)
     {
         Runtime = null;
+        Member = null;
         if (card == null) { gameObject.SetActive(false); return; }
         gameObject.SetActive(true);
         var rt = new CardRuntime(card);
         ApplyIdentity(card, card.rarity, card.element, card.talent, $"POWER {CardStats.EnemyPower(card)}", card.talent2);
+        ClearStatusIcons();
         hpBar.Set(rt.maxHealth, rt.maxHealth, true);
         manaBar.Set(rt.mana, rt.maxMana, true);
         SetStats(rt);
@@ -82,13 +89,30 @@ public class CardView : MonoBehaviour
     }
 
     /// <summary>Binds the view to a fighter for the battle.</summary>
+    /// <summary>3v3: one card of a team. HP, mana and statuses belong to the team; SPD, element, crit and talents to the card.</summary>
+    public void ShowMember(TeamMember m, CardRuntime team)
+    {
+        Runtime = team;
+        Member = m;
+        if (m == null || team == null) { gameObject.SetActive(false); return; }
+        gameObject.SetActive(true);
+        ApplyIdentity(m.art, m.rarity, m.element, m.talents.Count > 0 ? m.talents[0] : null, $"SPD {m.Speed(team)}", m.talents.Count > 1 ? m.talents[1] : null);
+        nameText.text = m.name;
+        SetVitals(team.health, team.maxHealth, team.mana, team.maxMana, true);
+        RefreshLive();
+        SetDefeated(false);
+        ResetPose();
+    }
+
     public void Bind(CardRuntime runtime)
     {
         Runtime = runtime;
+        Member = null;
         if (runtime == null) return;
         gameObject.SetActive(true);
         int power = runtime.instance != null ? CardStats.Power(runtime.instance, runtime.build) : CardStats.EnemyPower(runtime.baseCard);
         ApplyIdentity(runtime.baseCard, runtime.rarity, runtime.element, runtime.talent, $"POWER {power}", runtime.talents.Count > 1 ? runtime.talents[1] : null);
+        nameText.text = runtime.DisplayName;
         SetVitals(runtime.health, runtime.maxHealth, runtime.mana, runtime.maxMana, true);
         RefreshLive();
         SetDefeated(false);
@@ -197,9 +221,12 @@ public class CardView : MonoBehaviour
         return s;
     }
 
-    public void SetVitals(int hp, int maxHp, int mana, int maxMana, bool instant)
+    public void SetVitals(int hp, int maxHp, int mana, int maxMana, bool instant) => SetVitals(hp, maxHp, mana, maxMana, instant, 0);
+
+    /// <summary>shield: Burst Barrier amount, drawn as a light-blue part of the HP bar.</summary>
+    public void SetVitals(int hp, int maxHp, int mana, int maxMana, bool instant, int shield)
     {
-        hpBar.Set(Mathf.Max(0, hp), Mathf.Max(1, maxHp), instant);
+        hpBar.Set(Mathf.Max(0, hp), Mathf.Max(1, maxHp), Mathf.Max(0, shield), instant);
         float pct = maxHp > 0 ? (float)hp / maxHp : 0f;
         hpBar.SetColor(pct > 0.5f ? UIFactory.HpColor : pct > 0.25f ? new Color(1f, 0.8f, 0.25f) : UIFactory.Bad);
         manaBar.Set(Mathf.Max(0, mana), Mathf.Max(1, maxMana), instant);
@@ -210,10 +237,190 @@ public class CardView : MonoBehaviour
     public void RefreshLive()
     {
         if (Runtime == null) return;
-        SetStats(Runtime);
+        string combat;
+        if (Member != null)
+        {
+            // 3v3: the card's own share of the stats and its own SPD and crit
+            atkText.text = $"<color=#9AA4B5>ATK</color> {Member.atk}";
+            defText.text = $"<color=#9AA4B5>DEF</color> {Member.def}";
+            int spd = Member.Speed(Runtime);
+            spdText.text = StatLabel("SPD", spd, Member.baseSpeed);
+            combat = $"<color=#9AA4B5>Crit {Mathf.Clamp(Member.critRate + Runtime.critRate - Runtime.baseCrit, 0, 100)}%   Team evasion {GameRules.EvasionLabel(Runtime.evasion)}</color>";
+        }
+        else
+        {
+            SetStats(Runtime);
+            combat = $"<color=#9AA4B5>Crit {Runtime.critRate}%   Evasion {GameRules.EvasionLabel(Runtime.evasion)}</color>";
+        }
         string status = Runtime.StatusSummary();
-        string combat = $"<color=#9AA4B5>Crit {Runtime.critRate}%   Evasion {GameRules.EvasionLabel(Runtime.evasion)}</color>";
         statusText.text = combat + "\n" + (string.IsNullOrEmpty(status) ? "<color=#5A6475>No effects</color>" : status);
+        RefreshStatusIcons(Runtime);
+    }
+
+    // ---------------------------------------------------------------- battle buff / debuff icons
+    // A row of small pictures on the art (red ring = debuff, green ring = buff) with a counter (turns or stacks)
+    // and a tooltip each. Silence also puts a big lock on the picture; Freeze, Sleep and Stun tint it.
+
+    class StatusIcon
+    {
+        public Image ring;
+        public Image icon;
+        public Text label;
+        public Text count;
+        public TooltipTrigger tip;
+    }
+
+    RectTransform statusRow;
+    Image statusTint;
+    Image silenceLock;
+    readonly System.Collections.Generic.List<StatusIcon> statusIcons = new System.Collections.Generic.List<StatusIcon>();
+    static readonly System.Collections.Generic.Dictionary<string, Sprite> statusSprites = new System.Collections.Generic.Dictionary<string, Sprite>();
+
+    const int MaxStatusIcons = 12;
+    static readonly Color DebuffRing = new Color(0.62f, 0.12f, 0.18f, 0.95f);
+    static readonly Color BuffRing = new Color(0.12f, 0.5f, 0.28f, 0.95f);
+
+    /// <summary>The picture of a talent, by name (status icons reuse the talent that causes the effect).</summary>
+    static Sprite TalentSprite(string talentName)
+    {
+        if (statusSprites.TryGetValue(talentName, out var cached)) return cached;
+        var db = CardDatabase.Instance;
+        var theme = UITheme.Instance;
+        var t = db != null ? db.FindTalent(talentName) : null;
+        var s = t != null && theme != null ? theme.TalentIcon(t) : null;
+        statusSprites[talentName] = s;
+        return s;
+    }
+
+    void EnsureStatusUi()
+    {
+        if (statusRow != null || artBackground == null) return;
+        var theme = UITheme.Instance;
+        int artIndex = art != null ? art.transform.GetSiblingIndex() : 0;
+
+        statusTint = UIFactory.CreateImage(artBackground.transform, "StatusTint", Color.clear);
+        UIFactory.Stretch(statusTint.rectTransform, 4, 4, 4, 4);
+        statusTint.transform.SetSiblingIndex(artIndex + 1);
+
+        silenceLock = UIFactory.CreateImage(artBackground.transform, "SilenceLock", new Color(0.86f, 0.72f, 1f, 0.85f), theme != null ? theme.lockIcon : null);
+        silenceLock.preserveAspect = true;
+        UIFactory.Place(silenceLock.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 14f), new Vector2(130f, 130f));
+        silenceLock.transform.SetSiblingIndex(artIndex + 2);
+        UIFactory.AddOutline(silenceLock, new Color(0.15f, 0f, 0.25f, 0.9f), 3f);
+        silenceLock.gameObject.SetActive(false);
+
+        statusRow = UIFactory.CreateRect("StatusIcons", artBackground.transform);
+        UIFactory.Place(statusRow, new Vector2(0f, 0f), new Vector2(8f, 48f), new Vector2(272f, 88f));
+        var grid = statusRow.gameObject.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(42f, 42f);
+        grid.spacing = new Vector2(4f, 4f);
+        grid.startCorner = GridLayoutGroup.Corner.LowerLeft;
+        grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+        grid.childAlignment = TextAnchor.LowerLeft;
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 6;
+    }
+
+    StatusIcon GetStatusIcon(int i)
+    {
+        while (statusIcons.Count <= i)
+        {
+            var theme = UITheme.Instance;
+            var ring = UIFactory.CreateImage(statusRow, $"Status{statusIcons.Count}", DebuffRing, theme != null ? theme.circle : null, false, true);
+            var icon = UIFactory.CreateImage(ring.transform, "Icon", Color.white);
+            icon.preserveAspect = true;
+            UIFactory.Stretch(icon.rectTransform, 5, 5, 5, 5);
+            var label = UIFactory.CreateText(ring.transform, "Label", "", 13, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(label.rectTransform, 2, 2, 2, 2);
+            var count = UIFactory.CreateText(ring.transform, "Count", "", 15, Color.white, TextAnchor.LowerRight, FontStyle.Bold);
+            UIFactory.Stretch(count.rectTransform, -6, -6, -6, -6);
+            UIFactory.AddOutline(count, new Color(0f, 0f, 0f, 1f), 1.5f);
+            statusIcons.Add(new StatusIcon { ring = ring, icon = icon, label = label, count = count, tip = TooltipTrigger.Add(ring, "") });
+        }
+        return statusIcons[i];
+    }
+
+    /// <summary>Hides every status picture (cards shown outside battle).</summary>
+    void ClearStatusIcons()
+    {
+        foreach (var s in statusIcons) s.ring.gameObject.SetActive(false);
+        if (silenceLock != null) silenceLock.gameObject.SetActive(false);
+        if (statusTint != null) statusTint.color = Color.clear;
+    }
+
+    void RefreshStatusIcons(CardRuntime rt)
+    {
+        if (rt == null) { ClearStatusIcons(); return; }
+        EnsureStatusUi();
+        if (statusRow == null) return;
+        var theme = UITheme.Instance;
+        int n = 0;
+        int pct(float f) => Mathf.RoundToInt(f * 100f);
+
+        void Add(bool on, Sprite sprite, string shortName, string count, string tip, bool debuff)
+        {
+            if (!on || n >= MaxStatusIcons) return;
+            var s = GetStatusIcon(n++);
+            s.ring.gameObject.SetActive(true);
+            s.ring.color = debuff ? DebuffRing : BuffRing;
+            s.icon.sprite = sprite;
+            s.icon.enabled = sprite != null;
+            s.label.text = sprite == null ? shortName : "";
+            s.count.text = count ?? "";
+            s.tip.text = tip;
+        }
+        void AddT(bool on, string talent, string shortName, string count, string tip, bool debuff) =>
+            Add(on, on ? TalentSprite(talent) : null, shortName, count, tip, debuff);
+
+        // ---- debuffs (red)
+        Add(rt.silenceTurns > 0, theme != null ? theme.lockIcon : null, "SIL", rt.silenceTurns.ToString(),
+            $"<b><color=#C78BFF>Silenced</color></b>\nCan't use its active talent ({rt.silenceTurns} turn{(rt.silenceTurns == 1 ? "" : "s")} left).", true);
+        AddT(rt.isStunned, "Paralysis", "STN", "", "<b><color=#FFE14D>Stunned</color></b>\nSkips its next turn.", true);
+        AddT(rt.frozen, "Frostbite", "FRZ", "", "<b><color=#81D4FA>Frozen</color></b>\nSkips its next turn and can't evade until then.", true);
+        AddT(rt.sleepTurns > 0, "Sleep", "SLP", rt.sleepTurns.ToString(),
+            $"<b><color=#9FA8DA>Asleep</color></b>\nSkips its next {rt.sleepTurns} turn{(rt.sleepTurns == 1 ? "" : "s")} and can't evade. Attacks don't wake it, but normal attacks on it deal {pct(rt.sleepDamageCut)}% less.", true);
+        AddT(rt.burnStacks > 0, "Blaze", "BRN", $"x{rt.burnStacks}",
+            $"<b><color=#FF8A3D>Burning x{rt.burnStacks}</color></b>\nTakes {rt.burnPercent * rt.burnStacks * 100f:0.#}% of its max HP as true damage each turn. Healing received -{pct(rt.healingReduction)}%. {StatusEffects.BurnMissChance(rt)}% chance the next tick misses and puts out every stack.", true);
+        AddT(rt.poisonStacks > 0, "Poison", "PSN", $"x{rt.poisonStacks}",
+            $"<b><color=#7CFC6A>Poisoned x{rt.poisonStacks}</color></b>\nTakes {rt.poisonFlat} + {rt.poisonPercent * rt.poisonStacks * 100f:0.#}% max HP true damage each turn. {StatusEffects.PoisonMissChance(rt)}% chance the next tick misses and removes every stack.", true);
+        AddT(rt.blindTurns > 0, "Blind", "BLD", rt.blindTurns.ToString(),
+            $"<b><color=#B0BEC5>Blinded</color></b>\n{rt.blindMissChance}% chance to miss each normal attack ({rt.blindTurns} turn{(rt.blindTurns == 1 ? "" : "s")} left).", true);
+        AddT(rt.hexTurns > 0, "Hex", "HEX", rt.hexTurns.ToString(), $"<b><color=#CE93D8>Hexed</color></b>\nATK and DEF are swapped ({rt.hexTurns} turns left).", true);
+        AddT(rt.hypnoStacks > 0, "Hypnotize", "HYP", $"x{rt.hypnoStacks}",
+            $"<b><color=#BA68C8>Hypnotized x{rt.hypnoStacks}</color></b>\n{rt.hypnoChancePerStack * rt.hypnoStacks}% chance to attack itself.", true);
+        AddT(rt.TotalAttack < rt.baseAttack, "Breaker ATK", "ATK", "", $"<b><color=#FF6B6B>ATK lowered</color></b>\n{rt.TotalAttack} (base {rt.baseAttack}).", true);
+        AddT(rt.TotalDefense < rt.baseDefense, "Breaker DEF", "DEF", "", $"<b><color=#FF6B6B>DEF lowered</color></b>\n{rt.TotalDefense} (base {rt.baseDefense}).", true);
+        AddT(rt.TotalSpeed < rt.baseSpeed, "Frostbite", "SPD", "", $"<b><color=#FF6B6B>SPD lowered</color></b>\n{rt.TotalSpeed} (base {rt.baseSpeed}).", true);
+        AddT(rt.healTakenMultiplier < 0.999f, "Rot", "ROT", "", $"<b><color=#9CCC65>Rotting</color></b>\nHealing and lifesteal -{pct(1f - rt.healTakenMultiplier)}%.", true);
+
+        // ---- buffs (green)
+        AddT(rt.shield > 0, "Burst Barrier", "SHD", rt.shieldTurns > 0 ? rt.shieldTurns.ToString() : "",
+            $"<b><color=#6FD3FF>Barrier</color></b>\nAbsorbs the next {rt.shield} damage ({rt.shieldTurns} turns left)." + (rt.shieldManaRegen < 0.999f ? $" Mana Regeneration -{pct(1f - rt.shieldManaRegen)}% while it lasts." : ""), false);
+        AddT(rt.regenerationStacks > 0, "Regeneration", "REG", $"x{rt.regenerationStacks}",
+            $"<b><color=#5DFFB0>Regeneration x{rt.regenerationStacks}</color></b>\nHeals {rt.regenPercent * rt.regenerationStacks * 100f:0.#}% of its max HP each turn.", false);
+        AddT(rt.hasEndurance, "Endurance", "END", rt.enduranceTurns.ToString(),
+            $"<b><color=#6FD3FF>Endurance</color></b>\nTakes {pct(rt.enduranceReduction)}% less damage from normal attacks ({rt.enduranceTurns} turns left).", false);
+        AddT(rt.debuffImmuneTurns > 0, "Purify", "IMM", rt.debuffImmuneTurns.ToString(),
+            $"<b><color=#E0F7FA>Immune</color></b>\nCan't get new debuffs ({rt.debuffImmuneTurns} turns left).", false);
+        AddT(rt.buffTurnsLeft > 0, "Divine Blessing", "BLS", rt.buffTurnsLeft.ToString(),
+            $"<b><color=#FFD54F>Blessed</color></b>\nATK +{rt.bonusAttack}, DEF +{rt.bonusDefense} ({rt.buffTurnsLeft} turns left).", false);
+        AddT(rt.TotalAttack > rt.baseAttack, "Amplifier ATK", "ATK", "", $"<b><color=#7CFC6A>ATK raised</color></b>\n{rt.TotalAttack} (base {rt.baseAttack}).", false);
+        AddT(rt.TotalDefense > rt.baseDefense, "Amplifier DEF", "DEF", "", $"<b><color=#7CFC6A>DEF raised</color></b>\n{rt.TotalDefense} (base {rt.baseDefense}).", false);
+        AddT(rt.TotalSpeed > rt.baseSpeed, "Haste", "SPD", "", $"<b><color=#7CFC6A>SPD raised</color></b>\n{rt.TotalSpeed} (base {rt.baseSpeed}).", false);
+        AddT(rt.lifesteal > 0, "Bloodthirster", "LS", $"{rt.lifesteal}%", $"<b><color=#FF6B8B>Lifesteal {rt.lifesteal}%</color></b>\nHeals that much of its normal attack damage.", false);
+        AddT(rt.critIgnoresEvasion, "Precision", "CRT", "", "<b><color=#FFB23D>Precision</color></b>\nIts critical hits can't be evaded.", false);
+        AddT(rt.chargeStrikeReady, "Charge Strike", "CHG", "", $"<b><color=#FFB300>Charged</color></b>\nIts next normal attack deals {rt.chargeStrikeMultiplier:0.#}x damage.", false);
+        AddT(rt.chargeStored > 0, "Charge Attack", "STO", rt.chargeCount.ToString(), $"<b><color=#FFB300>Stored attacks: {rt.chargeCount}</color></b>\n{rt.chargeStored} damage waiting to be released.", false);
+        AddT(rt.momentumStacks > 0, "Momentum", "MOM", $"x{rt.momentumStacks}",
+            $"<b><color=#FF8A65>Momentum x{rt.momentumStacks}</color></b>\n+{rt.momentumPerStack * rt.momentumStacks * 100f:0.#}% attack damage.", false);
+
+        for (int i = n; i < statusIcons.Count; i++) statusIcons[i].ring.gameObject.SetActive(false);
+
+        silenceLock.gameObject.SetActive(rt.silenceTurns > 0 && silenceLock.sprite != null);
+        statusTint.color = rt.frozen ? new Color(0.5f, 0.82f, 1f, 0.38f)
+                         : rt.sleepTurns > 0 ? new Color(0.18f, 0.22f, 0.55f, 0.42f)
+                         : rt.isStunned ? new Color(1f, 0.9f, 0.3f, 0.28f)
+                         : Color.clear;
     }
 
     void SetStats(CardRuntime rt)

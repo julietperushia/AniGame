@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Berserk Strike
   m_EditorClassIdentifier: Assembly-CSharp::BerserkerStrike
   talentName: Berserk Strike
-  description: Deal elemental damage equal to 12% of your ATK, increased by the %
-    of HP you are missing (up to x2).
+  autoDescription: 1
+  description: 'Deal damage of your element equal to 12% (Max 14.4%) of your ATK.
+    It grows with the HP you are missing: +50% at half HP, up to +100% near 0 HP.
+    Element advantage applies. Mana cost: 100.'
   manaCost: 100
   atkPercent: 0.12
+  maxRageBonus: 1

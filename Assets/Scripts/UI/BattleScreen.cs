@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,7 +34,10 @@ public class BattleScreen : MonoBehaviour
     public Text bannerText;
     public Image bannerBackground;
     public Text logText;
+    public ScrollRect logScroll;
     public RectTransform reserveRow;
+    public Text playerTalentText;
+    public Text enemyTalentText;
 
     [Header("Result")]
     public GameObject resultPanel;
@@ -49,6 +53,7 @@ public class BattleScreen : MonoBehaviour
     public Button retryButton;
     public Button mapButton;
     public Text resultHint;
+    public Button saveLogButton;
 
     [Header("Timing")]
     public float baseDelay = 1f;
@@ -70,7 +75,13 @@ public class BattleScreen : MonoBehaviour
     Color dropColor = Color.white;
     int dropTier = -1;
 
-    float Speed => speeds[Mathf.Clamp(speedIndex, 0, speeds.Length - 1)];
+    /// <summary>x1 plays at 60% of the old pace (it felt too fast); x2 / x4 scale from there.</summary>
+    public const float PaceScale = 0.6f;
+    int SpeedLabel => speeds[Mathf.Clamp(speedIndex, 0, speeds.Length - 1)];
+    float Speed => SpeedLabel * PaceScale;
+    readonly List<string> fullLog = new List<string>();
+    BattleState finalState;
+    int shownTalentCount = -1;
 
     void Start()
     {
@@ -87,13 +98,14 @@ public class BattleScreen : MonoBehaviour
         var db = CardDatabase.Instance;
         if (db == null || db.LocationCount == 0)
         {
-            ShowFatal("Card database not found.\nRun Tools > AniGame > Build Everything in the Unity editor.");
+            ShowFatal("The game data could not be loaded.\nPlease reinstall the game.");
             return;
         }
 
         var data = PlayerProfile.Data;
         SfxSynth.Volume = data.sfxVolume;
         speedIndex = Mathf.Max(0, System.Array.IndexOf(speeds, data.battleSpeed));
+        if (saveLogButton != null) saveLogButton.onClick.AddListener(SaveBattleLog);
         UpdateSpeedLabel();
 
         if (GameSession.HasPendingBattle)
@@ -119,7 +131,7 @@ public class BattleScreen : MonoBehaviour
         }
         if (fighter == null)
         {
-            ShowFatal("No card in your build slot. Open My Cards and save a card to a slot.");
+            ShowFatal("No card in your build slot. Open Collection and save a card to a slot.");
             return;
         }
 
@@ -158,7 +170,7 @@ public class BattleScreen : MonoBehaviour
     void UpdateSpeedLabel()
     {
         var label = UIFactory.ButtonLabel(speedButton);
-        if (label != null) label.text = $"SPEED x{Speed}";
+        if (label != null) label.text = $"SPEED x{SpeedLabel}";
         DamagePopup.SpeedMultiplier = Speed;
         UIFx.Speed = Speed;
     }
@@ -174,9 +186,13 @@ public class BattleScreen : MonoBehaviour
     IEnumerator RunBattle(CardRuntime player)
     {
         var enemy = new CardRuntime(enemyCard);
+        ApplyTestTalents(player, GameSession.TestPlayerTalents);
+        ApplyTestTalents(enemy, GameSession.TestEnemyTalents);
+        GameSession.TestPlayerTalents = GameSession.TestEnemyTalents = null;
         enemyView.Bind(enemy);
         playerView.Bind(player);
         playerView.idle = enemyView.idle = true;
+        RefreshTalentPanels();
         UpdateMatchup(player, enemy);
         if (reserveRow != null) reserveRow.gameObject.SetActive(false);
 
@@ -206,8 +222,19 @@ public class BattleScreen : MonoBehaviour
         }
         battleFinished = true;
         var state = engine.State;
+        finalState = state;
         bool victory = state == BattleState.PlayerWon || (state == BattleState.Draw && !enemy.IsAlive);
         ShowResult(victory, state == BattleState.Draw && enemy.IsAlive);
+    }
+
+    /// <summary>Test battles only: replaces a fighter's talents with the named ones.</summary>
+    static void ApplyTestTalents(CardRuntime rt, string names)
+    {
+        var db = CardDatabase.Instance;
+        if (string.IsNullOrEmpty(names) || db == null) return;
+        rt.talents.Clear();
+        rt.talent = null;
+        foreach (var n in names.Split(',')) rt.AddTalent(db.FindTalent(n.Trim()));
     }
 
     void UpdateMatchup(CardRuntime player, CardRuntime enemy)
@@ -256,8 +283,8 @@ public class BattleScreen : MonoBehaviour
 
     void ApplySnapshot(BattleEvent e, bool instant)
     {
-        playerView.SetVitals(e.playerHp, e.playerMaxHp, e.playerMana, e.playerMaxMana, instant);
-        enemyView.SetVitals(e.enemyHp, e.enemyMaxHp, e.enemyMana, e.enemyMaxMana, instant);
+        playerView.SetVitals(e.playerHp, e.playerMaxHp, e.playerMana, e.playerMaxMana, instant, e.playerShield);
+        enemyView.SetVitals(e.enemyHp, e.enemyMaxHp, e.enemyMana, e.enemyMaxMana, instant, e.enemyShield);
     }
 
     void PlayInstant(BattleEvent e)
@@ -370,6 +397,7 @@ public class BattleScreen : MonoBehaviour
             case BattleEventType.Status:
                 Log(e.text);
                 ApplySnapshot(e, false);
+                if (EventFx(e, actorView, targetView)) { yield return Wait(0.35f); break; }
                 if (e.text != null && e.text.Contains("stunned"))
                 {
                     SfxSynth.Play("stun");
@@ -390,7 +418,7 @@ public class BattleScreen : MonoBehaviour
             case BattleEventType.Info:
                 Log(e.text);
                 ApplySnapshot(e, false);
-                yield return Wait(0.18f);
+                yield return Wait(EventFx(e, actorView, targetView) ? 0.4f : 0.18f);
                 break;
 
             case BattleEventType.BattleEnd:
@@ -403,6 +431,77 @@ public class BattleScreen : MonoBehaviour
 
         playerView.RefreshLive();
         enemyView.RefreshLive();
+        int count = (playerView.Runtime?.talents.Count ?? 0) * 100 + (enemyView.Runtime?.talents.Count ?? 0);
+        if (count != shownTalentCount) RefreshTalentPanels();
+    }
+
+    // ---------------------------------------------------------------- talent panels (always visible)
+
+    void RefreshTalentPanels()
+    {
+        shownTalentCount = (playerView.Runtime?.talents.Count ?? 0) * 100 + (enemyView.Runtime?.talents.Count ?? 0);
+        if (playerTalentText != null) playerTalentText.text = TalentSheet(playerView.Runtime);
+        if (enemyTalentText != null) enemyTalentText.text = TalentSheet(enemyView.Runtime);
+    }
+
+    static string TalentSheet(CardRuntime rt)
+    {
+        if (rt == null || rt.talents.Count == 0) return "<color=#9AA4B5>No talent</color>";
+        var sb = new System.Text.StringBuilder();
+        int bonus = Mathf.RoundToInt((GameRules.TalentPower(rt.Tier) - 1f) * 100f);
+        foreach (var t in rt.talents)
+        {
+            if (sb.Length > 0) sb.Append("\n");
+            string type = t.IsActive ? "<color=#6FD3FF>ACTIVE</color>" : "<color=#FFB23D>PASSIVE</color>";
+            float scale = rt.ScaleOf(t);
+            string extra = scale < 0.99f ? $" <color=#9AA4B5>({scale * 100:0}% from Gamble)</color>" : bonus > 0 ? $" <color=#7CFC6A>+{bonus}%</color>" : "";
+            sb.Append($"<b>{t.DisplayName}</b>  {type}{extra}\n<color=#C9CEDA>{t.DescriptionFor(rt.PowerOf(t))}</color>");
+        }
+        return sb.ToString();
+    }
+
+    // ---------------------------------------------------------------- battle log (scrollable, saveable)
+
+    void SaveBattleLog()
+    {
+        if (fullLog.Count == 0) { resultHint.text = "<color=#FF6B6B>The log is empty.</color>"; return; }
+        string result = finalState == BattleState.PlayerWon ? "VICTORY" : finalState == BattleState.EnemyWon ? "DEFEAT" : "DRAW";
+        string stamp = System.DateTime.Now.ToString("yyyy-MM-dd_HHmm");
+        string defaultName = $"AniGame_battle_LOC{location}_F{floor}_{result}_{stamp}";
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"AniGame battle log - {System.DateTime.Now:yyyy-MM-dd HH:mm}");
+        sb.AppendLine($"LOC {location} - Floor {floor} - {result}");
+        sb.AppendLine($"You:   {Describe(playerView.Runtime)}");
+        sb.AppendLine($"Enemy: {Describe(enemyView.Runtime)}");
+        sb.AppendLine(new string('-', 60));
+        foreach (var line in fullLog) sb.AppendLine(Strip(line));
+        string path = FileDialogs.Supported ? FileDialogs.SaveFile("Save battle log", "Text file", "txt", defaultName) : null;
+        if (path == null && FileDialogs.Supported) return; // cancelled
+        try
+        {
+            if (path == null)
+            {
+                string dir = System.IO.Path.Combine(Application.persistentDataPath, "BattleLogs");
+                System.IO.Directory.CreateDirectory(dir);
+                path = System.IO.Path.Combine(dir, defaultName + ".txt");
+            }
+            System.IO.File.WriteAllText(path, sb.ToString());
+            resultHint.text = $"<color=#7CFC6A>Battle log saved: {System.IO.Path.GetFileName(path)}</color>";
+            SfxSynth.Play("buff", 0.6f);
+        }
+        catch (System.Exception ex)
+        {
+            resultHint.text = $"<color=#FF6B6B>Could not save the log: {ex.Message}</color>";
+        }
+    }
+
+    static string Strip(string s) => System.Text.RegularExpressions.Regex.Replace(s ?? "", "<.*?>", "");
+
+    static string Describe(CardRuntime rt)
+    {
+        if (rt == null) return "?";
+        string talents = string.Join(" + ", rt.talents.Select(t => t.DisplayName));
+        return $"{rt.DisplayName} ({CardStats.RarityName(rt.rarity)}, {ElementSystem.DisplayName(rt.Element)}) HP {rt.baseMaxHealth} ATK {rt.baseAttack} DEF {rt.baseDefense} SPD {rt.baseSpeed} - {talents}";
     }
 
     // ---------------------------------------------------------------- animation runs
@@ -569,6 +668,122 @@ public class BattleScreen : MonoBehaviour
         yield return Wait(e.crit ? 0.62f : 0.34f);
     }
 
+    /// <summary>Animations for talent effects that arrive as Info / Status events (so the cards never look frozen).
+    /// Returns true when it played something.</summary>
+    bool EventFx(BattleEvent e, CardView actor, CardView target)
+    {
+        if (skipping) return false;
+        string t = e.text ?? "";
+        var who = target ?? actor;
+        switch (e.tag)
+        {
+            case "charge":
+                if (actor == null) return false;
+                actor.Pulse(0.4f, 0.05f);
+                actor.Flash(new Color(1f, 0.7f, 0.15f, 0.45f), 0.4f);
+                UIFx.GlowFlash(backLayer, FxPos(actor, backLayer), new Color(1f, 0.6f, 0.1f, 0.7f), 620f, 0.5f);
+                UIFx.Ring(popupLayer, FxPos(actor, popupLayer), new Color(1f, 0.75f, 0.2f, 0.9f), 520f, 120f, 0.4f);
+                Popup(actor, "CHARGING", new Color(1f, 0.75f, 0.2f), 40);
+                SfxSynth.Play("charge", 0.6f);
+                return true;
+            case "release":
+                if (actor == null) return false;
+                UIFx.Starburst(backLayer, FxPos(actor, backLayer), new Color(1f, 0.6f, 0.1f, 0.8f), 1000f, 0.8f);
+                UIFx.TextSlam(popupLayer, FxPos(actor, popupLayer) + new Vector2(0f, 220f), "RELEASE!", new Color(1f, 0.7f, 0.2f), 70, 0.8f);
+                SfxSynth.Play("impact", 0.7f, 1.2f);
+                return true;
+            case "haste":
+                if (actor == null) return false;
+                UIFx.Streaks(popupLayer, FxPos(actor, popupLayer), actor == playerView ? 1f : -1f, new Color(0.6f, 1f, 1f, 0.8f), 7, 420f, 0.3f);
+                Popup(actor, "HASTE!", new Color(0.4f, 1f, 1f), 40);
+                SfxSynth.Play("whoosh", 0.6f, 1.2f);
+                return true;
+            case "counter":
+                if (actor == null) return false;
+                Popup(actor, "COUNTER!", new Color(1f, 0.75f, 0.2f), 42);
+                return true;
+            case "hypno":
+                if (actor == null) return false;
+                UIFx.Ring(popupLayer, FxPos(actor, popupLayer), new Color(0.75f, 0.4f, 0.9f, 0.9f), 80f, 520f, 0.5f);
+                Popup(actor, "HYPNOTIZED", new Color(0.8f, 0.5f, 1f), 40);
+                actor.Shake(0.3f, 8f);
+                return true;
+        }
+        if (who == null) return false;
+        var at = FxPos(who, popupLayer);
+        if (t.Contains("barrier absorbs"))
+        {
+            bool broke = t.Contains("breaks");
+            UIFx.Ring(popupLayer, at, new Color(0.45f, 0.85f, 1f, 0.9f), 380f, 460f, 0.35f);
+            UIFx.GlowFlash(popupLayer, at, new Color(0.4f, 0.8f, 1f, 0.35f), 520f, 0.35f);
+            var num = System.Text.RegularExpressions.Regex.Match(t, @"absorbs (\d+)");
+            string absorbed = num.Success ? num.Groups[1].Value : "";
+            // Only a hit the barrier fully holds says BLOCKED; a broken barrier lets the rest through to the HP
+            Popup(who, broke ? $"SHIELD -{absorbed}  BROKEN!" : $"BLOCKED {absorbed}", new Color(0.5f, 0.9f, 1f), 38);
+            if (broke) who.Shake(0.25f, 8f);
+            return true;
+        }
+        if (t.Contains("barrier explodes"))
+        {
+            UIFx.Burst(popupLayer, at, new Color(0.45f, 0.85f, 1f), 1.2f);
+            SfxSynth.Play("impact", 0.6f, 1.3f);
+            return true;
+        }
+        if (t.Contains("raises a") && t.Contains("barrier"))
+        {
+            UIFx.Ring(popupLayer, at, new Color(0.45f, 0.85f, 1f, 0.9f), 120f, 520f, 0.5f);
+            UIFx.GlowFlash(backLayer, FxPos(who, backLayer), new Color(0.4f, 0.8f, 1f, 0.6f), 700f, 0.6f);
+            return true;
+        }
+        if (t.Contains("[Guts]"))
+        {
+            UIFx.TextSlam(popupLayer, at + new Vector2(0f, 220f), "GUTS!", new Color(1f, 0.45f, 0.3f), 76, 0.9f);
+            who.Shake(0.4f, 12f);
+            return true;
+        }
+        if (t.Contains("[Death's Dance]") && t.Contains("catches up"))
+        {
+            UIFx.Puff(popupLayer, at, new Color(0.6f, 0.5f, 0.8f), 1.4f);
+            return true;
+        }
+        if (t.Contains("is frozen"))
+        {
+            UIFx.Sparks(popupLayer, at, new Color(0.7f, 0.95f, 1f), 18, 500f, 30f, 0.6f, 200f);
+            who.Flash(new Color(0.6f, 0.9f, 1f, 0.55f), 0.5f);
+            return true;
+        }
+        if (t.Contains("falls asleep"))
+        {
+            UIFx.Rise(popupLayer, at, new Color(0.7f, 0.75f, 1f, 0.9f), 8, 220f, 34f, 1f);
+            Popup(who, "ZZZ", new Color(0.7f, 0.75f, 1f), 44);
+            return true;
+        }
+        if (t.Contains("blinded"))
+        {
+            who.Flash(new Color(0.9f, 0.9f, 0.9f, 0.6f), 0.4f);
+            Popup(who, "BLIND", new Color(0.8f, 0.85f, 0.9f), 40);
+            return true;
+        }
+        if (t.Contains("hexed"))
+        {
+            UIFx.Ring(popupLayer, at, new Color(0.8f, 0.5f, 0.85f, 0.9f), 80f, 480f, 0.45f);
+            Popup(who, "HEX: ATK <> DEF", new Color(0.85f, 0.6f, 0.9f), 36);
+            return true;
+        }
+        if (t.Contains("[Mimic]"))
+        {
+            var src = actor ?? who;
+            UIFx.Ring(popupLayer, FxPos(src, popupLayer), new Color(0.8f, 0.6f, 0.9f, 0.9f), 500f, 100f, 0.4f);
+            return true;
+        }
+        if (t.Contains("[Purify]") || t.Contains("immune"))
+        {
+            UIFx.Rise(popupLayer, at, new Color(0.85f, 1f, 1f, 1f), 14, 300f, 30f, 0.9f);
+            return true;
+        }
+        return false;
+    }
+
     void KindFx(DamageKind kind, Vector2 at)
     {
         switch (kind)
@@ -697,9 +912,16 @@ public class BattleScreen : MonoBehaviour
     void Log(string line)
     {
         if (string.IsNullOrEmpty(line)) return;
+        fullLog.Add(line);
         logLines.Add(line);
-        while (logLines.Count > 9) logLines.RemoveAt(0);
+        while (logLines.Count > 250) logLines.RemoveAt(0); // the screen keeps the last 250 lines (the saved log has all)
+        bool atBottom = logScroll == null || logScroll.verticalNormalizedPosition <= 0.02f || logScroll.content.rect.height <= logScroll.viewport.rect.height + 1f;
         logText.text = string.Join("\n", logLines);
+        if (logScroll != null && atBottom)
+        {
+            Canvas.ForceUpdateCanvases();
+            logScroll.verticalNormalizedPosition = 0f;
+        }
     }
 
     void ShowBanner(string text, Color color)
@@ -783,7 +1005,7 @@ public class BattleScreen : MonoBehaviour
             string counter = CounterElementHint(enemyCard.element);
             resultBody.text =
                 $"{enemyCard.DisplayName} was too strong.\n\n" +
-                $"- {counter} (Element Orb in My Cards)\n" +
+                $"- {counter} (Element Orb in Collection)\n" +
                 "- Reroll stats or talent, or fuse to raise rarity\n" +
                 "- Save other builds to slots 2-3 and pick one on the map" +
                 (staminaBack > 0 ? "\n\n<color=#7CFC6A>Returning Heroes gave you stamina back.</color>" : "");
@@ -960,6 +1182,19 @@ public class BattleScreen : MonoBehaviour
 
     // ---------------------------------------------------------------- layout (called by the editor scene builder)
 
+    static Text TalentPanel(RectTransform canvas, string name, float x, Color accent)
+    {
+        var panel = UIFactory.CreatePanel(canvas, name, new Color(0.04f, 0.04f, 0.09f, 0.92f), false);
+        UIFactory.Place(panel.rectTransform, new Vector2(0.5f, 0f), new Vector2(x, 12), new Vector2(CardView.Width + 40, 232));
+        UIFactory.AddOutline(panel, UIFactory.WithAlpha(accent, 0.55f), 2f);
+        var title = UIFactory.CreateText(panel.transform, "Title", "TALENTS", 15, UIFactory.WithAlpha(accent, 1f), TextAnchor.UpperLeft, FontStyle.Bold);
+        UIFactory.TopStrip(title.rectTransform, 6, 20, 14, 14);
+        var text = UIFactory.CreateText(panel.transform, "Text", "", 19, UIFactory.TextMain, TextAnchor.UpperLeft);
+        UIFactory.Stretch(text.rectTransform, 14, 26, 14, 8);
+        UIFactory.BestFit(text, 10);
+        return text;
+    }
+
     public static BattleScreen BuildLayout(RectTransform canvas)
     {
         var screen = canvas.gameObject.AddComponent<BattleScreen>();
@@ -998,14 +1233,18 @@ public class BattleScreen : MonoBehaviour
 
         // Cards
         screen.playerView = CardView.Build(canvas, "PlayerCard");
-        UIFactory.Place((RectTransform)screen.playerView.transform, new Vector2(0.5f, 0.5f), new Vector2(-500, 20), new Vector2(CardView.Width, CardView.Height));
+        UIFactory.Place((RectTransform)screen.playerView.transform, new Vector2(0.5f, 0.5f), new Vector2(-500, 36), new Vector2(CardView.Width, CardView.Height));
         var youLabel = UIFactory.CreateText(screen.playerView.transform, "YouLabel", "YOU", 26, UIFactory.Accent, TextAnchor.MiddleCenter, FontStyle.Bold);
         UIFactory.Place(youLabel.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, 40), new Vector2(200, 36));
 
         screen.enemyView = CardView.Build(canvas, "EnemyCard");
-        UIFactory.Place((RectTransform)screen.enemyView.transform, new Vector2(0.5f, 0.5f), new Vector2(500, 20), new Vector2(CardView.Width, CardView.Height));
+        UIFactory.Place((RectTransform)screen.enemyView.transform, new Vector2(0.5f, 0.5f), new Vector2(500, 36), new Vector2(CardView.Width, CardView.Height));
         var enemyLabel = UIFactory.CreateText(screen.enemyView.transform, "EnemyLabel", "ENEMY", 26, UIFactory.Accent2, TextAnchor.MiddleCenter, FontStyle.Bold);
         UIFactory.Place(enemyLabel.rectTransform, new Vector2(0.5f, 1f), new Vector2(0, 40), new Vector2(200, 36));
+
+        // Talent panels under each card (always visible: name, type and full description)
+        screen.playerTalentText = TalentPanel(canvas, "PlayerTalents", -500, UIFactory.Accent);
+        screen.enemyTalentText = TalentPanel(canvas, "EnemyTalents", 500, UIFactory.Accent2);
 
         // Reserve row under the player card
         screen.reserveRow = UIFactory.CreateRect("TeamReserve", canvas);
@@ -1033,9 +1272,14 @@ public class BattleScreen : MonoBehaviour
         UIFactory.Place(logPanel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, -150), new Vector2(560, 380));
         var logTitle = UIFactory.CreateText(logPanel.transform, "Title", "BATTLE LOG", 18, UIFactory.TextDim, TextAnchor.UpperLeft, FontStyle.Bold);
         UIFactory.TopStrip(logTitle.rectTransform, 10, 24, 16, 16);
-        screen.logText = UIFactory.CreateText(logPanel.transform, "Log", "", 19, UIFactory.TextMain, TextAnchor.LowerLeft);
-        UIFactory.Stretch(screen.logText.rectTransform, 16, 40, 16, 12);
-        screen.logText.verticalOverflow = VerticalWrapMode.Truncate;
+        var logHint = UIFactory.CreateText(logPanel.transform, "Hint", "scroll for more", 15, UIFactory.TextDim, TextAnchor.UpperRight, FontStyle.Italic);
+        UIFactory.TopStrip(logHint.rectTransform, 12, 22, 16, 16);
+        screen.logScroll = UIFactory.CreateScroll(logPanel.transform, "LogScroll", true, out RectTransform logContent);
+        UIFactory.Stretch((RectTransform)screen.logScroll.transform, 12, 40, 12, 10);
+        UIFactory.AddVertical(logContent, 0f, 4);
+        screen.logText = UIFactory.CreateText(logContent, "Log", "", 19, UIFactory.TextMain, TextAnchor.UpperLeft);
+        screen.logText.verticalOverflow = VerticalWrapMode.Overflow;
+        screen.logScroll.scrollSensitivity = 30f;
 
         // Banner
         var banner = UIFactory.CreateRect("TalentBanner", canvas);
@@ -1101,6 +1345,8 @@ public class BattleScreen : MonoBehaviour
         UIFactory.Place((RectTransform)screen.mapButton.transform, new Vector2(0.5f, 0f), new Vector2(-300, 40), new Vector2(260, 80));
         screen.retryButton = UIFactory.CreateButton(panel.transform, "RetryButton", "RETRY", UIFactory.Accent2, 30);
         UIFactory.Place((RectTransform)screen.retryButton.transform, new Vector2(0.5f, 0f), new Vector2(0, 40), new Vector2(260, 80));
+        screen.saveLogButton = UIFactory.CreateButton(panel.transform, "SaveLog", "SAVE BATTLE LOG", new Color(0.25f, 0.3f, 0.45f), 18);
+        UIFactory.Place((RectTransform)screen.saveLogButton.transform, new Vector2(1f, 1f), new Vector2(-24, -24), new Vector2(220, 46));
         screen.nextButton = UIFactory.CreateButton(panel.transform, "NextButton", "NEXT FLOOR >", UIFactory.Accent, 30);
         UIFactory.Place((RectTransform)screen.nextButton.transform, new Vector2(0.5f, 0f), new Vector2(300, 40), new Vector2(260, 80));
 

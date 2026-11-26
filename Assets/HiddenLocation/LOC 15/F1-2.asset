@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F1-2
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Taizou Hasegawa
+  cardImg: {fileID: 21300000, guid: 60340e64554692f4eb48126041038582, type: 3}
+  element: 2
+  rarity: 7
+  talent: {fileID: 11400000, guid: 1babccfa641b4ea4eb0da3f8c05a38b8, type: 2}
+  talent2: {fileID: 0}
+  health: 1850
+  defense: 185
+  attack: 185
+  speed: 185
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 740
+  location: 15
+  floor: 1
+  floorCode: H15-1B
+  anime: Gintama
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b3760-bxdyoPARX4Sx.png
+  characterId: b3760-bxdyoPARX4Sx
+  hidden: 1
+  teamSlot: 1

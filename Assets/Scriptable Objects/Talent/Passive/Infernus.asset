@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Infernus
   m_EditorClassIdentifier: Assembly-CSharp::Infernus
   talentName: Infernus
-  description: 15% of your attack damage is dealt as true damage (it ignores DEF
-    and reductions), and you heal for 50% of that true damage.
+  autoDescription: 1
+  description: 15% (Max 18%) of your normal attack damage is dealt as true damage
+    (it ignores DEF and damage reduction), and you heal 50% of that true damage.
   truePart: 0.15
+  maxTruePart: 0.9
   heal: 0.5

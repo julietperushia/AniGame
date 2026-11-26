@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F2-3
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Ling Yao
+  cardImg: {fileID: 21300000, guid: fdda9a20e50339747985d4e7b81a80b4, type: 3}
+  element: 3
+  rarity: 0
+  talent: {fileID: 11400000, guid: c4baef21a8bc89c4c988e030b7552b97, type: 2}
+  talent2: {fileID: 0}
+  health: 1070
+  defense: 107
+  attack: 107
+  speed: 107
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 428
+  location: 2
+  floor: 2
+  floorCode: H2-2C
+  anime: 'Fullmetal Alchemist: Brotherhood'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b3293-2GiFTmLQnBw8.jpg
+  characterId: b3293-2GiFTmLQnBw8
+  hidden: 1
+  teamSlot: 2

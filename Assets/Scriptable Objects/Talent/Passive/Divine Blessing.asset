@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Divine Blessing
   m_EditorClassIdentifier: Assembly-CSharp::DivineBlessing
   talentName: Divine Blessing
-  description: Start off the battle with a stack of Divine Blessing, increasing your
-    ATK and DEF by 30% for 5 turns.
+  autoDescription: 1
+  description: 'Start the battle blessed: +30% (Max 36%) ATK and +30% (Max 36%) DEF
+    for your first 5 turns.'
   atkBonus: 30
   defBonus: 30
   duration: 5

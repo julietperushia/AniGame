@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: Unlucky Coin
   m_EditorClassIdentifier: Assembly-CSharp::UnluckyCoin
   talentName: Unlucky Coin
-  description: Roll a 20 sided dice. Enemy familiars have their HP/ATK/DEF/SPD reduced
-    by the amount rolled x 2 at random.
+  autoDescription: 1
+  description: 'Roll a 20-sided dice: the enemy loses the roll x 2 (Max 2.4) in one
+    random stat: ATK, DEF, SPD or max HP (1 to 40 (Max 48) points). HP points count
+    like the HP stat. Mana cost: 100.'
   manaCost: 100
+  diceSides: 20
+  multiplier: 2

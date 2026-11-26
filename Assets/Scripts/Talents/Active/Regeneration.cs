@@ -3,12 +3,15 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Talents/Active/Regeneration")]
 public class Regeneration : ActiveTalent
 {
-    public float healPercent = 0.075f; // 7.5%
-    [Tooltip("Regeneration stacks are capped (uncapped stacks caused most timed-out draws in the balance simulation).")]
+    [Tooltip("Heal now and per stack each turn, in % of your max HP (0.075 = 7.5%).")]
+    public float healPercent = 0.075f;
+    [Tooltip("Most Regeneration stacks (uncapped stacks caused most timed-out draws in the balance simulation).")]
     public int maxStacks = 3;
 
     public override string DefaultName => "Regeneration";
-    public override string DefaultDescription => $"Heal {healPercent * 100:0.#}% max HP now and gain a Regeneration stack (heals {healPercent * 100:0.#}% max HP every turn per stack, max {maxStacks} stacks).";
+    public override string DefaultDescription =>
+        $"Heal {PctF(healPercent)} of your max HP now and gain a Regeneration stack: at the start of each of your turns you heal {PctF(healPercent)} of your max HP " +
+        $"per stack (max {maxStacks} stacks = {PctF(healPercent * maxStacks)} per turn).";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

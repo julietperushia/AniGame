@@ -13,7 +13,13 @@ MonoBehaviour:
   m_Name: Hypnotize
   m_EditorClassIdentifier: Assembly-CSharp::Hypnotize
   talentName: Hypnotize
-  description: Adds a Hypnotize stack to the enemy. Each stack gives it +20% chance
-    to attack itself instead of you (that hit deals 50% damage). After it triggers,
-    the stacks reset and the enemy can't be hypnotized for 2 turns.
+  autoDescription: 1
+  description: 'Add a Hypnotize stack to the enemy. Each stack gives it a 20% chance
+    to attack itself instead of you (that hit deals 50% of its normal damage). When
+    it hits itself, the stacks reset and it can''t be hypnotized for 2 turns. Mana
+    cost: 100.'
   manaCost: 100
+  stacksPerCast: 1
+  chancePerStack: 20
+  selfDamage: 0.5
+  immuneTurns: 2

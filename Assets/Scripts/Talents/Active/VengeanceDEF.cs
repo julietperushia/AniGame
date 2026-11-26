@@ -1,13 +1,13 @@
 using UnityEngine;
 
-/// <summary>Like Vengeance ATK, but scales with the enemy's DEF.</summary>
 [CreateAssetMenu(menuName = "Talents/Active/VengeanceDEF")]
 public class VengeanceDEF : ActiveTalent
 {
+    [Tooltip("True damage in % of the ENEMY's DEF (0.11 = 11%).")]
     public float percent = 0.11f;
 
     public override string DefaultName => "Vengeance DEF";
-    public override string DefaultDescription => $"Deal true damage equal to {percent * 100:0}% of the enemy's DEF.";
+    public override string DefaultDescription => $"Deal true damage equal to {PctF(percent)} of the enemy's DEF: the tankier it is, the harder this hits.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

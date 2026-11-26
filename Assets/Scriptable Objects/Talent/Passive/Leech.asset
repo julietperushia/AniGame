@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: Leech
   m_EditorClassIdentifier: Assembly-CSharp::Leech
   talentName: Leech
-  description: 'After every attack (yours and the enemy''s): steal 1% of the enemy''s
-    max HP, gain 1% max HP and heal 1% max HP.'
-  percent: 0.01
+  autoDescription: 1
+  description: 'After every normal attack (yours and the enemy''s): deal true damage
+    equal to 1% (Max 1.2%) of the enemy''s max HP, raise your max HP by 1% (Max 1.2%)
+    of your base max HP, and heal exactly the damage dealt.'
+  stealPercent: 0.01
+  growPercent: 0.01

@@ -25,6 +25,40 @@ public class CardDatabase : ScriptableObject
 
     public List<LocationData> locations = new List<LocationData>();
 
+    /// <summary>One floor of the Hidden Location: a team of 3 enemies.</summary>
+    [Serializable]
+    public class HiddenFloor
+    {
+        public List<Card> enemies = new List<Card>();
+    }
+
+    /// <summary>A Hidden Location LOC (3v3): one anime, one rarity, 3 floors of 3 enemies.</summary>
+    [Serializable]
+    public class HiddenLocationData
+    {
+        public int number;
+        public string anime;
+        public CardRarity rarity;
+        public List<HiddenFloor> floors = new List<HiddenFloor>();
+        public string Title => $"HIDDEN LOC {number}";
+    }
+
+    [Tooltip("Hidden Location (3v3): 20 LOCs x 3 floors x 3 enemies. Filled by Tools > AniGame > Hidden Location > Generate.")]
+    public List<HiddenLocationData> hiddenLocations = new List<HiddenLocationData>();
+
+    public HiddenLocationData GetHidden(int number)
+    {
+        foreach (var l in hiddenLocations) if (l != null && l.number == number) return l;
+        return null;
+    }
+
+    public List<Card> GetHiddenFloor(int location, int floor)
+    {
+        var loc = GetHidden(location);
+        if (loc == null || floor < 1 || floor > loc.floors.Count) return null;
+        return loc.floors[floor - 1].enemies;
+    }
+
     [Tooltip("Every talent asset (filled by the generator). Talent Orbs pick uniformly from this list.")]
     public List<Talent> talents = new List<Talent>();
 

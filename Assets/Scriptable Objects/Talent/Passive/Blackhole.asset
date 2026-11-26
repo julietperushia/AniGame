@@ -13,5 +13,9 @@ MonoBehaviour:
   m_Name: Blackhole
   m_EditorClassIdentifier: Assembly-CSharp::Blackhole
   talentName: Blackhole
-  description: While this card is in battle, neither fighter can raise its ATK, DEF,
-    SPD or max HP. Every stat gain is swallowed (healing still works).
+  autoDescription: 1
+  description: 'While this card is in battle, the enemy can''t raise its ATK, DEF,
+    SPD or max HP: every stat gain is swallowed, and you keep 50% of your own stat
+    gains. Stat drops and healing still work.'
+  ownGainKept: 0.5
+  enemyGainKept: 0

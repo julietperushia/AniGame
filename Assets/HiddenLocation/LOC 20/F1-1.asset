@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F1-1
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Tetsurou Kuroo
+  cardImg: {fileID: 21300000, guid: 8188d5d28b7d87447a30085f004b43a3, type: 3}
+  element: 7
+  rarity: 8
+  talent: {fileID: 11400000, guid: 8eeb5124909b5004ebd188cbc47691d3, type: 2}
+  talent2: {fileID: 11400000, guid: f5b5e166b2070844b8665f0af32b8375, type: 2}
+  health: 2440
+  defense: 244
+  attack: 244
+  speed: 244
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 976
+  location: 20
+  floor: 1
+  floorCode: H20-1A
+  anime: Haikyuu!!
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b71269-pi9vjyxKPFAu.jpg
+  characterId: b71269-pi9vjyxKPFAu
+  hidden: 1
+  teamSlot: 0

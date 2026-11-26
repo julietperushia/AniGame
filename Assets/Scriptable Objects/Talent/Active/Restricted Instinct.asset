@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Restricted Instinct
   m_EditorClassIdentifier: Assembly-CSharp::RestrictedInstinct
   talentName: Restricted Instinct
-  description: Inflicts a stack of Silence on enemy familiars for up to 3 turns,
-    restricting any of their abilities to be used.
+  autoDescription: 1
+  description: 'Silence the enemy for 3 turns (Max 4 turns): it can''t use its active
+    talent, and its max Mana is cut to 100 (any Mana above that is lost). Mana cost:
+    100.'
   manaCost: 100
   silenceDuration: 3
+  manaCap: 100

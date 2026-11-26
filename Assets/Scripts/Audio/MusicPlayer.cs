@@ -49,7 +49,7 @@ public class MusicPlayer : MonoBehaviour
 
     void Update()
     {
-        float target = MusicVolume * Mathf.Clamp01(PlayerProfile.Data.sfxVolume / 0.7f);
+        float target = MusicVolume * Mathf.Clamp(PlayerProfile.Data.musicVolume / 0.7f, 0f, 1.43f); // Settings > Music (70% = normal)
         float step = Time.unscaledDeltaTime / FadeSeconds;
         var other = current == a ? b : a;
         current.volume = Mathf.MoveTowards(current.volume, current.clip != null ? target : 0f, step * MusicVolume);

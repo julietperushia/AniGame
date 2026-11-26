@@ -1,15 +1,16 @@
 using UnityEngine;
 
-/// <summary>Asset text: "Start off the battle with 40% increased Mana Regen, while decreasing enemy familiars' Mana Regen by 14%."
-/// Fixed: the old version had a constructor with parameters (ScriptableObjects need a parameterless one) and did nothing.</summary>
 [CreateAssetMenu(menuName = "Talents/Passive/CelestialInfluence")]
 public class CelestialInfluence : PassiveTalent
 {
+    [Tooltip("Your Mana Regeneration bonus (% points).")]
     public int regenBonusPercent = 40;
+    [Tooltip("The enemy's Mana Regeneration loss (% points).")]
     public int penaltyPercent = 14;
 
     public override string DefaultName => "Celestial Influence";
-    public override string DefaultDescription => $"Start the battle with +{regenBonusPercent}% Mana Regen, while the enemy's Mana Regen is reduced by {penaltyPercent}%.";
+    public override string DefaultDescription =>
+        $"Start the battle with +{Pct(regenBonusPercent)} Mana Regeneration, while the enemy's Mana Regeneration is reduced by {Pct(penaltyPercent)}.";
 
     public override void OnBattleStart(CardRuntime self, CardRuntime enemy)
     {

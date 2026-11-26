@@ -34,10 +34,15 @@ public class BattleEvent
     public float elementMultiplier = 1f;
     public Talent skill;   // SkillActivated: the talent that was cast
     public bool miss;      // Evaded: a miss (Blind) rather than a dodge
+    public string tag;     // optional animation hint (charge, release, haste, counter, hypno)
     public string text;
     public int round;
+    /// <summary>3v3: the card of the acting team that did this (null in 1v1).</summary>
+    public TeamMember member;
 
     public int playerHp, playerMaxHp, playerMana, playerMaxMana;
+    /// <summary>Burst Barrier shields at the time of the event (drawn on the HP bars).</summary>
+    public int playerShield, enemyShield;
     public int enemyHp, enemyMaxHp, enemyMana, enemyMaxMana;
 }
 

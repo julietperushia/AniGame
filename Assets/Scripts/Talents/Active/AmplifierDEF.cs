@@ -3,10 +3,11 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Talents/Active/AmplifierDEF")]
 public class AmplifierDEF : ActiveTalent
 {
+    [Tooltip("DEF gained per cast, in % of base DEF.")]
     public int defBonus = 14;
 
     public override string DefaultName => "Amplifier DEF";
-    public override string DefaultDescription => $"Permanently increase your DEF by {defBonus}% of base DEF. Stacks every cast.";
+    public override string DefaultDescription => $"Permanently raise your DEF by {Pct(defBonus)} of your base DEF. Every cast stacks.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

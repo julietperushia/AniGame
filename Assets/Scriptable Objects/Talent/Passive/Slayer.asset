@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Slayer
   m_EditorClassIdentifier: Assembly-CSharp::Slayer
   talentName: Slayer
-  description: Your attacks deal extra damage equal to 10% of the enemy's max HP.
-  maxHpPercent: 0.1
+  autoDescription: 1
+  description: Each of your normal attacks deals extra damage equal to 5% (Max 6%)
+    of the enemy's max HP.
+  maxHpPercent: 0.05

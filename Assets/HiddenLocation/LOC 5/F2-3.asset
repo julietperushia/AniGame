@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F2-3
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Nami
+  cardImg: {fileID: 21300000, guid: da232931e7c0ecb44902aab6d5612d5b, type: 3}
+  element: 3
+  rarity: 2
+  talent: {fileID: 11400000, guid: 5a653a7976f212f45a25192a15f280d7, type: 2}
+  talent2: {fileID: 0}
+  health: 1260
+  defense: 126
+  attack: 126
+  speed: 126
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 504
+  location: 5
+  floor: 2
+  floorCode: H5-2C
+  anime: One Piece
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b723-vp5hPptgnNEC.png
+  characterId: b723-vp5hPptgnNEC
+  hidden: 1
+  teamSlot: 2

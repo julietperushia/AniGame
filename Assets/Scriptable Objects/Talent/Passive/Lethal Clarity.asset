@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Lethal Clarity
   m_EditorClassIdentifier: Assembly-CSharp::LethalClarity
   talentName: Lethal Clarity
-  description: Increase your CRIT  by 18% and and ATK by 12%. Whenever you inflict
-    a CRIT, heal for 50% of the damage dealt.
+  autoDescription: 1
+  description: +18% (Max 22%) crit rate and +12% (Max 14%) ATK. Whenever you land
+    a critical hit, heal 50% (Max 60%) of the damage dealt.
   critBonus: 18
   atkBonus: 12
   healPercent: 50

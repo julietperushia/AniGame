@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Berserker
   m_EditorClassIdentifier: Assembly-CSharp::Berserker
   talentName: Berserker
-  description: While your health is lower than 30%, increase the ATK of all allied
-    familiars by 30%
-  triggerHp: 0.3
-  atkBonus: 30
+  autoDescription: 1
+  description: While your HP is below 40%, your ATK is raised by 50% (Max 60%) of
+    your base ATK. The bonus goes away if you heal back above 40% (checked at the
+    start of each of your turns).
+  triggerHp: 0.4
+  atkBonus: 50

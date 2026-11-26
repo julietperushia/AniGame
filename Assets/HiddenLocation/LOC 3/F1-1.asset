@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff0a239b22476af4b9120718f2f74f3a, type: 3}
+  m_Name: F1-1
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardName: Heiter
+  cardImg: {fileID: 21300000, guid: 0fadb57f3c92eeb46b8df6bc68f2ce5b, type: 3}
+  element: 1
+  rarity: 1
+  talent: {fileID: 11400000, guid: d3872f5988c7194449d06417a6b014b3, type: 2}
+  talent2: {fileID: 0}
+  health: 1150
+  defense: 115
+  attack: 115
+  speed: 115
+  critRate: 5
+  critDamage: 135
+  evasion: 5
+  mana: 0
+  maxMana: 100
+  power: 460
+  location: 3
+  floor: 1
+  floorCode: H3-1A
+  anime: 'Frieren: Beyond Journey''s End'
+  imageUrl: https://s4.anilist.co/file/anilistcdn/character/large/b184310-tiXvrq4FINXP.jpg
+  characterId: b184310-tiXvrq4FINXP
+  hidden: 1
+  teamSlot: 0

@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Assassinate
   m_EditorClassIdentifier: Assembly-CSharp::Assassinate
   talentName: Assassinate
-  description: A guaranteed critical hit for 130% of a normal attack that can't be
-    evaded. It uses your crit damage.
+  autoDescription: 1
+  description: 'Strike once for 130% (Max 156%) of a normal attack. The hit is always
+    a critical hit (your crit damage applies) and can''t be evaded. It counts as
+    a normal attack, so lifesteal and on-hit effects work. Mana cost: 100.'
   manaCost: 100
   atkPercent: 1.3

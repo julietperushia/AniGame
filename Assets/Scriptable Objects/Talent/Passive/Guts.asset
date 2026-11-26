@@ -13,5 +13,9 @@ MonoBehaviour:
   m_Name: Guts
   m_EditorClassIdentifier: Assembly-CSharp::Guts
   talentName: Guts
-  description: Once per battle, you survive a hit that would knock you out with 1
-    HP, then gain +30% ATK for 3 turns.
+  autoDescription: 1
+  description: Once per battle, survive a hit that would knock you out with 1 HP
+    left, then gain +30% ATK for 5 turns.
+  surviveHp: 1
+  atkBonus: 30
+  turns: 5

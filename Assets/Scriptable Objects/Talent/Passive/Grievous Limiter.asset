@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Grievous Limiter
   m_EditorClassIdentifier: Assembly-CSharp::GrievousLimiter
   talentName: Grievous Limiter
-  description: When the battle starts, decrease the ATK of enemy familiars by 50%.
-    Their ATK increases by 6% every turn after that.
+  autoDescription: 1
+  description: When the battle starts, lower the enemy's ATK by 50% (Max 60%) of
+    its base ATK. It gets back 6% of its base ATK at the start of each of your turns
+    until the whole debuff is gone.
   startReduction: 50
   recoveryPerTurn: 6

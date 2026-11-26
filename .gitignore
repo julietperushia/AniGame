@@ -73,3 +73,22 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ---- AniGame: backups and logs (not part of the game)
+# Project backups made before big changes (_Backup_before_*), anywhere in the project
+_[Bb]ackup*/
+[Bb]ackup*/
+*_[Bb]ackup/
+# Single-file backups and merge leftovers
+*.bak
+*.bak.meta
+*.backup
+*.backup.meta
+*.orig
+*.orig.meta
+*~
+# Logs anywhere (Unity's /Logs/ folder and *.log are already ignored above);
+# this also covers the dev bridge output and simulation CSVs in Logs/AniGameBridge, Logs/TalentMatrix, Logs/HiddenSim
+[Ll]ogs/
+*.log.meta
+*-prev.log

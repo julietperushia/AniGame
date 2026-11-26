@@ -21,7 +21,7 @@ public class FxBob : MonoBehaviour
     void Update()
     {
         if (!started) return;
-        if (rt.anchoredPosition != lastSet) basePos = rt.anchoredPosition; // moved by someone else: follow
+        if ((rt.anchoredPosition - lastSet).sqrMagnitude > 0.25f) basePos = rt.anchoredPosition; // moved by someone else: follow
         lastSet = basePos + new Vector2(0f, Mathf.Sin(Time.unscaledTime * speed + phase) * amplitude);
         rt.anchoredPosition = lastSet;
     }

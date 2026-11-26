@@ -1,14 +1,16 @@
 using UnityEngine;
 
-/// <summary>Anigame: "Absorbs up to 20% of enemy familiars' Mana and deals True damage equal to the absorbed Mana x10."</summary>
 [CreateAssetMenu(menuName = "Talents/Active/ManaReaver")]
 public class ManaReaver : ActiveTalent
 {
+    [Tooltip("Part of the enemy's current Mana absorbed (%).")]
     public int manaStealPercent = 20;
+    [Tooltip("True damage per point of Mana absorbed.")]
     public int damagePerMana = 10;
 
     public override string DefaultName => "Mana Reaver";
-    public override string DefaultDescription => $"Absorb {manaStealPercent}% of the enemy's Mana and deal true damage equal to the absorbed Mana x{damagePerMana}.";
+    public override string DefaultDescription =>
+        $"Absorb {Pct(manaStealPercent)} of the enemy's current Mana (you gain it) and deal true damage equal to the absorbed Mana x {damagePerMana}.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {

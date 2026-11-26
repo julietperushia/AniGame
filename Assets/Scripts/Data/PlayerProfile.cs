@@ -39,6 +39,10 @@ public class SaveData
     /// <summary>Cleared floor count per LOC (index 0 = LOC 1). Floors are cleared in order.</summary>
     public List<int> clearedFloors = new List<int>();
 
+    /// <summary>Hidden Location (3v3): floors cleared, in order (LOC 1 floor 1 = 1 ... LOC 20 floor 3 = 60).</summary>
+    public int hiddenCleared;
+    public int hiddenWins;
+
     public int battlesWon;
     public int battlesLost;
     public int packsOpened;
@@ -49,6 +53,7 @@ public class SaveData
 
     public int battleSpeed = 1;
     public float sfxVolume = 0.7f;
+    public float musicVolume = 0.7f;
 
     /// <summary>Card materials per rarity tier (Common .. God). Used as fusion fodder.</summary>
     public int[] materials = new int[9];
@@ -107,7 +112,7 @@ public class AutoMergeResult
 /// Save data + every rule that changes it: the player's character, build slots, rerolls, fusion, gacha, shop,
 /// permanent buffs, stamina, dismantling and floor rewards (design doc + user changes of 15 Nov 2026).
 /// </summary>
-public static class PlayerProfile
+public static partial class PlayerProfile
 {
     public const int SaveVersion = 2;
     public const int StaminaCost = GameRules.StaminaCost;
@@ -546,6 +551,34 @@ public static class PlayerProfile
 
     /// <summary>Every card is the player's character: its art is always <see cref="CharacterCard"/>.</summary>
     public static Card Art(CardInstance card) => card == null ? null : CharacterCard;
+
+    public const int MaxCardNameLength = 18;
+
+    /// <summary>Name shown for a card copy: the name given to that build, or the character's name.</summary>
+    public static string CardName(CardInstance card, BuildData build)
+    {
+        var b = build ?? card?.build;
+        if (b != null && !string.IsNullOrWhiteSpace(b.name)) return b.name;
+        var art = Art(card);
+        return art != null ? art.DisplayName : CharacterName;
+    }
+
+    /// <summary>Cleans a name typed by the player: no rich-text tags, no line breaks, at most MaxCardNameLength letters.</summary>
+    public static string CleanCardName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "";
+        name = name.Replace("<", "").Replace(">", "").Replace("\n", " ").Replace("\r", " ").Replace("\t", " ").Trim();
+        while (name.Contains("  ")) name = name.Replace("  ", " ");
+        return name.Length > MaxCardNameLength ? name.Substring(0, MaxCardNameLength).Trim() : name;
+    }
+
+    /// <summary>Renames one card copy (its own build or one slot's build) and saves. Empty = back to the character's name.</summary>
+    public static void RenameBuild(BuildData build, string name)
+    {
+        if (build == null) return;
+        build.name = CleanCardName(name);
+        Save();
+    }
 
     public static CardInstance FindCard(int uid) => uid <= 0 ? null : Data.cards.FirstOrDefault(c => c.uid == uid);
 

@@ -13,7 +13,14 @@ MonoBehaviour:
   m_Name: Poison
   m_EditorClassIdentifier: Assembly-CSharp::Poison
   talentName: Poison
-  description: Inflict a stack of Poison to enemy familiars, dealing 5 + 5% true
-    damage every turn it persists. (The Poison have 10% chance to miss, plus 5% chance
-    after each turn it damaged)
+  autoDescription: 1
+  description: 'Inflict a stack of Poison. At the start of each of its turns a poisoned
+    enemy takes 5 true damage plus 5% (Max 6%) of its max HP per stack. Each tick
+    can miss: 15% with one stack, +5% for every extra stack. A miss cures the poison
+    and removes every stack. Mana cost: 100.'
   manaCost: 100
+  stacksPerCast: 1
+  percentPerStack: 0.05
+  flatDamage: 5
+  missBase: 15
+  missPerStack: 5

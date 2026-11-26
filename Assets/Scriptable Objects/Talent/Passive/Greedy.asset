@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: Greedy
   m_EditorClassIdentifier: Assembly-CSharp::Greedy
   talentName: Greedy
-  description: All of the enemy's healing (talents, regeneration, lifesteal) heals
-    you instead.
+  autoDescription: 1
+  description: 80% of every heal the enemy gets (talents, regeneration, lifesteal)
+    heals you instead.
+  stealPercent: 0.8

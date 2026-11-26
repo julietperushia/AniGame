@@ -12,6 +12,8 @@ public class BuildData
     public string talent;
     /// <summary>God cards only: the passive talent (talent is then the active one).</summary>
     public string talent2;
+    /// <summary>Name given by the player (empty = the character's name). Each saved copy keeps its own.</summary>
+    public string name;
 
     public BuildData Clone() => (BuildData)MemberwiseClone();
 

@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: Charge Attack
   m_EditorClassIdentifier: Assembly-CSharp::ChargeAttack
   talentName: Charge Attack
-  description: 'While above 30% HP you don''t attack: each attack is stored instead.
-    Once your HP drops to 30% or lower, your next attack releases everything and
-    deals 130% of the stored damage on top.'
+  autoDescription: 1
+  description: 'While your HP is above 30%, your normal attacks are stored instead
+    of hitting (up to 4). When 4 are stored, or once your HP is 30% or lower, your
+    next attack releases them: its normal damage plus 130% of all the stored damage.'
+  hpThreshold: 0.3
+  maxStored: 4
+  releaseMultiplier: 1.3

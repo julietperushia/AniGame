@@ -141,14 +141,14 @@ public class ShopScreen : MonoBehaviour
         }
 
         screen.messageText = UIFactory.CreateText(canvas, "Message", "", 28, UIFactory.TextMain, TextAnchor.MiddleCenter, FontStyle.Bold);
-        UIFactory.Place(screen.messageText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 80), new Vector2(1000, 56));
+        UIFactory.Place(screen.messageText.rectTransform, new Vector2(0.5f, 0f), new Vector2(0, 104), new Vector2(1000, 56));
         var note = UIFactory.CreateText(canvas, "Note", "Diamonds come from gold packs. God Orbs are never sold: God floors and diamond packs only.", 21, UIFactory.TextDim, TextAnchor.MiddleLeft);
-        UIFactory.Place(note.rectTransform, new Vector2(0f, 0f), new Vector2(60, 36), new Vector2(900, 40));
+        UIFactory.Place(note.rectTransform, new Vector2(0f, 0f), new Vector2(60, 24), new Vector2(900, 40));
         note.rectTransform.pivot = new Vector2(0f, 0f);
         screen.gachaButton = UIFactory.CreateButton(canvas, "Gacha", "GACHA", UIFactory.Accent2, 26);
-        UIFactory.Place((RectTransform)screen.gachaButton.transform, new Vector2(1f, 0f), new Vector2(-470, 64), new Vector2(260, 72));
-        screen.myCardsButton = UIFactory.CreateButton(canvas, "MyCards", "MY CARDS", UIFactory.Accent, 26);
-        UIFactory.Place((RectTransform)screen.myCardsButton.transform, new Vector2(1f, 0f), new Vector2(-170, 64), new Vector2(280, 72));
+        UIFactory.Place((RectTransform)screen.gachaButton.transform, new Vector2(1f, 0f), new Vector2(-470, 18), new Vector2(260, 64));
+        screen.myCardsButton = UIFactory.CreateButton(canvas, "MyCards", "COLLECTION", UIFactory.Accent, 26);
+        UIFactory.Place((RectTransform)screen.myCardsButton.transform, new Vector2(1f, 0f), new Vector2(-170, 18), new Vector2(280, 64));
         return screen;
     }
 }

@@ -2771,6 +2771,327 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 6244ddc6af533004895bc89c2495863a, type: 2}
     - {fileID: 11400000, guid: 7236d9e6a425c814e98a5de222b6833c, type: 2}
     - {fileID: 11400000, guid: 28717f342fa2519429a0a4eb23359093, type: 2}
+  hiddenLocations:
+  - number: 1
+    anime: Attack on Titan
+    rarity: 0
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 12d6edd797dfba94ab7eab5bcc293b5b, type: 2}
+      - {fileID: 11400000, guid: 4a50ee566db69ff40a3fa0e35cfbcfac, type: 2}
+      - {fileID: 11400000, guid: bd9d13ac2d04dd24197236d9fb9a0743, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: f70215ad7051049409be0929bce924de, type: 2}
+      - {fileID: 11400000, guid: be07bedcaef6a0d44a5ef4ef9dfba03a, type: 2}
+      - {fileID: 11400000, guid: 47ec0475453a0094eb9c8b20f9abfd7a, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 69a5de12f95ae1042927a45993a6a1e1, type: 2}
+      - {fileID: 11400000, guid: 473b25795eb081e4b9d1e52265bd1e7d, type: 2}
+      - {fileID: 11400000, guid: 660d344e265300d42990d73813674566, type: 2}
+  - number: 2
+    anime: 'Fullmetal Alchemist: Brotherhood'
+    rarity: 0
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: b19e08bdcdbaa9d4995ec00dfa0a90d2, type: 2}
+      - {fileID: 11400000, guid: a79fc4426a6f7034084ae52e1dbf7029, type: 2}
+      - {fileID: 11400000, guid: d3fa3e1e365edd64aabc22c0c54a13db, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: f093edeaf7ee0d349bccf5b64780044e, type: 2}
+      - {fileID: 11400000, guid: 9a3579163ec1c094dbd29506167f963e, type: 2}
+      - {fileID: 11400000, guid: 456354455574126408c2190670990571, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 43a96fe291d4b4d4b950b76c2f2e2201, type: 2}
+      - {fileID: 11400000, guid: 45dfea0002a141c4daefddfbd525e9a5, type: 2}
+      - {fileID: 11400000, guid: fb13068ccd4116a4cabf6ba2d14e62d1, type: 2}
+  - number: 3
+    anime: 'Frieren: Beyond Journey''s End'
+    rarity: 1
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 8d3d6a4cf422c374484fcbeabb65f914, type: 2}
+      - {fileID: 11400000, guid: 2b325c340839a1b4f9ecb733d4acb7ac, type: 2}
+      - {fileID: 11400000, guid: 8a8cac9b48d4fe640a33d9d8a07efbfc, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 3d5bbf3ffbef88044a12b0b6b2c8daee, type: 2}
+      - {fileID: 11400000, guid: ef6e780068d0ee84d93e27372e9b878b, type: 2}
+      - {fileID: 11400000, guid: 4871032d7c5effa4ca1d7d735fc1ad69, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 1b89f5c58992cb24288359f74cb01e21, type: 2}
+      - {fileID: 11400000, guid: adcb4bd11b14e3440ba795d8cdaf6484, type: 2}
+      - {fileID: 11400000, guid: d463f75931c05c145aa3b6bca2916a0a, type: 2}
+  - number: 4
+    anime: Steins;Gate
+    rarity: 1
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 13e487c58e8547745ab9ecf9d9b35fb8, type: 2}
+      - {fileID: 11400000, guid: 290e491cc96eb094e9437c26dde0133e, type: 2}
+      - {fileID: 11400000, guid: 3fc053b3873205a4da7366535ef07b45, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 7ce4956ed7ca1c445b0cf21f211d37c5, type: 2}
+      - {fileID: 11400000, guid: 317cc06df1dac704894a9d4dfeca6c2c, type: 2}
+      - {fileID: 11400000, guid: 2f722322faa16b749aa5fb0b7839fdf3, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 23d60603250f9c448b18c46dd22a433b, type: 2}
+      - {fileID: 11400000, guid: 721e5232336711b4d803b6a91eca7969, type: 2}
+      - {fileID: 11400000, guid: 3abcf1fb60201504796809f58e6c656c, type: 2}
+  - number: 5
+    anime: One Piece
+    rarity: 2
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: f3dafd81ac9480d4a8eba2830a044316, type: 2}
+      - {fileID: 11400000, guid: b04df7212fa73b6448069075b80efceb, type: 2}
+      - {fileID: 11400000, guid: 1f2989bf5ddbb6e46a85834fd2920e68, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 50831b5617049ba4c86737f79ab2fbbc, type: 2}
+      - {fileID: 11400000, guid: 4922dc781e9c84043b8a3549b8136756, type: 2}
+      - {fileID: 11400000, guid: f45d4c019bb59b04ab6fea2f848d1253, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: e37ab85fbf882b64bb7a1c983bba85d2, type: 2}
+      - {fileID: 11400000, guid: d9bd300c09a0f2c40a3e6e71677aadb9, type: 2}
+      - {fileID: 11400000, guid: dae1e43a278f5f04e8cde8c4d6215594, type: 2}
+  - number: 6
+    anime: Hunter x Hunter
+    rarity: 2
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: ab73b04cfdfafc54db27a7b66a7435c0, type: 2}
+      - {fileID: 11400000, guid: 05aa3f53dfac5ac4cb4c356fe694a799, type: 2}
+      - {fileID: 11400000, guid: c8505e757bc7681458f03dc640904ca1, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: a482e3a845fa71443826b232fc7439fe, type: 2}
+      - {fileID: 11400000, guid: 9fe442a7562b6cd41b757edbd79a4e96, type: 2}
+      - {fileID: 11400000, guid: e4303f1302d9b89418be37367029db6a, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 08ddd758759b7c548b5a45fbfbcaf517, type: 2}
+      - {fileID: 11400000, guid: 3018a85bfc9abca488128e5e49271338, type: 2}
+      - {fileID: 11400000, guid: f99b8e9e723268847ba208c8523f4f78, type: 2}
+  - number: 7
+    anime: Death Note
+    rarity: 3
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: b436e6bb17b90d44588256c339ced341, type: 2}
+      - {fileID: 11400000, guid: 99c5e0899ee75314f8510bd8043b1d82, type: 2}
+      - {fileID: 11400000, guid: 6ee9d3c9ea06e6448b388f8edbc636dc, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 11718f919b2d7044ebfecc74339c2a35, type: 2}
+      - {fileID: 11400000, guid: e5f2a1ac9fd843e448879c34cadefdef, type: 2}
+      - {fileID: 11400000, guid: 41af52f8fc3d15c4bbf441665d652b1d, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 80b3c7214486dce4e9191becd7030f1a, type: 2}
+      - {fileID: 11400000, guid: 8cc3ac092eebbc749891003f88138a4f, type: 2}
+      - {fileID: 11400000, guid: 0e40ce88f1631cc4b8a1b36e395a5c28, type: 2}
+  - number: 8
+    anime: Cowboy Bebop
+    rarity: 3
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: af8a1d48ccf5eb244a9d442f2a975b89, type: 2}
+      - {fileID: 11400000, guid: caf03382e8143ad4b8bf9c4f5de13817, type: 2}
+      - {fileID: 11400000, guid: ed06766ba4af07640bc41c57ec5910b7, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: fe6227e45236c284289fc0bdb62cd64d, type: 2}
+      - {fileID: 11400000, guid: a8717784ceae09b45bb69af384910173, type: 2}
+      - {fileID: 11400000, guid: df37e074391951c45b4e322b3d0e70e4, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: b0ef564aefd2e424f9be1fa9c537ab57, type: 2}
+      - {fileID: 11400000, guid: ce97fb6de46963745a2035d00040ee4d, type: 2}
+      - {fileID: 11400000, guid: 262d44f2491aea94686eb86492574a32, type: 2}
+  - number: 9
+    anime: Vinland Saga
+    rarity: 4
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 18106fc34a156c645ac29673420f8ae0, type: 2}
+      - {fileID: 11400000, guid: 2fb0aabac83835e48903ff51db5bac24, type: 2}
+      - {fileID: 11400000, guid: f30ad15311fe6704f82d4a49497221fd, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 415c6cf0b297b5f4098d0632baa1969c, type: 2}
+      - {fileID: 11400000, guid: 81fb4de3c22b2184dbb61a645059ff49, type: 2}
+      - {fileID: 11400000, guid: 59ac70b5ce4dc624d8a1e501b4648aa7, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 3008d51159f2d5948bd399716864027a, type: 2}
+      - {fileID: 11400000, guid: 77d982271cfa86c448d4e655c23581c1, type: 2}
+      - {fileID: 11400000, guid: 2b7a82e36dba07f4a95c00b6bd091759, type: 2}
+  - number: 10
+    anime: 'Naruto: Shippuden'
+    rarity: 4
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: b9b43ec3cb79bf1468a775cbfcb71c38, type: 2}
+      - {fileID: 11400000, guid: 601fe79b32b6bf341abb60cd84c4edbe, type: 2}
+      - {fileID: 11400000, guid: 8e4baf4d78683f54396da9e64b3e3013, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: f4ffd466f97e4a64f98d94e35aa3a428, type: 2}
+      - {fileID: 11400000, guid: 8c610abc8906a564c8cd028b94df46b1, type: 2}
+      - {fileID: 11400000, guid: b22b6ebf529933c45b1f3aa5a4e82653, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: e210a542b17dadd4e80e30ed456efdcc, type: 2}
+      - {fileID: 11400000, guid: 496985dfedfb8f640ac83d41d8c71771, type: 2}
+      - {fileID: 11400000, guid: 78d197aebbff7f540a1468567baa1e2c, type: 2}
+  - number: 11
+    anime: 'Demon Slayer: Kimetsu no Yaiba'
+    rarity: 5
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 3bf599d347eb8d54e9f7b505e384821f, type: 2}
+      - {fileID: 11400000, guid: 30d29bf34c3985d4f85b58a3a28a88a2, type: 2}
+      - {fileID: 11400000, guid: deab99e96638da64c8e560c828afa38f, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 6ed0cbf9a708ea745ae9cbd624a073f4, type: 2}
+      - {fileID: 11400000, guid: 50d8adbf55a78c041bed1aa9f61d3817, type: 2}
+      - {fileID: 11400000, guid: 7ab260ab9fd90c9408536a879ce9ade6, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 04fdd610eaed5af4aa7a2b619e8a264c, type: 2}
+      - {fileID: 11400000, guid: b465ea2e8a967d24594adbd78cafc6ab, type: 2}
+      - {fileID: 11400000, guid: 3b1e1310b31e70f419f6d682832c03cf, type: 2}
+  - number: 12
+    anime: Jujutsu Kaisen
+    rarity: 5
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: d710e28e6cac3394fbf43be743bf494a, type: 2}
+      - {fileID: 11400000, guid: 9aeab57f9d4bd13458ad42c058d03c1d, type: 2}
+      - {fileID: 11400000, guid: 3685108860f83654f8745dab39cca71b, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: e71a9e78f46e52440acd4bc327f340c4, type: 2}
+      - {fileID: 11400000, guid: 686e73ae38860614abb8398b62559b77, type: 2}
+      - {fileID: 11400000, guid: 1344c00ec34f3724aac5305547f94223, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 747d59930e346a8418b2c0f93c459199, type: 2}
+      - {fileID: 11400000, guid: 7bd0a5d2a73a32a438a072466d4b5e2b, type: 2}
+      - {fileID: 11400000, guid: 621f908e6ea7aed40b7369b08a2b82f0, type: 2}
+  - number: 13
+    anime: 'Code Geass: Lelouch of the Rebellion'
+    rarity: 6
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 1a5bc8ff145b6c744bd6d1939db42cf0, type: 2}
+      - {fileID: 11400000, guid: bccb6f36d3a37284fa076cd61a12555b, type: 2}
+      - {fileID: 11400000, guid: dced843d58a6a8743b491e1fbb7862a5, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 7c80b3c4e29d5ed40b3bc44190f8fee6, type: 2}
+      - {fileID: 11400000, guid: 63b73e44a4c72874b930a89e2780d61d, type: 2}
+      - {fileID: 11400000, guid: 3bbe9665e35eb5a4c82093795e3c5abe, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 070d8fc4a69f0764090af0d1125d4d16, type: 2}
+      - {fileID: 11400000, guid: 88b6d130cbe02184faf9cd3031fde91e, type: 2}
+      - {fileID: 11400000, guid: b8d4945145d606541bc589e42105f7e1, type: 2}
+  - number: 14
+    anime: Monster
+    rarity: 6
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 0b69546fcd1461e4aaf052233c0049cc, type: 2}
+      - {fileID: 11400000, guid: d4eb0b50da2a8b341b8c0bbd90d9d306, type: 2}
+      - {fileID: 11400000, guid: 4890995a1a543e34aac53caabf16c346, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 512c00b4fe26e8c46bb3e9ef9ef90953, type: 2}
+      - {fileID: 11400000, guid: af516847446af5741b805ce9769cb68e, type: 2}
+      - {fileID: 11400000, guid: d3cf7ad9b71f23b4ab5d81eba19d8a70, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 208bbcc4f2abca948bf0b55623d84ebc, type: 2}
+      - {fileID: 11400000, guid: 20c1aae62ded849459a8f59b08f7350a, type: 2}
+      - {fileID: 11400000, guid: bccf56323760d834c891dfda7cde0e7e, type: 2}
+  - number: 15
+    anime: Gintama
+    rarity: 7
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 56f32979241841f4e9626801e89588a5, type: 2}
+      - {fileID: 11400000, guid: a2656d6c426ec0241a1a43d6dedadefa, type: 2}
+      - {fileID: 11400000, guid: 4eb3825388ec18e46ae39b89de8a82ec, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 34c97db10910dff4fa64bf9e6fc227c5, type: 2}
+      - {fileID: 11400000, guid: 156e900f511595245b34a97edfc2e049, type: 2}
+      - {fileID: 11400000, guid: c761cdabaaca9a341b0407c7293ae59c, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 1f79822dc3eff9842a5c5373abd1cc03, type: 2}
+      - {fileID: 11400000, guid: 9e81c8d2ce444be48b16e84a7b142b7c, type: 2}
+      - {fileID: 11400000, guid: 9d655a195a757fe49a6ff9d85897612c, type: 2}
+  - number: 16
+    anime: Mob Psycho 100
+    rarity: 7
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 7e1c0f3e4a7af744497ed5ba9905ffa4, type: 2}
+      - {fileID: 11400000, guid: 6d93f8ed375556e458ffe4a8ccb2b0a9, type: 2}
+      - {fileID: 11400000, guid: e0b0def252cbbe9418a8da2a864d005a, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 628ae4fabf6203f419fb214863ffea80, type: 2}
+      - {fileID: 11400000, guid: 354e289338479d548bcae55fc9081b90, type: 2}
+      - {fileID: 11400000, guid: 6d3e3ee0dde986347bc055f23ed9d529, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 2d29ee9d2eac9a14eba731ec3e92b80c, type: 2}
+      - {fileID: 11400000, guid: 127e8c909cd5d0841a52d46cd6cec2c5, type: 2}
+      - {fileID: 11400000, guid: 7f8c1fb99ac9fe9449d0852dfa51decd, type: 2}
+  - number: 17
+    anime: 'Cyberpunk: Edgerunners'
+    rarity: 8
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 3e6d97cb4ccd6374abb436036b9a98b4, type: 2}
+      - {fileID: 11400000, guid: 3e2ed4315bfc5ae449dbd9105b93c21b, type: 2}
+      - {fileID: 11400000, guid: d388c25e4f8577d4492ab639774264c3, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: b8e538d81f75ee84b8d17cf60adbc291, type: 2}
+      - {fileID: 11400000, guid: 40577e39bba2d49498dba7bb40d388f0, type: 2}
+      - {fileID: 11400000, guid: 027e7b95cdcd3564db2a1f540c2b6b0c, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 784d0ef2c04a4ee4397b81e18f71c1f3, type: 2}
+      - {fileID: 11400000, guid: 3b129eea935f0c54499839441c52af43, type: 2}
+      - {fileID: 11400000, guid: 9798129fe9aa3c84f97223c216f97e92, type: 2}
+  - number: 18
+    anime: Chainsaw Man
+    rarity: 8
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: 54831fd7e97698d4bb14ec00e2794ab4, type: 2}
+      - {fileID: 11400000, guid: 410efc0f187f6d74daa3ce3ebfe75cd3, type: 2}
+      - {fileID: 11400000, guid: fa54b778c0ea6b44caf7d668b9892018, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: cd92563466e628f47ac5e37e09f9def2, type: 2}
+      - {fileID: 11400000, guid: 778163d7664f60e49b32c6f66f84fcb1, type: 2}
+      - {fileID: 11400000, guid: c32fdef85aaa13d4fb266349e5496896, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 4b38b927935c3cb438195e91a474f38e, type: 2}
+      - {fileID: 11400000, guid: 5238008dd820fda44be83ab8b2f12675, type: 2}
+      - {fileID: 11400000, guid: 1b7e2f566edbc5c4ba1d3b37e5b9f09e, type: 2}
+  - number: 19
+    anime: Dragon Ball Z
+    rarity: 8
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: cfe2a291b12d29845b23a7cbb5a51d6f, type: 2}
+      - {fileID: 11400000, guid: 1010d929a5696de4baf737719dd7bc27, type: 2}
+      - {fileID: 11400000, guid: 84b40b7c91cab0141ba24712edb35582, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: aac730169b5046c4e8a43245ab39545a, type: 2}
+      - {fileID: 11400000, guid: c8c73de84bbf5d74aae91e6c591cc8ab, type: 2}
+      - {fileID: 11400000, guid: 74a2d81458cdc4e41b2a18197d62611a, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: fd46226a8565cc44eaeb06782bedb1d1, type: 2}
+      - {fileID: 11400000, guid: 5ad4d3732177bfb48b7c3ec30cb7c082, type: 2}
+      - {fileID: 11400000, guid: 83ea3dcc2cb771642be256c1e5b9e149, type: 2}
+  - number: 20
+    anime: Haikyuu!!
+    rarity: 8
+    floors:
+    - enemies:
+      - {fileID: 11400000, guid: a3021288b0e007e4d9cf45d51172087b, type: 2}
+      - {fileID: 11400000, guid: 2d4feb8732ad507448241c9403027c5b, type: 2}
+      - {fileID: 11400000, guid: e1a0e12e0b3b0504e88da558f8467673, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: 362ae4d08c9800e41bcb2ef38f9b4913, type: 2}
+      - {fileID: 11400000, guid: b03224de024d4e14aa54f732e45de83d, type: 2}
+      - {fileID: 11400000, guid: 8e5bfe5c256098e4586e9f1608dd1657, type: 2}
+    - enemies:
+      - {fileID: 11400000, guid: b3407873e6ed3714690f68eb939670f2, type: 2}
+      - {fileID: 11400000, guid: fe8d0b969d90aa945b6827b29b69c64b, type: 2}
+      - {fileID: 11400000, guid: 1880685b337aedf4b8ad563a58ca50c5, type: 2}
   talents:
   - {fileID: 11400000, guid: e3656e06e93e5684ba3bc50c2bb8190e, type: 2}
   - {fileID: 11400000, guid: a32bbbaad4635fb4aa7e4e7835a0f780, type: 2}

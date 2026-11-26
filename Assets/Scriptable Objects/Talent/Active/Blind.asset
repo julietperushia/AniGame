@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: Blind
   m_EditorClassIdentifier: Assembly-CSharp::Blind
   talentName: Blind
-  description: 'Blinds the enemy for 2 turns: each of its normal attacks has a 50%
-    chance to miss.'
+  autoDescription: 1
+  description: 'Blind the enemy for 2 turns: each of its normal attacks has a 50%
+    chance to miss. Mana cost: 100.'
   manaCost: 100
   turns: 2
+  missChance: 50
