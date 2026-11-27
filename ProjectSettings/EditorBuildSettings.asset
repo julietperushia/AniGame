@@ -38,6 +38,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TeamBattle.unity
     guid: d2b57728caf1ae94daf253dd05ec12c0
+  - enabled: 1
+    path: Assets/Scenes/Boss.unity
+    guid: c81d56b3a3d685c4db4202e859e9a033
+  - enabled: 1
+    path: Assets/Scenes/Minigames.unity
+    guid: af79632b0671cf241bbf02b8d313df2f
   - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02

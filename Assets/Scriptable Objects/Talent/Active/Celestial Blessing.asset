@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CelestialBlessing
   talentName: Celestial Blessing
   autoDescription: 1
-  description: 'Raise your max Mana by 50 (up to 600; not while silenced) and your
-    Mana Regeneration by 18% (Max 22%), then heal HP equal to 2x (Max 2.4x) your
+  description: 'Raise your max Mana by 50 (up to 300; not while silenced) and your
+    Mana Regeneration by 18% (Max 22%), then heal HP equal to 1.5x (Max 1.8x) your
     max Mana. It fires again every time you have 100 Mana: the bigger bar stores
     extra Mana and makes each heal bigger. Mana cost: 100.'
   manaCost: 100
-  maxManaLimit: 600
+  maxManaLimit: 300
   maxManaIncrease: 50
   manaRegenBonus: 18
-  healPerMaxMana: 2
+  healPerMaxMana: 1.5
   needsFullBar: 0

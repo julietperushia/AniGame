@@ -15,9 +15,12 @@ MonoBehaviour:
   talentName: Frostbite
   autoDescription: 1
   description: 'Lower the enemy''s SPD by 15% (Max 18%) of its base SPD (stacks up
-    to 3 times), with a 25% (Max 30%) chance to Freeze it: a frozen card skips its
-    next turn and can''t evade until then. Mana cost: 100.'
+    to 3 times), then try to Freeze it: 25% (Max 30%) chance at full SPD, growing
+    as its SPD drops, up to 60% once its SPD is 35% of its base SPD or lower. A frozen
+    card skips its next turn and can''t evade until then. Mana cost: 100.'
   manaCost: 100
   spdPercent: 15
   maxStacks: 3
   freezeChance: 25
+  maxFreezeChance: 60
+  maxChanceAtSpeedPercent: 35

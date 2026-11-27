@@ -132,9 +132,26 @@ public class CardDatabase : ScriptableObject
             foreach (var loc in locations)
                 foreach (var c in loc.floors)
                     if (c != null && !byKey.ContainsKey(c.Key)) byKey[c.Key] = c;
+            foreach (var h in hiddenLocations)                       // Hidden Location characters too (bosses use them)
+                if (h != null)
+                    foreach (var f in h.floors)
+                        if (f != null)
+                            foreach (var c in f.enemies)
+                                if (c != null && !byKey.ContainsKey(c.Key)) byKey[c.Key] = c;
         }
         byKey.TryGetValue(key, out Card card);
         return card;
+    }
+
+    /// <summary>Every character card of the game (campaign floors and Hidden Location), for pickers and quizzes.</summary>
+    public List<Card> AllCharacterCards()
+    {
+        var list = new List<Card>();
+        var seen = new HashSet<Card>();
+        foreach (var loc in locations) foreach (var c in loc.floors) if (c != null && seen.Add(c)) list.Add(c);
+        foreach (var h in hiddenLocations)
+            if (h != null) foreach (var f in h.floors) if (f != null) foreach (var c in f.enemies) if (c != null && seen.Add(c)) list.Add(c);
+        return list;
     }
 
     Dictionary<CardRarity, List<Card>> byRarity;

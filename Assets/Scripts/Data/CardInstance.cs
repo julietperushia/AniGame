@@ -14,6 +14,8 @@ public class BuildData
     public string talent2;
     /// <summary>Name given by the player (empty = the character's name). Each saved copy keeps its own.</summary>
     public string name;
+    /// <summary>Picture given by the player (empty = the character's picture): "gallery:KEY" or "pic:ID" (see PictureStore).</summary>
+    public string picture;
 
     public BuildData Clone() => (BuildData)MemberwiseClone();
 

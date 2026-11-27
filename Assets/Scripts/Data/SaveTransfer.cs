@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
@@ -18,7 +19,15 @@ public class SaveExport
     public int highestLocation;
     public SaveData save;          // cards, builds, slots, buffs, currencies, orbs, stamina, progress, stats, settings, character
     public string portraitPng;     // the imported character picture (base64 PNG), empty when using a gallery portrait
+    public List<SavedPicture> cardPictures = new List<SavedPicture>(); // pictures imported for single cards (BuildData.picture "pic:ID")
     public string hash;            // HMAC of everything above: edited files are refused
+}
+
+[Serializable]
+public class SavedPicture
+{
+    public string id;
+    public string png; // base64
 }
 
 /// <summary>
@@ -64,6 +73,10 @@ public static class SaveTransfer
                 portraitPng = d.characterSource == "file" && File.Exists(PlayerProfile.PortraitPath)
                     ? Convert.ToBase64String(File.ReadAllBytes(PlayerProfile.PortraitPath)) : ""
             };
+            var ids = new HashSet<string>();
+            foreach (var b in PlayerProfile.AllBuilds())
+                if (PictureStore.PlayerFileExists(b.picture) && ids.Add(PictureStore.IdOf(b.picture)))
+                    export.cardPictures.Add(new SavedPicture { id = PictureStore.IdOf(b.picture), png = Convert.ToBase64String(File.ReadAllBytes(PictureStore.PlayerPath(PictureStore.IdOf(b.picture)))) });
             if (string.IsNullOrEmpty(path))
             {
                 Directory.CreateDirectory(ExportFolder);
@@ -136,6 +149,10 @@ public static class SaveTransfer
                 File.WriteAllBytes(PlayerProfile.PortraitPath, Convert.FromBase64String(export.portraitPng));
             else if (save.characterSource == "file")
                 warning = (warning != null ? warning + " " : "") + "The character picture was not in the file; pick it again on the Character screen.";
+
+            if (export.cardPictures != null)
+                foreach (var pic in export.cardPictures)
+                    if (pic != null && !string.IsNullOrEmpty(pic.png)) PictureStore.RestorePlayer(pic.id, Convert.FromBase64String(pic.png));
 
             PlayerProfile.ApplyImportedSave(save); // validates, re-signs and saves
             return null;

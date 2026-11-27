@@ -16,7 +16,7 @@ MonoBehaviour:
   autoDescription: 1
   description: 'While your HP is above 30%, your normal attacks are stored instead
     of hitting (up to 4). When 4 are stored, or once your HP is 30% or lower, your
-    next attack releases them: its normal damage plus 130% of all the stored damage.'
+    next attack releases them: its normal damage plus 160% of all the stored damage.'
   hpThreshold: 0.3
   maxStored: 4
-  releaseMultiplier: 1.3
+  releaseMultiplier: 1.6

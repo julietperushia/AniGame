@@ -18,6 +18,9 @@ public class TeamMember
     public readonly List<Talent> talents = new List<Talent>();
     public int index;                  // 0..2 inside its team
     public Card art;                   // optional (names / pictures)
+    /// <summary>Turns per round (a boss fighting a team alone acts 3 times: at full, 2/3 and 1/3 of its SPD).</summary>
+    public int actionsPerRound = 1;
+    public Sprite portrait;            // optional picture when there is no Card (bosses)
     internal int nextActive;
 
     public int Tier => GameRules.Tier(rarity);

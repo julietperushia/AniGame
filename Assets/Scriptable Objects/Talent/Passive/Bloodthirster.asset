@@ -15,10 +15,10 @@ MonoBehaviour:
   talentName: Bloodthirster
   autoDescription: 1
   description: On your first turn gain 18% (Max 22%) Lifesteal and +23% (Max 27.6%)
-    healing received (max +50%). Every turn after that, gain +5% (Max 6%) Lifesteal
-    (max 100%). Lifesteal heals you that % of the damage your normal attacks deal.
+    healing received (max +50%). Every turn after that, gain +3% (Max 4%) Lifesteal
+    (max 75%). Lifesteal heals you that % of the damage your normal attacks deal.
   startLifesteal: 18
   healingBonus: 0.23
   maxHealingBonus: 0.5
-  lifestealPerTurn: 5
-  maxLifesteal: 100
+  lifestealPerTurn: 3
+  maxLifesteal: 75

@@ -9,10 +9,12 @@ public class Assassinate : ActiveTalent
     public override string DefaultName => "Assassinate";
     public override string DefaultDescription =>
         $"Strike once for {PctF(atkPercent)} of a normal attack. The hit is always a critical hit (your crit damage applies) and can't be evaded. " +
-        "It counts as a normal attack, so lifesteal and on-hit effects work.";
+        "It is your normal attack for this turn (you don't attack again), so lifesteal and on-hit effects work.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
     {
         BattleLog.Current?.PerformAttack(self, enemy, new BattleEngine.AttackOptions { skillHit = true, forceCrit = true, unevadable = true, multiplier = Scaled(atkPercent, self) });
+        self.skipAttackThisTurn = true; // the strike was this turn's attack
+        self.skipAttackText = "already struck with Assassinate this turn";
     }
 }

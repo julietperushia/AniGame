@@ -15,5 +15,5 @@ MonoBehaviour:
   talentName: Doppelganger
   autoDescription: 1
   description: Whenever the enemy raises its ATK, DEF, SPD or max HP, or heals, you
-    gain 70% of that amount too.
-  copyPercent: 0.7
+    gain 110% of that amount too.
+  copyPercent: 1.1

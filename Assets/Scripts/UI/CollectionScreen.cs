@@ -250,24 +250,29 @@ public class CollectionScreen : MonoBehaviour
         c.selectedColor = Color.white;
         btn.colors = c;
         btn.onClick.AddListener(OpenRename);
-        TooltipTrigger.Add(nt, "<b>Rename</b>\nClick to give this card its own name. Each saved copy (the card and every slot) keeps its own name.");
+        TooltipTrigger.Add(nt, "<b>Edit card</b>\nClick to give this card its own name and picture. Each saved copy (the card and every slot) keeps its own.");
     }
 
     void OpenRename()
     {
         if (selected == null || viewBuild == null) return;
         string copy = viewSlot >= 0 ? $"the copy in slot {viewSlot + 1}" : $"card #{selected.uid}";
-        TextPrompt.Show(transform, "RENAME CARD", $"Only {copy} changes. Other saved copies keep their names.",
-                        PlayerProfile.CardName(selected, viewBuild), PlayerProfile.MaxCardNameLength,
-                        ApplyRename, "DEFAULT NAME", () => ApplyRename(""));
+        CardEditPanel.Show(transform, selected, viewBuild, $"Only {copy} changes. Other saved copies keep their own name and picture.", ApplyEdit);
     }
 
-    void ApplyRename(string text)
+    void ApplyEdit(string name, string picture)
     {
         if (selected == null || viewBuild == null) return;
-        PlayerProfile.RenameBuild(viewBuild, text);
-        if (pendingBuild != null) pendingBuild.name = viewBuild.name; // an unsaved roll keeps the new name when it is saved
-        Message(string.IsNullOrEmpty(viewBuild.name) ? $"Name set back to {PlayerProfile.CardName(selected, viewBuild)}." : $"Renamed to {viewBuild.name}.");
+        string oldName = viewBuild.name ?? "", oldPic = viewBuild.picture ?? "";
+        PlayerProfile.EditBuild(viewBuild, name, picture);
+        if (pendingBuild != null) { pendingBuild.name = viewBuild.name; pendingBuild.picture = viewBuild.picture; } // an unsaved roll keeps them when it is saved
+        bool nameChanged = (viewBuild.name ?? "") != oldName, picChanged = (viewBuild.picture ?? "") != oldPic;
+        if (!nameChanged && !picChanged) { Message("Nothing changed."); return; }
+        var parts = new System.Collections.Generic.List<string>();
+        if (nameChanged) parts.Add(string.IsNullOrEmpty(viewBuild.name) ? $"name set back to {PlayerProfile.CardName(selected, viewBuild)}" : $"renamed to {viewBuild.name}");
+        if (picChanged) parts.Add(string.IsNullOrEmpty(viewBuild.picture) ? "picture set back to your character's" : "new picture");
+        string msg = string.Join(", ", parts);
+        Message(char.ToUpper(msg[0]) + msg.Substring(1) + ".");
         SfxSynth.Play("buff", 0.5f);
         RefreshAll();
     }

@@ -42,7 +42,7 @@ public class CardTile : MonoBehaviour
     {
         if (card == null) { SetEmpty("Empty"); return; }
         var b = build ?? card.build;
-        Set(PlayerProfile.Art(card), card.rarity, b.element, CardStats.RarityName(card.rarity), CardStats.Power(card, b).ToString());
+        Set(PlayerProfile.Art(card, b), card.rarity, b.element, CardStats.RarityName(card.rarity), CardStats.Power(card, b).ToString());
         nameText.text = PlayerProfile.CardName(card, b);
         var db = CardDatabase.Instance;
         var t2 = card.Tier >= GameRules.MaxTier && db != null ? db.FindTalent(b.talent2) : null;

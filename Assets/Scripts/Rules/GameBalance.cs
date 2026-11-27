@@ -20,6 +20,12 @@ public class GameBalance : ScriptableObject
     [Tooltip("ATK gained per round of enrage (% of base ATK).")]
     public int enragePercent = 10;
 
+    [Header("Healing fatigue (every battle)")]
+    [Tooltip("After this round, all healing received drops a little more every round (0 = off).")]
+    public int healingFatigueAfterRound = 10;
+    [Tooltip("Healing lost per round after that, in %. 5 = round 11: -5%, round 12: -10% ... round 30: no healing at all.")]
+    public int healingFatiguePerRound = 5;
+
     [Header("3v3 team battles")]
     [Tooltip("Normal attack damage x this in 3v3. Team ATK and DEF are the totals of 3 cards, which makes every hit about 3x a 1v1 hit, " +
              "and 3 cards attack per round. 0.33 keeps 3v3 battles about as long as 1v1; 1 = no change (much shorter battles).")]

@@ -225,9 +225,8 @@ public class LocationMapScreen : MonoBehaviour
                 img.color = new Color(0.16f, 0.15f, 0.24f);
                 continue;
             }
-            var art = PlayerProfile.Art(card);
             string rarity = $"<color=#{ColorUtility.ToHtmlStringRGB(CardStats.RarityColor(card.rarity))}>{CardStats.RarityShort(card.rarity)}</color>";
-            label.text = $"SLOT {i + 1}  {rarity}\n<size=15>{(art != null ? art.DisplayName : "?")}  P{CardStats.Power(card.rarity, slot.build)}</size>";
+            label.text = $"SLOT {i + 1}  {rarity}\n<size=15>{PlayerProfile.CardName(card, slot.build)}  P{CardStats.Power(card.rarity, slot.build)}</size>";
             img.color = i == active ? new Color(0.85f, 0.3f, 0.55f) : new Color(0.22f, 0.2f, 0.34f);
         }
     }

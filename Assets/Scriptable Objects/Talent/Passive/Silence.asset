@@ -14,9 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SilenceTalent
   talentName: Silence
   autoDescription: 1
-  description: 'The enemy can''t use its active talent for 3 turns. In exchange,
-    its Mana fills 2x as fast while silenced, so it casts as soon as the silence
-    ends. Mana cost: 100.'
-  manaCost: 100
-  turns: 3
-  manaFillMultiplier: 2
+  description: Whenever the enemy uses its active talent, it gets no Mana Regeneration
+    for the rest of that turn and its next 2 turns. Mana from being hit or evading
+    still counts.
+  regenBlockTurns: 2

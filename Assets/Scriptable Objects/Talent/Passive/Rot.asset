@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Rot
   talentName: Rot
   autoDescription: 1
-  description: The enemy's healing and lifesteal are 50% (Max 60%) weaker for the
-    whole battle.
-  reduction: 0.5
+  description: The enemy's healing and lifesteal are 75% (Max 90%) weaker for the
+    whole battle. Every time Rot cuts a heal, you permanently gain ATK equal to 5%
+    (Max 6%) of the healing it stopped.
+  reduction: 0.75
+  atkPerHealingCut: 0.05

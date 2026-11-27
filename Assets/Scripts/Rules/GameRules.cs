@@ -119,6 +119,18 @@ public static class GameRules
     public static int EnrageStartRound => Mathf.Max(1, Mathf.RoundToInt(GameBalance.Current.enrageStartRound * RoundScale));
     public static int EnragePercent => Mathf.Max(0, GameBalance.Current.enragePercent);
 
+    // ---- Healing fatigue: after round N all healing received drops by X% per round
+    public static int HealingFatigueAfterRound => Mathf.Max(0, GameBalance.Current.healingFatigueAfterRound);
+    public static int HealingFatiguePerRound => Mathf.Max(0, GameBalance.Current.healingFatiguePerRound);
+    public static bool HealingFatigueOn => HealingFatigueAfterRound > 0 && HealingFatiguePerRound > 0;
+
+    /// <summary>Part of every heal a card still receives in this round (1 = all, 0 = none).</summary>
+    public static float HealingMultiplier(int round)
+    {
+        if (!HealingFatigueOn || round <= HealingFatigueAfterRound) return 1f;
+        return Mathf.Clamp01(1f - (round - HealingFatigueAfterRound) * HealingFatiguePerRound / 100f);
+    }
+
     // ---- Hidden Location (3v3): 20 LOCs x 3 floors, unlocked by owning 3 cards of Mythic or higher
     public const int HiddenLocationCount = 20;
     public const int HiddenFloorsPerLocation = 3;

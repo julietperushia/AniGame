@@ -15,7 +15,8 @@ MonoBehaviour:
   talentName: Assassinate
   autoDescription: 1
   description: 'Strike once for 130% (Max 156%) of a normal attack. The hit is always
-    a critical hit (your crit damage applies) and can''t be evaded. It counts as
-    a normal attack, so lifesteal and on-hit effects work. Mana cost: 100.'
+    a critical hit (your crit damage applies) and can''t be evaded. It is your normal
+    attack for this turn (you don''t attack again), so lifesteal and on-hit effects
+    work. Mana cost: 100.'
   manaCost: 100
   atkPercent: 1.3

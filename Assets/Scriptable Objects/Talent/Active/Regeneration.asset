@@ -14,9 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Regeneration
   talentName: Regeneration
   autoDescription: 1
-  description: 'Heal 7.5% (Max 9%) of your max HP now and gain a Regeneration stack:
-    at the start of each of your turns you heal 7.5% (Max 9%) of your max HP per
-    stack (max 3 stacks = 22.5% (Max 27%) per turn). Mana cost: 100.'
+  description: 'Heal 5% (Max 6%) of your max HP now and gain a Regeneration stack:
+    at the start of each of your turns you heal 5% (Max 6%) of your max HP per stack
+    (max 3 stacks = 15% (Max 18%) per turn). Each turn''s heal can fail: 10% with
+    one stack, +10% for every extra stack (max 30%). A failed turn heals nothing
+    and loses one stack. Mana cost: 100.'
   manaCost: 100
-  healPercent: 0.075
+  healPercent: 0.05
   maxStacks: 3
+  missBase: 10
+  missPerStack: 10

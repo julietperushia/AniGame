@@ -105,6 +105,25 @@ public static class ElementSystem
     }
 
     /// <summary>"+25%", "-12.5%", "0%".</summary>
+    /// <summary>How well a hit with this element multiplier lands (null when neutral): for the battle log.</summary>
+    public static string Effectiveness(float multiplier)
+    {
+        if (multiplier >= 1.2f) return "SUPER EFFECTIVE!";
+        if (multiplier > 1.01f) return "slightly effective";
+        if (multiplier >= 0.85f && multiplier < 0.99f) return "not very effective";
+        if (multiplier < 0.85f) return "barely effective...";
+        return null;
+    }
+
+    /// <summary>The effectiveness text in its colour with the multiplier, e.g. "SUPER EFFECTIVE! (x1.25)" (empty when neutral).</summary>
+    public static string EffectivenessTag(float multiplier)
+    {
+        string e = Effectiveness(multiplier);
+        if (e == null) return "";
+        string color = multiplier >= 1.2f ? "#FFB23D" : multiplier > 1.01f ? "#9CE37D" : multiplier >= 0.85f ? "#9AA4B5" : "#8FA3FF";
+        return $"<color={color}>{e} (x{multiplier:0.###})</color>";
+    }
+
     public static string Describe(float multiplier)
     {
         float pct = (multiplier - 1f) * 100f;

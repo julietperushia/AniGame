@@ -15,5 +15,5 @@ MonoBehaviour:
   talentName: Slayer
   autoDescription: 1
   description: Each of your normal attacks deals extra damage equal to 5% (Max 6%)
-    of the enemy's max HP.
-  maxHpPercent: 0.05
+    of the enemy's current HP (strongest against a healthy enemy).
+  currentHpPercent: 0.05

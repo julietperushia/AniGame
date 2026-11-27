@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CounterStance
   talentName: Counter Stance
   autoDescription: 1
-  description: +10 (Max 12) evasion rating. Every time you evade a normal attack,
-    you strike back at once for 40% (Max 48%) of a normal attack. The counter can't
-    be countered and gives no Mana.
+  description: +10 (Max 12) evasion rating, and you can evade skill damage too (Elemental
+    Strike, Dexterity Drive, Life Sap...), not only normal attacks. Every time you
+    evade, you strike back at once for 40% (Max 48%) of a normal attack. The counter
+    can't be countered and gives no Mana.
   evasionBonus: 10
   counterDamage: 0.4

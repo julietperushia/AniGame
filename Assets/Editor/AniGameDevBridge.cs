@@ -46,7 +46,7 @@ public static class AniGameDevBridge
 
     static string Now => DateTime.Now.ToString("HH:mm:ss");
 
-    static void Append(string line)
+    internal static void Append(string line)
     {
         try { File.AppendAllText(LogPath, $"[{Now}] {line}\n"); } catch { }
     }
@@ -507,6 +507,27 @@ public static class AniGameDevBridge
             case "matrixtry":
                 // matrixtry:Talent.field=value;... - talent matrix with numbers changed in memory only (restored after)
                 Append(FloorCheck.MatrixTry(arg));
+                break;
+            case "floorsim":
+                // floorsim[:battlesPerFloor][|fromLoc-toLoc][|max] - every talent alone (1v1 matrix card, or a max God card)
+                // vs every campaign floor of the LOC range; runs in the background, CSVs in Logs/AniGameBridge/FloorSim
+                Append(FloorCheck.StartFloorSim(arg));
+                break;
+            case "bosssim":
+                // bosssim[:battles] - every boss gate vs your 3 build slots and vs random max God teams
+                Append(FloorCheck.BossSim(arg));
+                break;
+            case "configsave":
+                // configsave - writes the boss and minigame configs (or their defaults) to Assets/Resources/Config
+                // configsave:reset - writes the built-in defaults instead
+                if (arg == "reset")
+                {
+                    Append("configsave: " + JsonConfig.Save(BossConfig.FileName, BossConfig.Defaults()) + " | " + JsonConfig.Save(MinigameConfig.FileName, MinigameConfig.Defaults()) + " (defaults)");
+                    BossConfig.Reload(); MinigameConfig.Reload();
+                    break;
+                }
+                BossConfig.Reload(); MinigameConfig.Reload();
+                Append("configsave: " + BossConfig.SaveCurrent() + " | " + MinigameConfig.SaveCurrent());
                 break;
             case "floorcheck":
                 // floorcheck[:Talent1,Talent2] - the slot cards vs every campaign floor (headless): casts and full-bar turns with no talent

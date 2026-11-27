@@ -10,8 +10,8 @@ public class CounterStance : PassiveTalent
 
     public override string DefaultName => "Counter Stance";
     public override string DefaultDescription =>
-        $"+{Num(evasionBonus)} evasion rating. Every time you evade a normal attack, you strike back at once for {PctF(counterDamage)} of a normal attack. " +
-        "The counter can't be countered and gives no Mana.";
+        $"+{Num(evasionBonus)} evasion rating, and you can evade skill damage too (Elemental Strike, Dexterity Drive, Life Sap...), not only normal attacks. " +
+        $"Every time you evade, you strike back at once for {PctF(counterDamage)} of a normal attack. The counter can't be countered and gives no Mana.";
 
     public override void OnBattleStart(CardRuntime self, CardRuntime enemy)
     {

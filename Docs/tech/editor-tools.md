@@ -67,6 +67,11 @@ build. It lets an **outside tool or AI assistant** drive the open editor through
 | `cheat`, `newgame` | Give resources / start a new save |
 | `buff:all`, `buff:none`, `buff:<id>` | Set owned buffs |
 | `character:Name`, `character:gallery:KEY` | Set the player's character |
+| `talentmatrix[:battles][\|Rarity]` | 1v1 talent matrix, CSVs in `Logs/AniGameBridge/TalentMatrix` |
+| `matrixtry:Talent.field=value;...` | The matrix with talent numbers changed in memory only |
+| `floorcheck[:Talents]` | Your slot cards vs every campaign floor (casts, stuck turns) |
+| `floorsim[:battles][\|from-to][\|max]` | Every talent alone vs every campaign floor of a LOC range (default 6 battles, LOC 60-100, the 1v1 matrix card; `max` = max God card). Runs in the background; CSVs in `Logs/AniGameBridge/FloorSim` |
+| `bosssim[:battles]` | Every boss gate vs your build slots and vs max God teams |
 
 To use it: open the project in Unity, write a command into `Logs/AniGameBridge/command.txt`, then read
 `bridge_log.txt`. `Logs/` is ignored by git.

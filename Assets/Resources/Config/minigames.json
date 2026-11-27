@@ -1,0 +1,333 @@
+{
+    "cooldownMinutes": 0,
+    "games": [
+        {
+            "id": "flappy",
+            "title": "Flappy Hero",
+            "enabled": true,
+            "tiers": [
+                {
+                    "label": "3 pipes",
+                    "minScore": 3,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "8 pipes",
+                    "minScore": 8,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "rare"
+                    }
+                },
+                {
+                    "label": "15 pipes",
+                    "minScore": 15,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "superrare"
+                    }
+                },
+                {
+                    "label": "25 pipes",
+                    "minScore": 25,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "ultrarare"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "quiz",
+            "title": "Anime Quiz",
+            "enabled": true,
+            "tiers": [
+                {
+                    "label": "2 right",
+                    "minScore": 2,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "3 right",
+                    "minScore": 3,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "rare"
+                    }
+                },
+                {
+                    "label": "4 right",
+                    "minScore": 4,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "superrare"
+                    }
+                },
+                {
+                    "label": "5 right",
+                    "minScore": 5,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "ultrarare"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "slots",
+            "title": "Lucky 777",
+            "enabled": true,
+            "tiers": [
+                {
+                    "label": "Pair",
+                    "minScore": 1,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "rare"
+                    }
+                },
+                {
+                    "label": "Three of a kind",
+                    "minScore": 2,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "superrare"
+                    }
+                },
+                {
+                    "label": "777 JACKPOT",
+                    "minScore": 3,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 3,
+                        "materialTier": 8,
+                        "packId": "ultrarare"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "roulette",
+            "title": "Roulette",
+            "enabled": true,
+            "tiers": [
+                {
+                    "label": "200 Gold",
+                    "minScore": 0,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 2,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "500 Gold",
+                    "minScore": 0,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "superrare"
+                    }
+                },
+                {
+                    "label": "1,000 Gold",
+                    "minScore": 0,
+                    "weight": 6,
+                    "prize": {
+                        "type": 0,
+                        "amount": 1000,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "5 Diamonds",
+                    "minScore": 0,
+                    "weight": 6,
+                    "prize": {
+                        "type": 1,
+                        "amount": 10,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "3 Stamina",
+                    "minScore": 0,
+                    "weight": 4,
+                    "prize": {
+                        "type": 6,
+                        "amount": 30,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "Fusion Orb",
+                    "minScore": 0,
+                    "weight": 4,
+                    "prize": {
+                        "type": 2,
+                        "amount": 2,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "Talent Orb",
+                    "minScore": 0,
+                    "weight": 2,
+                    "prize": {
+                        "type": 4,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "GOD ORB",
+                    "minScore": 0,
+                    "weight": 1,
+                    "prize": {
+                        "type": 5,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "higherlower",
+            "title": "Higher or Lower",
+            "enabled": true,
+            "tiers": [
+                {
+                    "label": "3 in a row",
+                    "minScore": 3,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "5 in a row",
+                    "minScore": 5,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "rare"
+                    }
+                },
+                {
+                    "label": "7 in a row",
+                    "minScore": 7,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "superrare"
+                    }
+                },
+                {
+                    "label": "10 in a row",
+                    "minScore": 10,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1,
+                        "materialTier": 8,
+                        "packId": "ultrarare"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "memory",
+            "title": "Memory Match",
+            "enabled": true,
+            "tiers": [
+                {
+                    "label": "2 pairs",
+                    "minScore": 2,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 300,
+                        "materialTier": 8,
+                        "packId": "common"
+                    }
+                },
+                {
+                    "label": "4 pairs",
+                    "minScore": 4,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 1000,
+                        "materialTier": 8,
+                        "packId": "rare"
+                    }
+                },
+                {
+                    "label": "All 6 pairs",
+                    "minScore": 6,
+                    "weight": 1,
+                    "prize": {
+                        "type": 8,
+                        "amount": 15,
+                        "materialTier": 8,
+                        "packId": "superrare"
+                    }
+                }
+            ]
+        }
+    ]
+}

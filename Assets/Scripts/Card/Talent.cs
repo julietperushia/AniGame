@@ -143,6 +143,9 @@ public abstract class Talent : ScriptableObject
     // Called when battle starts
     public virtual void OnBattleStart(CardRuntime self, CardRuntime enemy) { }
 
+    /// <summary>The card got this talent during the battle from another talent (copied by Mimic, drawn by Gamble...).</summary>
+    public virtual void OnLearnedInBattle(CardRuntime self, CardRuntime enemy) { }
+
     // Called before attack
     public virtual void OnBeforeAttack(CardRuntime self, CardRuntime enemy) { }
 

@@ -104,6 +104,11 @@ public class MainMenuScreen : MonoBehaviour
         while (true)
         {
             RefreshProfile();
+            if (minigamesButton != null)
+            {
+                int left = PlayerProfile.MinigameCooldownLeft;
+                UIFactory.ButtonLabel(minigamesButton).text = left <= 0 ? "MINIGAMES" : $"MINIGAMES\n<size=14>{PlayerProfile.CooldownText(left)}</size>";
+            }
             if (pendingImport != null && Time.unscaledTime > pendingImportUntil) CancelImport();
             if (confirmReset && Time.unscaledTime > confirmUntil)
             {
@@ -125,18 +130,30 @@ public class MainMenuScreen : MonoBehaviour
         }
     }
 
-    Button hiddenButton;
+    Button hiddenButton, bossButton, minigamesButton;
 
-    /// <summary>HIDDEN LOCATION (3v3) next to SETTINGS: locked until the player owns 3 cards of Mythic or higher.</summary>
+    /// <summary>
+    /// Bottom rows: CHARACTER / SETTINGS / RESET SAVE / QUIT, then the modes HIDDEN LOCATION (3 Mythic+ cards),
+    /// BOSS (1 God card) and MINIGAMES. Laid out at runtime so old scenes get the new buttons too.
+    /// </summary>
     void BuildHiddenButton()
     {
         if (saveDataButton == null) return;
         var settingsRt = (RectTransform)saveDataButton.transform;
-        UIFactory.TopLeft(settingsRt, 0, 430, 255, 56);
+        var small = new[] { characterButton, saveDataButton, resetButton, quitButton };
+        for (int i = 0; i < small.Length; i++)
+        {
+            if (small[i] == null) continue;
+            UIFactory.TopLeft((RectTransform)small[i].transform, i * 132, 360, 124, 60);
+            var l = UIFactory.ButtonLabel(small[i]);
+            if (l != null) { l.fontSize = 18; UIFactory.BestFit(l, 12); }
+        }
+        BuildBossAndMinigames(settingsRt.parent);
         if (hiddenButton == null)
         {
-            hiddenButton = UIFactory.CreateButton(settingsRt.parent, "HiddenButton", "HIDDEN LOCATION", new Color(0.45f, 0.2f, 0.6f), 21);
-            UIFactory.TopLeft((RectTransform)hiddenButton.transform, 265, 430, 255, 56);
+            hiddenButton = UIFactory.CreateButton(settingsRt.parent, "HiddenButton", "HIDDEN LOCATION", new Color(0.45f, 0.2f, 0.6f), 19);
+            UIFactory.TopLeft((RectTransform)hiddenButton.transform, 0, 430, 170, 60);
+            UIFactory.BestFit(UIFactory.ButtonLabel(hiddenButton), 11);
             hiddenButton.onClick.AddListener(() =>
             {
                 if (PlayerProfile.HiddenUnlocked) GameSession.LoadScene(SceneNames.HiddenLocation);
@@ -148,11 +165,50 @@ public class MainMenuScreen : MonoBehaviour
             });
         }
         bool open = PlayerProfile.HiddenUnlocked;
-        UIFactory.ButtonLabel(hiddenButton).text = open ? "HIDDEN LOCATION" : $"HIDDEN LOCATION  <size=15>{PlayerProfile.HighRarityCards}/{GameRules.HiddenUnlockCards} MYTHIC+</size>";
+        UIFactory.ButtonLabel(hiddenButton).text = open ? "HIDDEN\nLOCATION" : $"HIDDEN LOCATION\n<size=14>{PlayerProfile.HighRarityCards}/{GameRules.HiddenUnlockCards} MYTHIC+</size>";
         hiddenButton.image.color = open ? new Color(0.55f, 0.22f, 0.75f) : new Color(0.25f, 0.2f, 0.32f);
         TooltipTrigger.Add(hiddenButton.image, open
             ? "<b>Hidden Location</b>\n3v3 battles: your 3 build slots fight teams of 3 from 20 legendary anime. 20 LOCs, 3 floors each."
             : $"<b>Hidden Location</b> (locked)\nOwn {GameRules.HiddenUnlockCards} cards of Mythic rarity or higher to open 3v3 battles against 20 legendary anime.");
+    }
+
+    // Dev bridge only (ui:MainMenuScreen.DevOpenBossEditor / DevOpenMinigamePrizes)
+    void DevOpenBossEditor() { if (PlayerProfile.TestModeAvailable) BossEditorPanel.Open(transform); }
+    void DevOpenMinigamePrizes() { if (PlayerProfile.TestModeAvailable) MinigameConfigPanel.Open(transform); }
+
+    void BuildBossAndMinigames(Transform parent)
+    {
+        if (bossButton == null)
+        {
+            bossButton = UIFactory.CreateButton(parent, "BossButton", "BOSS", new Color(0.75f, 0.15f, 0.22f), 22);
+            UIFactory.TopLeft((RectTransform)bossButton.transform, 175, 430, 170, 60);
+            bossButton.onClick.AddListener(() =>
+            {
+                if (PlayerProfile.BossUnlocked) GameSession.LoadScene(SceneNames.Boss);
+                else
+                {
+                    SfxSynth.Play("fail", 0.6f);
+                    subtitleText.text = $"<color=#FF9E9E>BOSS: own {PlayerProfile.BossUnlockGodCards} God card to break the seal (you have {PlayerProfile.GodCards}).</color>";
+                }
+            });
+        }
+        bool open = PlayerProfile.BossUnlocked;
+        UIFactory.ButtonLabel(bossButton).text = open ? "BOSS" : $"BOSS\n<size=14>{PlayerProfile.GodCards}/{PlayerProfile.BossUnlockGodCards} GOD</size>";
+        bossButton.image.color = open ? new Color(0.8f, 0.15f, 0.22f) : new Color(0.3f, 0.18f, 0.2f);
+        TooltipTrigger.Add(bossButton.image, open
+            ? "<b>Boss</b>\nYour 3 build slots against one boss at a time. Gates open in order; bosses give God Orbs and materials."
+            : $"<b>Boss</b> (locked)\nOwn {PlayerProfile.BossUnlockGodCards} God card to fight the bosses for God Orbs and materials.");
+
+        if (minigamesButton == null)
+        {
+            minigamesButton = UIFactory.CreateButton(parent, "MinigamesButton", "MINIGAMES", new Color(0.15f, 0.55f, 0.75f), 20);
+            UIFactory.TopLeft((RectTransform)minigamesButton.transform, 350, 430, 170, 60);
+            UIFactory.BestFit(UIFactory.ButtonLabel(minigamesButton), 11);
+            minigamesButton.onClick.AddListener(() => GameSession.LoadScene(SceneNames.Minigames));
+            TooltipTrigger.Add(minigamesButton.image, "<b>Minigames</b>\nFlappy Hero, Anime Quiz, Lucky 777, Roulette, Higher or Lower and Memory Match. Play one, then wait for the cooldown.");
+        }
+        int left = PlayerProfile.MinigameCooldownLeft;
+        UIFactory.ButtonLabel(minigamesButton).text = left <= 0 ? "MINIGAMES" : $"MINIGAMES\n<size=14>{PlayerProfile.CooldownText(left)}</size>";
     }
 
     void RefreshProfile()

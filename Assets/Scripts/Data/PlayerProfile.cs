@@ -43,6 +43,14 @@ public class SaveData
     public int hiddenCleared;
     public int hiddenWins;
 
+    /// <summary>Boss location: gates cleared, in order.</summary>
+    public int bossCleared;
+    public int bossWins;
+
+    /// <summary>Minigames: unix time when the next game can start (shared cooldown).</summary>
+    public long minigameReadyAt;
+    public int minigamesPlayed;
+
     public int battlesWon;
     public int battlesLost;
     public int packsOpened;
@@ -549,8 +557,50 @@ public static partial class PlayerProfile
 
     // ================================================================== cards
 
-    /// <summary>Every card is the player's character: its art is always <see cref="CharacterCard"/>.</summary>
-    public static Card Art(CardInstance card) => card == null ? null : CharacterCard;
+    static readonly Dictionary<string, Card> pictureArt = new Dictionary<string, Card>();
+
+    /// <summary>
+    /// The art of one card copy: the player's character (<see cref="CharacterCard"/>), unless that build has its own picture.
+    /// The name comes from <see cref="CardName"/> (a build's own name, else the character's name).
+    /// </summary>
+    public static Card Art(CardInstance card, BuildData build = null)
+    {
+        if (card == null) return null;
+        var b = build ?? card.build;
+        string pic = b != null ? b.picture : null;
+        if (string.IsNullOrEmpty(pic)) return CharacterCard;
+        var ch = CharacterCard;
+        if (!pictureArt.TryGetValue(pic, out var art) || art == null)
+        {
+            art = ScriptableObject.CreateInstance<Card>();
+            art.hideFlags = HideFlags.HideAndDontSave;
+            art.name = PlayerCardKey;
+            pictureArt[pic] = art;
+        }
+        var sprite = PictureStore.Load(pic);
+        var gallery = sprite == null ? PictureStore.GalleryCard(pic) : null;
+        art.cardName = ch.cardName;
+        art.cardImg = sprite != null ? sprite : gallery != null ? null : ch.cardImg; // a missing file falls back to the character
+        art.imageUrl = gallery != null ? gallery.imageUrl : null;
+        art.anime = "";
+        return art;
+    }
+
+    /// <summary>Sets one card copy's own name and picture (empty = the character's) and saves.</summary>
+    public static void EditBuild(BuildData build, string name, string picture)
+    {
+        if (build == null) return;
+        build.name = CleanCardName(name);
+        build.picture = picture ?? "";
+        Save();
+    }
+
+    /// <summary>Every build in the save (cards and slots), e.g. to find the imported pictures in use.</summary>
+    public static IEnumerable<BuildData> AllBuilds()
+    {
+        foreach (var c in Data.cards) if (c != null && c.build != null) yield return c.build;
+        foreach (var s in Data.slots) if (s != null && s.build != null) yield return s.build;
+    }
 
     public const int MaxCardNameLength = 18;
 
@@ -559,8 +609,7 @@ public static partial class PlayerProfile
     {
         var b = build ?? card?.build;
         if (b != null && !string.IsNullOrWhiteSpace(b.name)) return b.name;
-        var art = Art(card);
-        return art != null ? art.DisplayName : CharacterName;
+        return CharacterCard.DisplayName; // the character's name (or the unsaved one while the Character screen is open)
     }
 
     /// <summary>Cleans a name typed by the player: no rich-text tags, no line breaks, at most MaxCardNameLength letters.</summary>
@@ -1067,7 +1116,13 @@ public static partial class PlayerProfile
         if (CanOpenPack(pack) != null) return null;
         if (pack.currency == PackCurrency.Gold) SpendGold(pack.price);
         else Data.diamonds -= pack.price;
+        return OpenPackFree(pack);
+    }
 
+    /// <summary>Opens a pack without paying (prizes): the cards go to the collection (auto exchange applies).</summary>
+    public static List<PackItem> OpenPackFree(PackDefinition pack)
+    {
+        if (pack == null) return new List<PackItem>();
         var items = new List<PackItem> { GiveCardItem(pack.guaranteed) };
         for (int i = 1; i < PackDefinition.ItemCount; i++)
         {

@@ -74,6 +74,17 @@ public static class CharacterPortrait
 
     public static string ImportBytes(byte[] bytes, out Sprite preview)
     {
+        string err = Crop(bytes, out byte[] png, out preview);
+        if (err != null) return err;
+        try { File.WriteAllBytes(PendingPath, png); }
+        catch (Exception ex) { preview = null; return "Could not save the picture: " + ex.Message; }
+        return null;
+    }
+
+    /// <summary>Crops a PNG/JPG to the card art shape without saving it. Returns an error or null.</summary>
+    public static string Crop(byte[] bytes, out byte[] png, out Sprite preview)
+    {
+        png = null;
         preview = null;
         var src = new Texture2D(2, 2, TextureFormat.RGBA32, false);
         if (bytes == null || !src.LoadImage(bytes))
@@ -83,10 +94,35 @@ public static class CharacterPortrait
         }
         var cropped = CropResize(src, Aspect, MaxHeight);
         UnityEngine.Object.Destroy(src);
-        try { File.WriteAllBytes(PendingPath, cropped.EncodeToPNG()); }
-        catch (Exception ex) { return "Could not save the picture: " + ex.Message; }
+        png = cropped.EncodeToPNG();
         preview = Sprite.Create(cropped, new Rect(0, 0, cropped.width, cropped.height), new Vector2(0.5f, 0.5f), 100f);
         return null;
+    }
+
+    /// <summary>Reads a file and crops it (see <see cref="Crop"/>).</summary>
+    public static string CropFile(string path, out byte[] png, out Sprite preview)
+    {
+        png = null; preview = null;
+        path = (path ?? "").Trim().Trim('"');
+        if (path.Length == 0) return "No file chosen";
+        if (!File.Exists(path)) return "File not found: " + path;
+        byte[] bytes;
+        try { bytes = File.ReadAllBytes(path); }
+        catch (Exception ex) { return "Could not read the file: " + ex.Message; }
+        return Crop(bytes, out png, out preview);
+    }
+
+    /// <summary>Downloads an image URL and crops it. Calls done(error, png, preview).</summary>
+    public static IEnumerator DownloadAndCrop(string url, Action<string, byte[], Sprite> done)
+    {
+        using (var req = UnityWebRequest.Get(url.Trim()))
+        {
+            req.timeout = 20;
+            yield return req.SendWebRequest();
+            if (req.result != UnityWebRequest.Result.Success) { done?.Invoke("Download failed: " + req.error, null, null); yield break; }
+            string err = Crop(req.downloadHandler.data, out byte[] png, out Sprite preview);
+            done?.Invoke(err, png, preview);
+        }
     }
 
     /// <summary>Downloads an image URL, then imports it. Calls done(error, preview).</summary>

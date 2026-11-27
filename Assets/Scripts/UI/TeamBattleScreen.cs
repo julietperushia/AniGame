@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 3v3 battle of the Hidden Location. Each side is one team (shared HP, ATK, DEF, mana pool and statuses) of 3 cards
+/// 3v3 battle of the Hidden Location, and of the Boss location (the 3 build slots against one boss that acts several times a round). Each side is one team (shared HP, ATK, DEF, mana pool and statuses) of 3 cards
 /// that act on their own SPD. The engine runs the battle; this screen replays its events. Built at runtime.
 /// </summary>
 public class TeamBattleScreen : MonoBehaviour
@@ -25,6 +25,9 @@ public class TeamBattleScreen : MonoBehaviour
     CardRuntime player, enemy;
     int location, floor, speedIndex;
     bool skipping, finished;
+    bool bossMode, testFight;
+    int bossGate;
+    string BackScene => bossMode ? SceneNames.Boss : SceneNames.HiddenLocation;
 
     float Speed => Speeds[Mathf.Clamp(speedIndex, 0, Speeds.Length - 1)] * 0.6f;
 
@@ -36,6 +39,15 @@ public class TeamBattleScreen : MonoBehaviour
     void Start()
     {
         root = (RectTransform)transform;
+        if (GameSession.HasPendingBossBattle)
+        {
+            bossMode = true;
+            bossGate = GameSession.PendingBossGate;
+            testFight = GameSession.BossTestFight;
+            GameSession.HasPendingBossBattle = false;
+            StartBoss();
+            return;
+        }
         if (GameSession.HasPendingHiddenBattle)
         {
             location = GameSession.PendingHiddenLocation;
@@ -72,13 +84,43 @@ public class TeamBattleScreen : MonoBehaviour
         StartCoroutine(RunBattle());
     }
 
+    void StartBoss()
+    {
+        var gate = BossConfig.Current.Gate(bossGate);
+        Color tint = gate != null ? CardStats.RarityColor(gate.rarity) : UIFactory.Accent2;
+        UIFactory.CreateBackground(root, UIFactory.WithAlpha(Color.Lerp(tint, new Color(0.5f, 0f, 0.05f), 0.55f), 0.9f), UIFactory.BgDark, out _);
+        arena = UIFactory.CreateRect("Arena", root);
+        UIFactory.Stretch(arena);
+        BuildHud(null);
+        speedIndex = Mathf.Max(0, System.Array.IndexOf(Speeds, PlayerProfile.Data.battleSpeed));
+        UpdateSpeed();
+        SfxSynth.Volume = PlayerProfile.Data.sfxVolume;
+
+        player = PlayerProfile.TeamRuntime(testFight || PlayerProfile.HiddenTestMode);
+        enemy = PlayerProfile.BossRuntime(bossGate);
+        if (player == null || enemy == null)
+        {
+            ShowResult(false, player == null ? (PlayerProfile.BossTeamProblem() ?? PlayerProfile.TeamSlotsProblem() ?? "Your team is not ready.") : "This boss could not be loaded.", null, true);
+            return;
+        }
+        BuildTeam(player, playerViews, true);
+        BuildTeam(enemy, enemyViews, false);
+        StartCoroutine(RunBattle());
+    }
+
     // ---------------------------------------------------------------- layout
 
     void BuildHud(CardDatabase.HiddenLocationData loc)
     {
         var bar = UIFactory.CreateTopBar(root, "", out Button back, out title, out Text info);
         info.gameObject.SetActive(false);
-        back.onClick.AddListener(() => GameSession.LoadScene(SceneNames.HiddenLocation));
+        back.onClick.AddListener(() => GameSession.LoadScene(BackScene));
+        if (bossMode)
+        {
+            var gate = BossConfig.Current.Gate(bossGate);
+            title.text = $"BOSS  -  GATE {bossGate}/{BossConfig.Current.gates.Count}" + (gate != null ? $"   <size=24><color=#FFB0B0>{gate.name}</color></size>" : "") + (testFight ? "   <size=22><color=#FFB23D>TEST FIGHT</color></size>" : "");
+        }
+        else
         title.text = $"HIDDEN LOC {location}  -  FLOOR {floor}/{GameRules.HiddenFloorsPerLocation}" + (loc != null ? $"   <size=24><color=#C9CEDA>{loc.anime}</color></size>" : "");
         title.rectTransform.sizeDelta = new Vector2(1100, 80);
         UIFactory.BestFit(title, 20);
@@ -102,7 +144,7 @@ public class TeamBattleScreen : MonoBehaviour
         enemyMana = TeamBar("EnemyMana", new Vector2(480, -256), UIFactory.ManaColor, 15, 24);
         var pl = UIFactory.CreateText(root, "PlayerLabel", "YOUR TEAM", 24, new Color(0.55f, 0.85f, 1f), TextAnchor.MiddleLeft, FontStyle.Bold);
         UIFactory.Place(pl.rectTransform, new Vector2(0.5f, 1f), new Vector2(-480, -188), new Vector2(820, 30));
-        var el = UIFactory.CreateText(root, "EnemyLabel", "ENEMY TEAM", 24, new Color(1f, 0.6f, 0.6f), TextAnchor.MiddleRight, FontStyle.Bold);
+        var el = UIFactory.CreateText(root, "EnemyLabel", bossMode ? "BOSS" : "ENEMY TEAM", 24, new Color(1f, 0.6f, 0.6f), TextAnchor.MiddleRight, FontStyle.Bold);
         UIFactory.Place(el.rectTransform, new Vector2(0.5f, 1f), new Vector2(480, -188), new Vector2(820, 30));
         playerStatus = UIFactory.CreateText(root, "PlayerStatus", "", 16, UIFactory.TextMain, TextAnchor.MiddleLeft);
         UIFactory.Place(playerStatus.rectTransform, new Vector2(0.5f, 1f), new Vector2(-480, -288), new Vector2(820, 28));
@@ -134,8 +176,9 @@ public class TeamBattleScreen : MonoBehaviour
             var view = CardView.Build(arena, (isPlayer ? "P" : "E") + i);
             var rt = (RectTransform)view.transform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.localScale = Vector3.one * 0.6f;
-            float x = (isPlayer ? -480f : 480f) + (i - 1) * 272f;
+            bool solo = team.members.Count == 1;                   // a boss: one big card in the middle of its side
+            rt.localScale = Vector3.one * (solo ? 0.8f : 0.6f);
+            float x = (isPlayer ? -480f : 480f) + (solo ? 0f : (i - 1) * 272f);
             rt.anchoredPosition = new Vector2(x, 0f);
             view.ShowMember(m, team);
             if (view.hpBar != null) view.hpBar.gameObject.SetActive(false);   // HP and mana are the team's: shown above
@@ -184,11 +227,24 @@ public class TeamBattleScreen : MonoBehaviour
         var state = engine.State;
         bool victory = state == BattleState.PlayerWon || (state == BattleState.Draw && !enemy.IsAlive);
         foreach (var v in victory ? enemyViews : playerViews) v.SetDefeated(true);
-        if (victory)
+        if (victory && bossMode)
+        {
+            foreach (var v in playerViews) v.Victory();
+            var rewards = PlayerProfile.ApplyBossVictory(bossGate, testFight);
+            var gate = BossConfig.Current.Gate(bossGate);
+            ShowResult(true, $"You defeated {(gate != null ? gate.name : "the boss")} (gate {bossGate}) in {engine.Round} rounds.", rewards, false);
+        }
+        else if (victory)
         {
             foreach (var v in playerViews) v.Victory();
             var rewards = PlayerProfile.ApplyHiddenVictory(location, floor);
             ShowResult(true, $"You beat Hidden LOC {location} floor {floor} in {engine.Round} rounds.", rewards, false);
+        }
+        else if (bossMode)
+        {
+            int back = testFight || PlayerProfile.HiddenTestMode ? 0 : PlayerProfile.ApplyDefeat();
+            string why = state == BattleState.Draw ? $"Time is up after {engine.Round} rounds." : $"Your team fell in round {engine.Round}.";
+            ShowResult(false, why + (back > 0 ? $"\nReturning Heroes: +{back} stamina." : "") + "\nThe boss acts several times a round: try faster cards, healing or debuffs in your 3 slots.", null, false);
         }
         else
         {
@@ -352,7 +408,7 @@ public class TeamBattleScreen : MonoBehaviour
             UIFactory.Place((RectTransform)retryButton.transform, new Vector2(0.5f, 0f), new Vector2(0, 30), new Vector2(260, 70));
             mapButton = UIFactory.CreateButton(panel.transform, "Map", "MAP", UIFactory.PanelLight, 26);
             UIFactory.Place((RectTransform)mapButton.transform, new Vector2(0.5f, 0f), new Vector2(290, 30), new Vector2(260, 70));
-            mapButton.onClick.AddListener(() => GameSession.LoadScene(SceneNames.HiddenLocation));
+            mapButton.onClick.AddListener(() => GameSession.LoadScene(BackScene));
         }
         resultPanel.SetActive(true);
         resultPanel.transform.SetAsLastSibling();
@@ -365,8 +421,23 @@ public class TeamBattleScreen : MonoBehaviour
             foreach (var l in rewards.lines) sb.Append("<color=#FFD54F>").Append(l).Append("</color>\n");
             foreach (var n in rewards.notes) sb.Append("<color=#C9A2FF>").Append(n).Append("</color>\n");
         }
-        sb.Append($"\n<size=18><color=#9AA4B5>Stamina {PlayerProfile.Data.stamina}/{PlayerProfile.MaxStamina} (each fight costs {PlayerProfile.StaminaCost})</color></size>");
+        int cost = bossMode ? BossConfig.Current.staminaCost : PlayerProfile.StaminaCost;
+        sb.Append($"\n<size=18><color=#9AA4B5>Stamina {PlayerProfile.Data.stamina}/{PlayerProfile.MaxStamina} (each fight costs {cost})</color></size>");
         resultBody.text = sb.ToString();
+        if (bossMode)
+        {
+            UIFactory.ButtonLabel(nextButton).text = "NEXT GATE";
+            UIFactory.ButtonLabel(mapButton).text = "BOSSES";
+            bool next = victory && !fatal && !testFight && bossGate < BossConfig.Current.gates.Count;
+            nextButton.gameObject.SetActive(next);
+            retryButton.gameObject.SetActive(!fatal);
+            nextButton.onClick.RemoveAllListeners();
+            retryButton.onClick.RemoveAllListeners();
+            nextButton.onClick.AddListener(() => TryStartBoss(bossGate + 1));
+            retryButton.onClick.AddListener(() => TryStartBoss(bossGate));
+            SfxSynth.Play(victory ? "buff" : "lose", 0.7f);
+            return;
+        }
 
         int nextLoc = floor < GameRules.HiddenFloorsPerLocation ? location : location + 1;
         int nextFloor = floor < GameRules.HiddenFloorsPerLocation ? floor + 1 : 1;
@@ -378,6 +449,21 @@ public class TeamBattleScreen : MonoBehaviour
         nextButton.onClick.AddListener(() => TryStart(nextLoc, nextFloor));
         retryButton.onClick.AddListener(() => TryStart(location, floor));
         SfxSynth.Play(victory ? "buff" : "lose", 0.7f);
+    }
+
+    void TryStartBoss(int gate)
+    {
+        bool test = testFight || PlayerProfile.HiddenTestMode;
+        string problem = test ? null : PlayerProfile.BossTeamProblem();
+        if (problem != null) { resultBody.text = problem; return; }
+        int cost = BossConfig.Current.staminaCost;
+        if (!test && !PlayerProfile.TrySpendStamina(cost))
+        {
+            resultBody.text = $"Not enough stamina: each boss fight costs {cost} (you have {PlayerProfile.Data.stamina}).";
+            SfxSynth.Play("fail", 0.6f);
+            return;
+        }
+        GameSession.StartBossBattle(gate, testFight);
     }
 
     void TryStart(int loc, int fl)

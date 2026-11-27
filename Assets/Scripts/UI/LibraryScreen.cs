@@ -252,8 +252,10 @@ public class LibraryScreen : MonoBehaviour
 
         // ---- Battle
         Add("Battle", "How a battle works", theme != null ? theme.Frame(CardRarity.Epic) : null,
-            $"One card against one enemy. The faster card acts first each round. Damage = (100 x ATK x current ATK + 638,000) / (87 x DEF) x element bonus. Base crit 5% (x1.35 damage), base evasion rating 5 (4.8% evade chance). Mana fills every turn; an active talent fires when it is full. From round {GameRules.EnrageStartRound} both fighters get +{GameRules.EnragePercent}% ATK per round (enrage). After {GameRules.MaxRounds} rounds the battle is a draw.",
-            null, 0f, "damage crit evasion mana enrage round formula");
+            $"One card against one enemy. The faster card acts first each round. Damage = (100 x ATK x current ATK + 638,000) / (87 x DEF) x element bonus. Base crit 5% (x1.35 damage), base evasion rating 5 (4.8% evade chance). Mana fills every turn; an active talent fires when it is full. From round {GameRules.EnrageStartRound} both fighters get +{GameRules.EnragePercent}% ATK per round (enrage)." +
+            (GameRules.HealingFatigueOn ? $" After round {GameRules.HealingFatigueAfterRound} all healing received drops by {GameRules.HealingFatiguePerRound}% more every round (healing fatigue)." : "") +
+            $" After {GameRules.MaxRounds} rounds the battle is a draw.",
+            null, 0f, "damage crit evasion mana enrage round formula healing fatigue");
         Add("Save Data", "Move your save to another PC", null,
             $"Main menu > SETTINGS > EXPORT / IMPORT SAVE > EXPORT SAVE FILE writes one .{SaveTransfer.Extension} file with everything: cards and builds, slots, buffs, currencies, orbs, stamina, LOC progress, stats, settings and your character's name and picture. Copy it to the other PC (USB, cloud drive, email), then SETTINGS > EXPORT / IMPORT SAVE > IMPORT SAVE FILE there. Your old save on that PC is backed up first. Stamina keeps regenerating for the time in between.",
             null, 0f, "export import backup transfer pc computer load file");

@@ -35,7 +35,7 @@ public class TestModePanel : MonoBehaviour
         var p = dim.gameObject.AddComponent<TestModePanel>();
         p.onChanged = onChanged;
         var panel = UIFactory.CreatePanel(dim.transform, "Panel", new Color(0.12f, 0.05f, 0.08f, 1f), true);
-        UIFactory.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 880));
+        UIFactory.Place(panel.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(980, 960));
         UIFactory.AddOutline(panel, new Color(1f, 0.35f, 0.4f, 0.7f), 3f);
         var title = UIFactory.CreateText(panel.transform, "Title", "TEST MODE", 46, new Color(1f, 0.5f, 0.55f), TextAnchor.MiddleCenter, FontStyle.Bold);
         UIFactory.TopStrip(title.rectTransform, 14, 60, 20, 20);
@@ -90,19 +90,23 @@ public class TestModePanel : MonoBehaviour
         TooltipTrigger.Add(matrix.image, "<b>1v1 Talent Matrix</b>\nEvery talent fights every other talent on identical cards. Shows a ranking, each talent's matchups and the first battle log of every pair, and exports CSV files.");
         var hidden = Btn("HIDDEN LOCATION SIM", new Color(0.55f, 0.25f, 0.75f), 500, 550, 440, () => HiddenSimPanel.Open(canvas));
         Button testHidden = null;
-        testHidden = Btn(PlayerProfile.HiddenTestMode ? "HIDDEN LOC TEST: ON" : "HIDDEN LOC TEST: OFF", new Color(0.35f, 0.25f, 0.5f), 40, 630, 900, () =>
+        testHidden = Btn(PlayerProfile.HiddenTestMode ? "3v3 TEST (HIDDEN + BOSS): ON" : "3v3 TEST (HIDDEN + BOSS): OFF", new Color(0.35f, 0.25f, 0.5f), 40, 630, 900, () =>
         {
             PlayerProfile.HiddenTestMode = !PlayerProfile.HiddenTestMode;
-            UIFactory.ButtonLabel(testHidden).text = PlayerProfile.HiddenTestMode ? "HIDDEN LOC TEST: ON" : "HIDDEN LOC TEST: OFF";
-            p.Done(PlayerProfile.HiddenTestMode ? "Hidden Location test: open, every floor open, empty slots use test God cards, no stamina, no rewards" : "Hidden Location test off");
+            UIFactory.ButtonLabel(testHidden).text = PlayerProfile.HiddenTestMode ? "3v3 TEST (HIDDEN + BOSS): ON" : "3v3 TEST (HIDDEN + BOSS): OFF";
+            p.Done(PlayerProfile.HiddenTestMode ? "3v3 test: Hidden Location and Boss open, every floor and gate open, empty slots use test God cards, no stamina, no rewards" : "3v3 test off");
         });
+        var bossEd = Btn("BOSS EDITOR", new Color(0.8f, 0.2f, 0.28f), 40, 710, 440, () => BossEditorPanel.Open(canvas));
+        TooltipTrigger.Add(bossEd.image, "<b>Boss editor</b>\nAdd, remove and order the boss gates. Each boss takes its name and picture from a character of the game; set its rarity, element, talents, stats and rewards (God Orbs, materials, gold), then SAVE or TEST FIGHT.");
+        var mini = Btn("MINIGAME PRIZES", new Color(0.15f, 0.55f, 0.75f), 500, 710, 440, () => MinigameConfigPanel.Open(canvas));
+        TooltipTrigger.Add(mini.image, "<b>Minigame prizes</b>\nThe cooldown between games and every game's prize lines. RESET COOLDOWN lets you play again right away.");
         testHidden.name = "HiddenTestToggle";
         TooltipTrigger.Add(testHidden.image, "<b>Hidden Location test</b>\nOpens the Hidden Location and every floor without changing your save. Empty build slots are filled with max-stat God test cards. Test fights cost no stamina and give no rewards or progress.");
         TooltipTrigger.Add(hidden.image, "<b>Hidden Location simulator</b>\nRuns every Hidden Location floor with teams of 3 max-stat God cards and shows how often each floor is cleared.");
         TooltipTrigger.Add(sim.image, "<b>3v3 Simulator</b>\nRun hundreds of headless 3v3 battles with the cards you pick (or random ones) and see which talents win the most.");
 
         p.info = UIFactory.CreateText(panel.transform, "Info", "", 20, new Color(0.55f, 1f, 0.6f), TextAnchor.MiddleCenter, FontStyle.Bold);
-        UIFactory.TopStrip(p.info.rectTransform, 706, 70, 40, 40);
+        UIFactory.TopStrip(p.info.rectTransform, 786, 70, 40, 40);
         UIFactory.BestFit(p.info, 12);
         var close = UIFactory.CreateButton(panel.transform, "Close", "CLOSE", UIFactory.PanelLight, 24);
         UIFactory.Place((RectTransform)close.transform, new Vector2(0.5f, 0f), new Vector2(0, 24), new Vector2(260, 60));

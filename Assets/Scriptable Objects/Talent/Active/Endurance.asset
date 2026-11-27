@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Endurance
   talentName: Endurance
   autoDescription: 1
-  description: 'For 3 turns, take 65% less damage from normal attacks, and 35% (Max
+  description: 'For 3 turns, take 45% less damage from normal attacks, and 35% (Max
     42%) of the damage blocked goes back to the attacker as true damage. Piercing
     Edge weakens the reduction. Mana cost: 100.'
   manaCost: 100
   duration: 3
-  reduction: 0.65
+  reduction: 0.45
   reflect: 0.35

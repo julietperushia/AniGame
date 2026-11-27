@@ -37,7 +37,7 @@ sweeps across the screen, the next scene loads behind it, and the new screen's p
 | **Main Menu** | `MainMenu` | Hub. Shows your builds and currencies. Shows save warnings once (for example after a tampered save) | PLAY, MY CARDS, GACHA, SHOP, BUFFS, LIBRARY, CHARACTER; SAVE DATA panel: export / import / open folder / reset save; QUIT |
 | **Character** | `Character` | Create (first launch) or edit your character: name (≤20 characters) and picture (import from the PC / a path / a URL, or pick a built-in anime portrait) | Save; cards preview the change live |
 | **Location Map** | `LocationMap` | Locations list (left), floors of the chosen location (middle), the floor's enemy and rewards (right) | Choose a build slot, FIGHT (5 stamina) |
-| **My Cards** | `Collection` | A large showcase of the chosen card or slot build, an upgrade panel, a filterable collection grid, the 3 build slots | Reroll stats / element / talent (preview), SAVE TO SLOT, fuse, auto merge, God Orb, dismantle, lock |
+| **My Cards** | `Collection` | A large showcase of the chosen card or slot build, an upgrade panel, a filterable collection grid, the 3 build slots | Reroll stats / element / talent (preview), SAVE TO SLOT, fuse, auto merge, God Orb, dismantle, lock; click the card's name to EDIT CARD (own name and picture) |
 | **Gacha** | `Gacha` | The 6 packs with their odds | Open a pack (reveal animation) |
 | **Shop** | `Shop` | The orb shop | Buy Fusion / Element / Talent Orbs in any quantity |
 | **Buffs** | `Buffs` | 22 permanent buffs in 4 groups | Buy |

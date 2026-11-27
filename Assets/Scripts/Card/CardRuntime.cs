@@ -117,6 +117,10 @@ public class CardRuntime
     public float enduranceReduction = 0.65f; // Endurance: normal attack damage blocked
     public float silenceManaMultiplier = 1f; // Silence talent: mana gain multiplier while silenced
     public float healTakenMultiplier = 1f; // Rot: healing and lifesteal received
+    public CardRuntime rotSource;          // Rot: the card whose Rot weakens this card's healing (gains ATK from it)
+    public Talent rotTalent;
+    public float rotAtkShare;              // Rot: ATK the Rot card gains per point of healing it stopped (0.05 = 5%)
+    public int manaBlockTurns;             // Silence (passive): no Mana Regeneration while > 0 (counts down at the end of this card's turns)
     public float greedyPercent;      // Greedy: share of the opponent's healing that heals this card instead
     public float doppelgangerPercent;// Doppelganger: share of the opponent's stat gains and heals copied
     public bool gutsReady;           // Guts: survive one lethal hit
@@ -127,7 +131,7 @@ public class CardRuntime
     public int storedDamage;
     public float defIgnore;          // Piercing Edge: part of the enemy DEF ignored
     public float reductionPierce;    // Piercing Edge: share of the enemy's damage reduction ignored (0.5 = half)
-    public float slayerPercent;      // Slayer: + enemy max HP per attack
+    public float slayerPercent;      // Slayer: + enemy CURRENT HP per attack
     public float infernusPercent;    // Infernus: part of attack damage dealt as true damage
     public float infernusHeal;
     public int momentumStacks;       // Momentum
@@ -140,6 +144,9 @@ public class CardRuntime
     public float chargeStrikeMultiplier = 3f;
     public bool chargeStrikeUnevadable = true;
     public bool skipAttackThisTurn;
+    public string skipAttackText;    // why the attack is skipped (null = Charge Strike's "charges up")
+    public int regenMissBase = 10;   // Regeneration: chance (%) a tick misses with one stack; a miss removes 1 stack
+    public int regenMissPerStack = 10;
     public bool chargeAttackPassive; // Charge Attack: store attacks while above a HP threshold
     public float chargeAttackThreshold = 0.3f;
     public int chargeAttackMax = 4;
@@ -218,7 +225,7 @@ public class CardRuntime
         {
             instance = card,
             build = build,
-            baseCard = PlayerProfile.CharacterCard, // every player card is the player's own character
+            baseCard = PlayerProfile.Art(card, build), // the player's own character (or the picture given to this copy)
             rarity = card.rarity,
             element = build.element,
             talent = db != null ? db.FindTalent(build.talent) : null,
@@ -355,11 +362,26 @@ public class CardRuntime
                 if (amount <= 0) return;
             }
         }
-        float multiplier = (1f + healingBonus) * (1f - healingReduction) * Mathf.Max(0f, healTakenMultiplier);
+        var engine = BattleLog.Current;
+        float fatigue = GameRules.HealingMultiplier(engine != null ? engine.Round : 0); // healing fatigue after round 10
+        float withoutRot = (1f + healingBonus) * (1f - healingReduction) * fatigue;
+        float multiplier = withoutRot * Mathf.Max(0f, healTakenMultiplier);
         int actualHeal = Mathf.Max(0, Mathf.RoundToInt(amount * multiplier)); // Can't heal if reduction >= 100%
         int before = health;
         health = Mathf.Min(maxHealth, health + actualHeal);
         BattleLog.Healed(this, health - before);
+        // Rot: part of the healing it stopped becomes ATK for the Rot card (only healing that could have landed counts)
+        if (rotSource != null && rotAtkShare > 0f && healTakenMultiplier < 1f && engine != null && rotSource.IsAlive)
+        {
+            int would = Mathf.Min(Mathf.Max(0, maxHealth - before), Mathf.Max(0, Mathf.RoundToInt(amount * withoutRot)));
+            int gain = Mathf.RoundToInt(Mathf.Max(0, would - (health - before)) * rotAtkShare);
+            if (gain > 0)
+            {
+                var src = rotSource;
+                engine.ApplyStatChange(src, rotTalent, () => src.attack += gain);
+                BattleLog.Passive(src, $"<color=#9CCC65>[Rot] {src.DisplayName} feeds on the rotten healing: +{gain} ATK</color>");
+            }
+        }
         // Doppelganger: the opponent copies part of every heal
         if (!redirected && health > before && opponent != null && opponent.doppelgangerPercent > 0f && opponent.IsAlive)
             opponent.Heal(Mathf.Max(1, Mathf.RoundToInt((health - before) * opponent.doppelgangerPercent)), true);
@@ -378,6 +400,8 @@ public class CardRuntime
     public int TakeDamage(int amount, DamageKind kind, float reductionScale)
     {
         if (!IsAlive) return 0;
+        // Counter Stance: skill damage can be evaded too (and countered)
+        if (kind == DamageKind.Skill && counterStance && BattleLog.Current != null && BattleLog.Current.TryEvadeSkill(this)) return 0;
         float scaled = amount * (1f - Mathf.Clamp01(damageTakenReduction * reductionScale));
         int actualDamage = Mathf.Max(1, Mathf.RoundToInt(scaled) - Mathf.RoundToInt(damageReduction * reductionScale));
         return ApplyDamage(actualDamage, kind);
@@ -508,6 +532,7 @@ public class CardRuntime
         float boost = silenceTurns > 0 ? Mathf.Max(0f, silenceManaMultiplier) : 1f;
         if (shield > 0) boost *= Mathf.Max(0f, shieldManaRegen);                                     // Burst Barrier
         if (opponent != null && opponent.sleepTurns > 0) boost *= Mathf.Max(0f, opponent.sleepCasterRegen); // Sleep caster
+        if (manaBlockTurns > 0) return;                                                                    // Silence: no regen at all
         GainMana(Mathf.RoundToInt(amount * Mathf.Max(0, manaRegen) / 100f * boost));
     }
 

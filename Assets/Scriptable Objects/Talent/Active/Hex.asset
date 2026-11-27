@@ -15,6 +15,8 @@ MonoBehaviour:
   talentName: Hex
   autoDescription: 1
   description: 'Swap the enemy''s ATK and DEF for 2 turns. They swap back when the
-    Hex ends. Mana cost: 100.'
+    Hex ends. Then, if its ATK is higher than its DEF, you permanently gain ATK equal
+    to the difference; if its DEF is higher, you gain DEF instead. Mana cost: 100.'
   manaCost: 100
   turns: 2
+  gapGainPercent: 100

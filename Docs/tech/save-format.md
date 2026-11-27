@@ -14,6 +14,7 @@ Show Save File**, or **Main Menu › SAVE DATA › OPEN SAVE FOLDER**.
 | `anigame_save.json.bak` | A copy written on every save; used if the main file fails its integrity check |
 | `anigame_save_backup_<tag>_<timestamp>.json` | Created before a reset, a tamper recovery, or an import |
 | `character_portrait.png` | The imported player picture |
+| `pictures/*.png` | Pictures imported for single cards (EDIT CARD); a build points at one with `picture = "pic:ID"` |
 | `Exports/*.anisave` | Save exports for moving to another PC |
 | `image_cache/` | Portraits downloaded at runtime |
 
@@ -36,7 +37,8 @@ From `PlayerProfile.cs:11-55`:
 | Protection | `integrity` (HMAC of everything else) |
 
 `CardInstance`: `uid`, `key` (always `"player"`), `rarity` (int), `build` {`hp`, `atk`, `def`, `spd`, `element`
-(int), `talent` (name)}, `locked`, `godBonus`.
+(int), `talent` (name), `talent2`, `name` (own name, empty = the character's), `picture` (own picture: `gallery:KEY` or
+`pic:ID`, empty = the character's)}, `locked`, `godBonus`. Save exports also carry the `pic:` files (`cardPictures`).
 
 ## Integrity (anti-cheat)
 

@@ -47,7 +47,7 @@ public class CharacterScreen : MonoBehaviour
         titleText.text = firstTime ? "CREATE YOUR CHARACTER" : "YOUR CHARACTER";
         subtitleText.text = firstTime
             ? "Pick a name and a picture. This is the only character you will collect: every card you get is this hero, in a different rarity."
-            : "Change your character's name or picture. Every card you own updates.";
+            : "Change your character's name or picture. Every card you own updates, except cards you gave their own name or picture (click a card's name in the collection).";
         UIFactory.ButtonLabel(saveButton).text = firstTime ? "START ADVENTURE" : "SAVE CHANGES";
 
         nameInput.characterLimit = 20;
@@ -100,7 +100,11 @@ public class CharacterScreen : MonoBehaviour
         PlayerProfile.PreviewName = name.Length > 0 ? name : "Your hero";
         PlayerProfile.PreviewSprite = pendingSprite;
         var card = PlayerProfile.Data.cards.FirstOrDefault();
-        if (card != null) preview.ShowInstance(card, card.build);
+        if (card == null) return;
+        var b = card.build.Clone();
+        b.name = null;      // show the character itself, not a copy's own name / picture
+        b.picture = null;
+        preview.ShowInstance(card, b);
     }
 
     // ---------------------------------------------------------------- picture sources
@@ -201,7 +205,7 @@ public class CharacterScreen : MonoBehaviour
         UIFx.BurstAtPointer(UIFactory.Accent2, 1f);
         SfxSynth.Play("sparkle", 0.6f);
         if (firstTime) GameSession.LoadScene(SceneNames.MainMenu);
-        else { Message("<color=#7CFC6A>Saved! All your cards now show the new name and picture.</color>"); RefreshPreview(); }
+        else { Message("<color=#7CFC6A>Saved! Your cards now show the new name and picture (cards with their own name or picture keep it).</color>"); RefreshPreview(); }
     }
 
     // ---------------------------------------------------------------- layout

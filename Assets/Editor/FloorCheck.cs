@@ -10,6 +10,51 @@ using UnityEngine;
 /// </summary>
 public static class FloorCheck
 {
+    // ---------------------------------------------------------------- floorsim (background job)
+    static System.Collections.IEnumerator floorJob;
+    static int floorJobDone, floorJobTotal, floorJobReported;
+
+    /// <summary>floorsim[:battlesPerFloor][|fromLoc-toLoc][|max]: starts the floor simulator in the background (the editor stays usable).</summary>
+    public static string StartFloorSim(string arg)
+    {
+        if (floorJob != null) return $"floorsim: already running ({floorJobDone}/{floorJobTotal} talents)";
+        var s = new FloorSimSettings();
+        var parts = (arg ?? "").Split('|');
+        if (parts.Length > 0 && int.TryParse(parts[0], out int per)) s.battlesPerFloor = per;
+        if (parts.Length > 1)
+        {
+            var range = parts[1].Split('-');
+            if (range.Length == 2 && int.TryParse(range[0], out int a) && int.TryParse(range[1], out int b)) { s.fromLoc = a; s.toLoc = b; }
+        }
+        if (parts.Length > 2 && parts[2].Trim().ToLowerInvariant() == "max")
+        {
+            s.roll = GameRules.MaxDeviation(GameRules.Tier(s.rarity));
+            s.godOrbs = GameRules.Tier(s.rarity) >= GameRules.MaxTier ? GameRules.GodOrbMaxStacks : 0;
+        }
+        floorJobDone = 0; floorJobTotal = 0; floorJobReported = 0;
+        floorJob = FloorSim.Steps(s, (d, n) => { floorJobDone = d; floorJobTotal = n; }, 0.2f);
+        UnityEditor.EditorApplication.update -= StepFloorSim;
+        UnityEditor.EditorApplication.update += StepFloorSim;
+        return $"floorsim: started - LOC {s.fromLoc}-{s.toLoc}, {s.battlesPerFloor} battles per floor, card {s.CardText}";
+    }
+
+    static void StepFloorSim()
+    {
+        if (floorJob == null) { UnityEditor.EditorApplication.update -= StepFloorSim; return; }
+        bool more;
+        try { more = floorJob.MoveNext(); }
+        catch (System.Exception ex) { Debug.LogException(ex); AniGameDevBridge.Append("floorsim: failed - " + ex.Message); floorJob = null; return; }
+        if (floorJobDone >= floorJobReported + 10) { floorJobReported = floorJobDone; AniGameDevBridge.Append($"floorsim: {floorJobDone}/{floorJobTotal} talents done"); }
+        if (more && floorJob.Current is FloorSimResult r)
+        {
+            string folder = FloorSim.Export(r);
+            AniGameDevBridge.Append(r.SummaryText(12) + "  CSVs: " + folder);
+            floorJob = null;
+            UnityEditor.EditorApplication.update -= StepFloorSim;
+        }
+        else if (!more) { floorJob = null; UnityEditor.EditorApplication.update -= StepFloorSim; }
+    }
+
     public static string Run(string arg)
     {
         var db = CardDatabase.Instance;
@@ -163,6 +208,66 @@ public static class FloorCheck
         finally
         {
             for (int i = undo.Count - 1; i >= 0; i--) undo[i]();
+        }
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Bridge command bosssim[:battles]: every boss gate against the player's 3 build slots and against random teams of
+    /// 3 max-stat God cards (HiddenSimulator.MaxGod). Win rates per gate, to tune the boss stats.
+    /// </summary>
+    /// <summary>bosssim:battles|hp0,hpStep,atk0,atkStep,def0,defStep,spd0,spdStep - tries a stat ladder in memory (gate k = base + k x step).</summary>
+    public static string BossSim(string arg)
+    {
+        var parts = (arg ?? "").Split('|');
+        int battles = parts.Length > 0 && int.TryParse(parts[0], out int b) ? b : 100;
+        if (parts.Length < 2) return BossSim(battles);
+        var n = parts[1].Split(',').Select(x => int.TryParse(x, out int v) ? v : 0).ToArray();
+        if (n.Length < 8) return "bosssim: ladder needs 8 numbers";
+        var cfg = BossConfig.Current;
+        for (int k = 0; k < cfg.gates.Count; k++)
+        {
+            var g = cfg.gates[k];
+            g.hpPercent = n[0] + k * n[1]; g.atkPercent = n[2] + k * n[3]; g.defPercent = n[4] + k * n[5]; g.spdPercent = n[6] + k * n[7];
+        }
+        try { return BossSim(battles); }
+        finally { BossConfig.Reload(); }
+    }
+
+    public static string BossSim(int battles = 100)
+    {
+        var cfg = BossConfig.Current;
+        var all = TeamSimulator.AllTalents();
+        var actives = all.Where(t => t.IsActive).ToList();
+        var passives = all.Where(t => !t.IsActive).ToList();
+        var rng = new System.Random(7);
+        bool userReady = PlayerProfile.TeamSlotsProblem() == null;
+        var sb = new StringBuilder($"bosssim: {cfg.gates.Count} gates, {battles} battles each, HP x{GameRules.HpMultiplier}, your team {(userReady ? "ready" : "not ready")}\n");
+        for (int gate = 1; gate <= cfg.gates.Count; gate++)
+        {
+            var g = cfg.Gate(gate);
+            int userWins = 0, maxWins = 0, userRounds = 0, maxRounds = 0;
+            for (int k = 0; k < battles; k++)
+            {
+                if (userReady)
+                {
+                    var e1 = PlayerProfile.BossRuntime(gate);
+                    var eng1 = new BattleEngine(PlayerProfile.TeamRuntime(false), e1, 1000 + gate * 97 + k);
+                    var st1 = eng1.RunToEnd();
+                    if (st1 == BattleState.PlayerWon || (st1 == BattleState.Draw && !e1.IsAlive)) userWins++;
+                    userRounds += eng1.Round;
+                }
+                var members = new List<TeamMember>();
+                for (int i = 0; i < 3; i++) members.Add(HiddenSimulator.MaxGod(rng, actives, passives, i));
+                var e2 = PlayerProfile.BossRuntime(gate);
+                var eng2 = new BattleEngine(CardRuntime.ForTeam("Max", members), e2, 5000 + gate * 131 + k);
+                var st2 = eng2.RunToEnd();
+                if (st2 == BattleState.PlayerWon || (st2 == BattleState.Draw && !e2.IsAlive)) maxWins++;
+                maxRounds += eng2.Round;
+            }
+            sb.AppendLine($"  Gate {gate} {g.name} ({g.rarity}, HP {g.hpPercent}% ATK {g.atkPercent}% DEF {g.defPercent}% SPD {g.spdPercent}% x{g.actionsPerRound}): " +
+                          (userReady ? $"your team {100f * userWins / battles:0}% ({userRounds / (float)battles:0.#} rounds), " : "") +
+                          $"max God teams {100f * maxWins / battles:0}% ({maxRounds / (float)battles:0.#} rounds)");
         }
         return sb.ToString();
     }

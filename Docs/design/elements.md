@@ -47,6 +47,21 @@ Rows are the **attacker**, columns the **defender**. The multiplier applies to n
 | **Non-Neutral** | +12.5% | +12.5% | +12.5% | +12.5% | +12.5% | +12.5% | +12.5% | −12.5% | −12.5% |
 | **Neutral** | 0 | 0 | 0 | 0 | 0 | 0 | 0 | **+25%** | 0 |
 
+### In the battle log
+
+Normal attacks (and the skills that use the element multiplier) say how well they hit
+(`ElementSystem.Effectiveness`):
+
+| Multiplier | Battle log |
+|---|---|
+| ×1.25 (and team averages ≥ ×1.2) | **SUPER EFFECTIVE!** |
+| ×1.125 (above ×1.01) | slightly effective |
+| ×0.875 (×0.85 – ×0.99) | not very effective |
+| ×0.75 (below ×0.85) | barely effective... |
+| ×1 | nothing |
+
+In 3v3 the multiplier is the average over the defending team, so it can land between these values.
+
 ### Reading the chart as a player
 
 - **Non-Neutral** is the "safe" pick: +12.5% against almost everything, never −25%, but weak to Neutral.

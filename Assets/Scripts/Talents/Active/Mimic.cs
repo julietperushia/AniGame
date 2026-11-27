@@ -68,12 +68,7 @@ public class Mimic : ActiveTalent
         self.SetTalentState(Key, true);
         self.AddTalent(passive);
         BattleLog.Info($"<color=#CE93D8>[Mimic] {self.DisplayName} learns {passive.DisplayName} for the rest of the battle!</color>");
-        if (passive is Nothingness nothing)
-        {
-            BattleLog.Info($"<color=#9E9E9E>[Nothingness] Copying nothing has a price: {nothing.copyPenalty * 100f:0}% max HP!</color>");
-            self.TakeTrueDamage(Mathf.RoundToInt(self.maxHealth * nothing.copyPenalty), DamageKind.True);
-        }
-        BattleLog.Current?.InitTalent(self, enemy, passive);
+        BattleLog.Current?.InitTalent(self, enemy, passive); // Nothingness takes its price there (OnLearnedInBattle)
     }
 
     void Heal(CardRuntime self)

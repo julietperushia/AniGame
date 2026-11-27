@@ -141,6 +141,10 @@ public static class StatusEffects
         BattleLog.Status(target, $"<color=#BA68C8>{target.DisplayName} is hypnotized (x{target.hypnoStacks}, {chancePerStack * target.hypnoStacks}% to hit itself)</color>");
     }
 
+    /// <summary>Chance (%) the next Regeneration tick fails (heals nothing, loses one stack).</summary>
+    public static int RegenMissChance(CardRuntime card) =>
+        Mathf.Clamp(card.regenMissBase + card.regenMissPerStack * Mathf.Max(0, card.regenerationStacks - 1), 0, 100);
+
     /// <summary>Chance (%) the next Burn tick misses and removes every stack.</summary>
     public static int BurnMissChance(CardRuntime card) =>
         Mathf.Clamp(card.burnMissBase + card.burnMissPerStack * Mathf.Max(0, card.burnStacks - 1), 0, 100);
@@ -162,6 +166,7 @@ public static class StatusEffects
         if (card.blindTurns > 0) { card.blindTurns = 0; n++; }
         if (card.hexTurns > 0) { EndHex(card); n++; }
         if (card.hypnoStacks > 0) { card.hypnoStacks = 0; n++; }
+        if (card.manaBlockTurns > 0) { card.manaBlockTurns = 0; n++; }
         if (card.attack < card.baseAttack) { card.attack = card.baseAttack; n++; }
         if (card.defense < card.baseDefense) { card.defense = card.baseDefense; n++; }
         if (card.speed < card.baseSpeed) { card.speed = card.baseSpeed; n++; }
@@ -175,6 +180,7 @@ public static class StatusEffects
     {
         if (card.blindTurns > 0) card.blindTurns--;
         if (card.hypnoImmuneTurns > 0) card.hypnoImmuneTurns--;
+        if (card.manaBlockTurns > 0 && --card.manaBlockTurns == 0) BattleLog.Status(card, $"{card.DisplayName}'s Mana Regeneration is back");
         if (card.hexTurns > 0 && --card.hexTurns == 0) { card.hexTurns = 1; EndHex(card); }
     }
 
@@ -194,11 +200,20 @@ public static class StatusEffects
     /// </summary>
     public static bool TickStatuses(CardRuntime card)
     {
-        // Regeneration (heal first)
+        // Regeneration (heal first). A tick can miss: then it heals nothing and loses one stack
         if (card.regenerationStacks > 0)
         {
-            int healAmount = Mathf.RoundToInt(card.maxHealth * card.regenPercent * card.regenerationStacks);
-            card.Heal(healAmount);
+            int missChance = RegenMissChance(card);
+            if (BattleRandom.Chance(missChance))
+            {
+                card.regenerationStacks--;
+                BattleLog.Status(card, $"<color=#5DFFB0>{card.DisplayName}'s Regeneration fails and loses a stack (x{card.regenerationStacks} left, {missChance}% chance)</color>");
+            }
+            else
+            {
+                int healAmount = Mathf.RoundToInt(card.maxHealth * card.regenPercent * card.regenerationStacks);
+                card.Heal(healAmount);
+            }
         }
 
         // Burn damage (a miss puts the fire out: every stack is removed)

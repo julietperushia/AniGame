@@ -112,6 +112,7 @@ public class BattleEngine
                 var rs = Emit(BattleEventType.RoundStart, first, second);
                 rs.text = $"<color=#9AA4B5>- Round {Round} -</color>";
                 if (Round >= EnrageStartRound) ApplyEnrage();
+                AnnounceHealingFatigue();
             }
 
             CardRuntime actor = turnInRound == 0 ? first : second;
@@ -205,7 +206,8 @@ public class BattleEngine
         {
             attacker.skipAttackThisTurn = false;
             var info = Emit(BattleEventType.Info, attacker, defender);
-            info.text = $"<color=#FFB300>{attacker.DisplayName} charges up instead of attacking</color>";
+            info.text = $"<color=#FFB300>{attacker.DisplayName} {attacker.skipAttackText ?? "charges up instead of attacking"}</color>";
+            attacker.skipAttackText = null;
         }
         else if (attacker.IsAlive && defender.IsAlive)
         {
@@ -234,7 +236,11 @@ public class BattleEngine
     // Stun / Freeze / Sleep skip only the team's next card. Actives can't be used in round 1; each card uses only
     // its own actives and pays their mana cost from the shared pool.
     // =====================================================================================
-    readonly HashSet<TeamMember> actedThisRound = new HashSet<TeamMember>();
+    readonly Dictionary<TeamMember, int> actedThisRound = new Dictionary<TeamMember, int>();
+    int Acted(TeamMember m) => actedThisRound.TryGetValue(m, out int n) ? n : 0;
+    static int Actions(TeamMember m) => Mathf.Max(1, m.actionsPerRound);
+    /// <summary>SPD of a card's k-th turn this round: a card with several turns (a boss) takes them at full, 2/3, 1/3... SPD.</summary>
+    static int ActionSpeed(TeamMember m, CardRuntime side, int k) => Mathf.Max(1, Mathf.RoundToInt(m.Speed(side) * (Actions(m) - k) / (float)Actions(m)));
     readonly HashSet<CardRuntime> tickedThisRound = new HashSet<CardRuntime>();
 
     bool StepTeam()
@@ -257,10 +263,11 @@ public class BattleEngine
                 var rs = Emit(BattleEventType.RoundStart, Player, Enemy);
                 rs.text = $"<color=#9AA4B5>- Round {Round} -</color>";
                 if (Round >= EnrageStartRound) ApplyEnrage();
+                AnnounceHealingFatigue();
                 next = NextTeamActor(out team);
                 if (next == null) { Finish(BattleState.Draw, "No cards"); return false; }
             }
-            actedThisRound.Add(next);
+            actedThisRound[next] = Acted(next) + 1;
             var foe = team == Player ? Enemy : Player;
             ExecuteTeamTurn(team, next, foe);
             team.currentMember = null;
@@ -286,8 +293,8 @@ public class BattleEngine
             if (!side.IsTeam) continue;
             foreach (var m in side.members)
             {
-                if (actedThisRound.Contains(m)) continue;
-                int spd = m.Speed(side);
+                if (Acted(m) >= Actions(m)) continue;
+                int spd = ActionSpeed(m, side, Acted(m));
                 if (spd > bestSpd) { best = m; team = side; bestSpd = spd; } // strict: ties keep the player team / lower index
             }
         }
@@ -297,12 +304,14 @@ public class BattleEngine
     /// <summary>Order of the cards that still act this round (for the UI / logs).</summary>
     public List<TeamMember> TeamTurnOrder()
     {
-        var all = new List<(TeamMember m, CardRuntime t)>();
+        var all = new List<(TeamMember m, CardRuntime t, int spd)>();
         foreach (var side in new[] { Player, Enemy })
-            if (side.IsTeam) foreach (var m in side.members) all.Add((m, side));
+            if (side.IsTeam)
+                foreach (var m in side.members)
+                    for (int k = Acted(m); k < Actions(m); k++) all.Add((m, side, ActionSpeed(m, side, k)));
         all.Sort((a, b) =>
         {
-            int c = b.m.Speed(b.t).CompareTo(a.m.Speed(a.t));
+            int c = b.spd.CompareTo(a.spd);
             if (c != 0) return c;
             c = (a.t == Player ? 0 : 1).CompareTo(b.t == Player ? 0 : 1);
             return c != 0 ? c : a.m.index.CompareTo(b.m.index);
@@ -314,7 +323,7 @@ public class BattleEngine
 
     bool IsLastOfTeam(CardRuntime team)
     {
-        foreach (var m in team.members) if (!actedThisRound.Contains(m)) return false;
+        foreach (var m in team.members) if (Acted(m) < Actions(m)) return false;
         return true;
     }
 
@@ -372,7 +381,8 @@ public class BattleEngine
         {
             team.skipAttackThisTurn = false;
             var info = Emit(BattleEventType.Info, team, foe);
-            info.text = $"<color=#FFB300>{m.name} charges up instead of attacking</color>";
+            info.text = $"<color=#FFB300>{m.name} {team.skipAttackText ?? "charges up instead of attacking"}</color>";
+            team.skipAttackText = null;
         }
         else if (team.IsAlive && foe.IsAlive)
         {
@@ -411,6 +421,39 @@ public class BattleEngine
         public static AttackOptions Normal => new AttackOptions();
     }
 
+    /// <summary>Counter Stance: hit back right away after an evade (weaker, no mana, can't be countered).</summary>
+    void CounterStrike(CardRuntime defender, CardRuntime attacker)
+    {
+        if (defender == null || attacker == null || !defender.counterStance || !defender.IsAlive || !attacker.IsAlive) return;
+        var prevMember = defender.currentMember;
+        var prevAttacker = attacker.currentMember;
+        if (defender.IsTeam) defender.currentMember = defender.members[BattleRandom.Range(0, defender.members.Count)];
+        var c = Emit(BattleEventType.Info, defender, attacker);
+        c.tag = "counter";
+        c.text = $"<color=#FFB300>[Counter Stance] {defender.ActorName} strikes back!</color>";
+        NormalAttack(defender, attacker, new AttackOptions { counter = true, multiplier = defender.counterDamage });
+        defender.currentMember = prevMember;
+        attacker.currentMember = prevAttacker;
+    }
+
+    /// <summary>
+    /// Counter Stance: skill damage (Elemental Strike, Dexterity Drive, Life Sap...) can be evaded with the card's evasion
+    /// chance. An evade gives +5 Mana, runs the evade talents and the counter. Returns true if the damage was evaded.
+    /// </summary>
+    public bool TryEvadeSkill(CardRuntime defender)
+    {
+        if (defender == null || !defender.IsAlive || !defender.counterStance || defender.sleepTurns > 0 || defender.frozen) return false;
+        if (!BattleRandom.Chance(GameRules.EvadeChance(defender.evasion))) return false;
+        var attacker = defender.opponent;
+        var ev = Emit(BattleEventType.Evaded, attacker, defender);
+        ev.elementMultiplier = attacker != null ? DamageCalculator.ElementMul(attacker, defender) : 1f;
+        ev.text = $"<color=#C9D1DC>[Counter Stance] {defender.DisplayName} evades the skill!</color>";
+        defender.GainMana(5);
+        RunTalents(defender, attacker, t => t.OnEvade(defender, attacker));
+        CounterStrike(defender, attacker);
+        return true;
+    }
+
     /// <summary>Every enemy card of a fighter (one today; team battles can return several).</summary>
     public List<CardRuntime> EnemiesOf(CardRuntime c) => new List<CardRuntime> { c == Player ? Enemy : Player };
 
@@ -426,6 +469,25 @@ public class BattleEngine
     {
         if (owner == null || t == null) return;
         Guarded(owner, t, () => t.OnBattleStart(owner, enemy));
+        Guarded(owner, t, () => t.OnLearnedInBattle(owner, enemy)); // Nothingness punishes every copy
+    }
+
+    /// <summary>Runs a stat change with the stat rules (Blackhole, Chaotic...). Inside a talent call the rules
+    /// already run at the end of that call, so the change is made directly.</summary>
+    public void ApplyStatChange(CardRuntime owner, Talent t, Action change)
+    {
+        if (change == null) return;
+        if (guardDepth > 0 || owner == null || t == null) { change(); return; }
+        Guarded(owner, t, change);
+    }
+
+    /// <summary>The round's healing fatigue, announced at the start of every round after round 10.</summary>
+    void AnnounceHealingFatigue()
+    {
+        if (!GameRules.HealingFatigueOn || Round <= GameRules.HealingFatigueAfterRound) return;
+        int cut = Mathf.RoundToInt((1f - GameRules.HealingMultiplier(Round)) * 100f);
+        var e = Emit(BattleEventType.Info, null, null);
+        e.text = cut >= 100 ? "<color=#9CCC65>HEALING FATIGUE! Healing no longer works</color>" : $"<color=#9CCC65>HEALING FATIGUE! All healing received -{cut}%</color>";
     }
 
     void NormalAttack(CardRuntime attacker, CardRuntime defender, AttackOptions opt)
@@ -503,25 +565,13 @@ public class BattleEngine
             Missed(attacker, defender, elementMul, $"<color=#C9D1DC>{defender.DisplayName} evaded the attack!</color>", false);
             defender.GainMana(5);
             RunTalents(defender, attacker, t => t.OnEvade(defender, attacker));
-            // Counter Stance: hit back right away (60% weaker, no mana)
-            if (!opt.counter && defender.counterStance && defender.IsAlive && attacker.IsAlive)
-            {
-                var prevMember = defender.currentMember;
-                var prevAttacker = attacker.currentMember;
-                if (defender.IsTeam) defender.currentMember = defender.members[BattleRandom.Range(0, defender.members.Count)];
-                var c = Emit(BattleEventType.Info, defender, attacker);
-                c.tag = "counter";
-                c.text = $"<color=#FFB300>[Counter Stance] {defender.ActorName} strikes back!</color>";
-                NormalAttack(defender, attacker, new AttackOptions { counter = true, multiplier = defender.counterDamage });
-                defender.currentMember = prevMember;
-                attacker.currentMember = prevAttacker;
-            }
+            if (!opt.counter) CounterStrike(defender, attacker);
             return;
         }
 
         int damage = Mathf.RoundToInt(DamageCalculator.NormalAttack(attacker, defender, isCrit) * mult) + chargeBonus;
         if (attacker.slayerPercent > 0f) // part of the attack, so 3v3 scales it like the rest of the hit
-            damage += Mathf.RoundToInt(defender.maxHealth * attacker.slayerPercent * (attacker.IsTeam ? GameRules.TeamAttackScale : 1f));
+            damage += Mathf.RoundToInt(Mathf.Max(0, defender.health) * attacker.slayerPercent * DamageCalculator.TeamScale(attacker)); // current HP
 
         // Sleep: attacks don't wake the target, but hitting a sleeping card deals less damage
         bool hitSleeper = defender.sleepTurns > 0 && defender.sleepDamageCut > 0f;
@@ -547,7 +597,8 @@ public class BattleEngine
         var atk = Emit(BattleEventType.NormalAttack, attacker, defender);
         atk.crit = isCrit;
         atk.elementMultiplier = elementMul;
-        atk.text = $"{attacker.ActorName} attacks{(isCrit ? " - <color=#FFB23D>CRITICAL!</color>" : "")}" +
+        string effect = ElementSystem.EffectivenessTag(elementMul); // element advantage: super effective, not very effective...
+        atk.text = $"{attacker.ActorName} attacks{(isCrit ? " - <color=#FFB23D>CRITICAL!</color>" : "")}" + (effect.Length > 0 ? " - " + effect : "") +
                    (hitSleeper ? $" <color=#9FA8DA>(asleep: -{defender.sleepDamageCut * 100f:0}%)</color>" : "");
 
         // Infernus: part of the damage is dealt as true damage, and half of it heals the attacker
@@ -676,6 +727,11 @@ public class BattleEngine
     /// whatever ATK/DEF/SPD/max HP changes the call made: Purify immunity and Gigantify resist block drops caused
     /// by the enemy, Chaotic flips every change, Blackhole swallows the enemy's gains and halves its owner's, Doppelganger copies 30% of gains.
     /// </summary>
+    int guardDepth;
+
+    /// <summary>Stats a Blackhole takes from what it swallowed (applied after both cards' rules).</summary>
+    struct Swallowed { public CardRuntime to; public int atk, def, spd, hp; public float share; }
+
     void Guarded(CardRuntime owner, Talent t, Action call)
     {
         if (owner == null || t == null) return;
@@ -685,15 +741,33 @@ public class BattleEngine
         owner.talentPower = owner.PowerOf(t);
         var previous = CurrentActor;
         CurrentActor = owner;
+        guardDepth++;
         try { call(); }
         catch (Exception ex) { Debug.LogException(ex); }
+        finally { guardDepth--; }
         CurrentActor = previous;
         owner.talentPower = prevPower;
-        ApplyStatRules(Player, a, owner);
-        ApplyStatRules(Enemy, b, owner);
+        var swallowed = new List<Swallowed>();
+        ApplyStatRules(Player, a, owner, swallowed);
+        ApplyStatRules(Enemy, b, owner, swallowed);
+        foreach (var s in swallowed)
+        {
+            if (s.to == null || !s.to.IsAlive || s.atk + s.def + s.spd + s.hp <= 0) continue;
+            s.to.attack += s.atk;
+            s.to.defense += s.def;
+            s.to.speed += s.spd;
+            s.to.maxHealth += s.hp;
+            s.to.health += s.hp;
+            var parts = new List<string>();
+            if (s.atk > 0) parts.Add($"+{s.atk} ATK");
+            if (s.def > 0) parts.Add($"+{s.def} DEF");
+            if (s.spd > 0) parts.Add($"+{s.spd} SPD");
+            if (s.hp > 0) parts.Add($"+{s.hp} max HP");
+            BattleLog.Status(s.to, $"<color=#9E9E9E>[Blackhole] {s.to.DisplayName} absorbs {s.share * 100f:0}% of the swallowed stats: {string.Join(", ", parts)}</color>");
+        }
     }
 
-    void ApplyStatRules(CardRuntime card, StatSnap before, CardRuntime source)
+    void ApplyStatRules(CardRuntime card, StatSnap before, CardRuntime source, List<Swallowed> swallowed)
     {
         int dAtk = card.attack - before.atk, dBonusAtk = card.bonusAttack - before.bonusAtk;
         int dDef = card.defense - before.def, dBonusDef = card.bonusDefense - before.bonusDef;
@@ -710,12 +784,19 @@ public class BattleEngine
 
         bool chaotic = Player.HasTalent<Chaotic>() || Enemy.HasTalent<Chaotic>();
         if (chaotic) { dAtk = -dAtk; dBonusAtk = -dBonusAtk; dDef = -dDef; dBonusDef = -dBonusDef; dSpd = -dSpd; dHp = -dHp; }
-        // Blackhole: the enemy's gains are swallowed, the owner keeps half of its own (numbers on the Blackhole asset)
+        // Blackhole: the enemy's gains are swallowed (part of them goes to the Blackhole card), the owner keeps half of its own
         float kept = Blackhole.GainKept(card);
         bool anyGain = dAtk > 0 || dBonusAtk > 0 || dDef > 0 || dBonusDef > 0 || dSpd > 0 || dHp > 0;
         bool blackhole = kept < 1f && anyGain;
         if (blackhole)
         {
+            var hole = Blackhole.EnemyHoleOf(card);
+            if (hole != null && hole.swallowedToYou > 0f && card.opponent != null)
+            {
+                float share = (1f - Mathf.Clamp01(hole.enemyGainKept)) * Mathf.Clamp01(hole.swallowedToYou);
+                int S(int d) => d > 0 ? Mathf.RoundToInt(d * share) : 0;
+                swallowed.Add(new Swallowed { to = card.opponent, atk = S(dAtk) + S(dBonusAtk), def = S(dDef) + S(dBonusDef), spd = S(dSpd), hp = S(dHp), share = Mathf.Clamp01(hole.swallowedToYou) });
+            }
             int K(int d) => d > 0 ? Mathf.RoundToInt(d * kept) : d;
             dAtk = K(dAtk); dBonusAtk = K(dBonusAtk); dDef = K(dDef); dBonusDef = K(dBonusDef); dSpd = K(dSpd); dHp = K(dHp);
         }
@@ -796,6 +877,16 @@ public static class DamageCalculator
     public const float FlatConstant = 638000f;
     public const float DefCoefficient = 87f; // 8.7 * 10
 
+    /// <summary>
+    /// 3v3 hit scale: a team adds up the ATK of its cards, so each hit is cut (x0.33 for 3 cards). A team of fewer cards
+    /// (a boss fighting alone) adds up less, so its hits are cut less: x(scale x 3 / cards), at most 1.
+    /// </summary>
+    public static float TeamScale(CardRuntime attacker)
+    {
+        if (attacker == null || !attacker.IsTeam) return 1f;
+        return Mathf.Min(1f, GameRules.TeamAttackScale * 3f / Mathf.Max(1, attacker.members.Count));
+    }
+
     /// <summary>Normal attack damage that rolls its own crit.</summary>
     public static int NormalAttack(CardRuntime attacker, CardRuntime defender, out bool isCrit)
     {
@@ -812,7 +903,7 @@ public static class DamageCalculator
 
         float damage = (AtkCoefficient * baseAtk * currentAtk + FlatConstant) / (DefCoefficient * def);
         damage *= ElementMul(attacker, defender);
-        if (attacker.IsTeam) damage *= GameRules.TeamAttackScale; // 3v3: totals of 3 cards on both sides
+        damage *= TeamScale(attacker); // 3v3: totals of 3 cards on both sides
 
         if (isCrit) damage *= Mathf.Max(100, attacker.ActingCritDamage) / 100f;
 
@@ -828,7 +919,10 @@ public static class DamageCalculator
     /// <summary>Applies the attacker-vs-defender element multiplier to talent damage.</summary>
     public static int WithElement(int damage, CardRuntime attacker, CardRuntime defender)
     {
-        return Mathf.Max(1, Mathf.RoundToInt(damage * ElementMul(attacker, defender)));
+        float mul = ElementMul(attacker, defender);
+        string effect = ElementSystem.EffectivenessTag(mul);
+        if (effect.Length > 0) BattleLog.Info($"{ElementSystem.DisplayName(attacker.Element)} vs {ElementSystem.DisplayName(defender.Element)}: {effect}");
+        return Mathf.Max(1, Mathf.RoundToInt(damage * mul));
     }
 
     /// <summary>

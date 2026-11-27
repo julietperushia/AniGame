@@ -15,7 +15,9 @@ MonoBehaviour:
   talentName: Blackhole
   autoDescription: 1
   description: 'While this card is in battle, the enemy can''t raise its ATK, DEF,
-    SPD or max HP: every stat gain is swallowed, and you keep 50% of your own stat
-    gains. Stat drops and healing still work.'
+    SPD or max HP: every stat gain is swallowed. 30% of what it swallows from the
+    enemy goes to you as permanent stats, and you keep 50% of your own stat gains.
+    Stat drops and healing still work.'
   ownGainKept: 0.5
   enemyGainKept: 0
+  swallowedToYou: 0.3

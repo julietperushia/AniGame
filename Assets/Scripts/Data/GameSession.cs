@@ -13,6 +13,8 @@ public static class SceneNames
     public const string Library = "Library";     // searchable guide
     public const string HiddenLocation = "HiddenLocation"; // 3v3 mode: 20 LOCs x 3 floors
     public const string TeamBattle = "TeamBattle";         // 3v3 battle
+    public const string Boss = "Boss";                     // one location, many gates: the 3 build slots vs one boss
+    public const string Minigames = "Minigames";           // quick games with a shared cooldown
 }
 
 /// <summary>Data passed between scenes (which floor to fight, etc.).</summary>
@@ -55,6 +57,23 @@ public static class GameSession
     }
 
     /// <summary>Loads a screen behind the animated transition (ScreenFader).</summary>
+    // ---- Boss location (3v3 against one boss)
+    public static bool HasPendingBossBattle;
+    public static int PendingBossGate = 1;
+    /// <summary>Started from the Test Mode boss editor: empty slots get test cards, no stamina, no rewards.</summary>
+    public static bool BossTestFight;
+    /// <summary>Gate the Boss screen should open on (0 = the next gate to beat).</summary>
+    public static int SelectedBossGate;
+
+    public static void StartBossBattle(int gate, bool testFight = false)
+    {
+        HasPendingBossBattle = true;
+        PendingBossGate = gate;
+        BossTestFight = testFight;
+        SelectedBossGate = gate;
+        LoadScene(SceneNames.TeamBattle);
+    }
+
     public static void LoadScene(string sceneName)
     {
         ScreenFader.Load(sceneName);

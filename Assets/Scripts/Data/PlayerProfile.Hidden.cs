@@ -41,6 +41,12 @@ public static partial class PlayerProfile
     {
         if (!HiddenUnlocked) return $"Own {GameRules.HiddenUnlockCards} cards of Mythic rarity or higher to enter (you have {HighRarityCards}).";
         if (HiddenTestMode) return null; // missing slots are filled with test cards
+        return TeamSlotsProblem();
+    }
+
+    /// <summary>Why the 3 build slots can't form a team (null = ready).</summary>
+    public static string TeamSlotsProblem()
+    {
         for (int i = 0; i < 3; i++)
         {
             var slot = GetSlot(i);
@@ -70,14 +76,17 @@ public static partial class PlayerProfile
             critRate = rt.critRate,
             critDamage = rt.critDamage,
             evasion = rt.evasion,
-            art = Art(card),
+            art = Art(card, slot.build),
         };
         foreach (var t in rt.talents) if (t != null) m.talents.Add(t);
         return m;
     }
 
     /// <summary>The player's 3v3 team (build slots 1-3) with the combat buffs, or null if a slot is missing.</summary>
-    public static CardRuntime HiddenTeamRuntime()
+    public static CardRuntime HiddenTeamRuntime() => TeamRuntime(HiddenTestMode);
+
+    /// <summary>The 3 build slots as a team; with fillWithTestCards, empty slots get max-stat God test cards.</summary>
+    public static CardRuntime TeamRuntime(bool fillWithTestCards)
     {
         var members = new List<TeamMember>();
         var rng = new System.Random();
@@ -85,7 +94,7 @@ public static partial class PlayerProfile
         for (int i = 0; i < 3; i++)
         {
             var m = SlotMember(i);
-            if (m == null && HiddenTestMode)
+            if (m == null && fillWithTestCards)
             {
                 m = HiddenSimulator.MaxGod(rng, all.Where(t => t.IsActive).ToList(), all.Where(t => !t.IsActive).ToList(), i);
                 m.name = $"Test God {i + 1}";

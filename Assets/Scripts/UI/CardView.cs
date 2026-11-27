@@ -375,6 +375,8 @@ public class CardView : MonoBehaviour
         // ---- debuffs (red)
         Add(rt.silenceTurns > 0, theme != null ? theme.lockIcon : null, "SIL", rt.silenceTurns.ToString(),
             $"<b><color=#C78BFF>Silenced</color></b>\nCan't use its active talent ({rt.silenceTurns} turn{(rt.silenceTurns == 1 ? "" : "s")} left).", true);
+        AddT(rt.manaBlockTurns > 0, "Silence", "NMR", rt.manaBlockTurns.ToString(),
+            $"<b><color=#C78BFF>No Mana Regeneration</color></b>\nGains no Mana from Mana Regeneration ({rt.manaBlockTurns} turn{(rt.manaBlockTurns == 1 ? "" : "s")} left). Mana from being hit still counts.", true);
         AddT(rt.isStunned, "Paralysis", "STN", "", "<b><color=#FFE14D>Stunned</color></b>\nSkips its next turn.", true);
         AddT(rt.frozen, "Frostbite", "FRZ", "", "<b><color=#81D4FA>Frozen</color></b>\nSkips its next turn and can't evade until then.", true);
         AddT(rt.sleepTurns > 0, "Sleep", "SLP", rt.sleepTurns.ToString(),
@@ -397,7 +399,7 @@ public class CardView : MonoBehaviour
         AddT(rt.shield > 0, "Burst Barrier", "SHD", rt.shieldTurns > 0 ? rt.shieldTurns.ToString() : "",
             $"<b><color=#6FD3FF>Barrier</color></b>\nAbsorbs the next {rt.shield} damage ({rt.shieldTurns} turns left)." + (rt.shieldManaRegen < 0.999f ? $" Mana Regeneration -{pct(1f - rt.shieldManaRegen)}% while it lasts." : ""), false);
         AddT(rt.regenerationStacks > 0, "Regeneration", "REG", $"x{rt.regenerationStacks}",
-            $"<b><color=#5DFFB0>Regeneration x{rt.regenerationStacks}</color></b>\nHeals {rt.regenPercent * rt.regenerationStacks * 100f:0.#}% of its max HP each turn.", false);
+            $"<b><color=#5DFFB0>Regeneration x{rt.regenerationStacks}</color></b>\nHeals {rt.regenPercent * rt.regenerationStacks * 100f:0.#}% of its max HP each turn. {StatusEffects.RegenMissChance(rt)}% chance the next tick fails and loses a stack.", false);
         AddT(rt.hasEndurance, "Endurance", "END", rt.enduranceTurns.ToString(),
             $"<b><color=#6FD3FF>Endurance</color></b>\nTakes {pct(rt.enduranceReduction)}% less damage from normal attacks ({rt.enduranceTurns} turns left).", false);
         AddT(rt.debuffImmuneTurns > 0, "Purify", "IMM", rt.debuffImmuneTurns.ToString(),

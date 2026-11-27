@@ -15,8 +15,9 @@ MonoBehaviour:
   talentName: Purify
   autoDescription: 1
   description: 'Remove every Burn, Poison, Stun, Freeze, Sleep, Blind, Hex, Hypnotize,
-    Silence and stat drop on you. You can''t get new debuffs for 2 turns, and you
-    heal 10% (Max 12%) of your max HP for each effect removed. Mana cost: 100.'
+    Silence, Mana Regeneration stop and stat drop on you. You can''t get new debuffs
+    for 2 turns, and you heal 10% (Max 12%) of your max HP for each effect removed.
+    Mana cost: 100.'
   manaCost: 100
   immuneTurns: 2
   healPerEffect: 0.1

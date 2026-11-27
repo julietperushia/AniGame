@@ -29,7 +29,7 @@ public static class AniGameSetup
     const string TalentFolder = "Assets/Scriptable Objects/Talent";
     public const string ReportPath = "Logs/AniGame_Report.txt";
 
-    static readonly string[] SceneOrder = { SceneNames.MainMenu, SceneNames.Character, SceneNames.LocationMap, SceneNames.Collection, SceneNames.Gacha, SceneNames.Shop, SceneNames.Buffs, SceneNames.Library, SceneNames.Battle, SceneNames.HiddenLocation, SceneNames.TeamBattle };
+    static readonly string[] SceneOrder = { SceneNames.MainMenu, SceneNames.Character, SceneNames.LocationMap, SceneNames.Collection, SceneNames.Gacha, SceneNames.Shop, SceneNames.Buffs, SceneNames.Library, SceneNames.Battle, SceneNames.HiddenLocation, SceneNames.TeamBattle, SceneNames.Boss, SceneNames.Minigames };
 
     // ------------------------------------------------------------------ menu
 
@@ -452,6 +452,8 @@ public static class AniGameSetup
         BuildScene(SceneNames.Battle, c => BattleScreen.BuildLayout(c));
         BuildScene(SceneNames.HiddenLocation, c => HiddenLocationScreen.BuildLayout(c));
         BuildScene(SceneNames.TeamBattle, c => TeamBattleScreen.BuildLayout(c));
+        BuildScene(SceneNames.Boss, c => BossScreen.BuildLayout(c));
+        BuildScene(SceneNames.Minigames, c => MinigamesScreen.BuildLayout(c));
 
         // Build settings: our scenes first, keep any other scenes that were already listed.
         var list = new List<EditorBuildSettingsScene>();

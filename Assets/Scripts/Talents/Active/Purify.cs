@@ -10,7 +10,7 @@ public class Purify : ActiveTalent
 
     public override string DefaultName => "Purify";
     public override string DefaultDescription =>
-        "Remove every Burn, Poison, Stun, Freeze, Sleep, Blind, Hex, Hypnotize, Silence and stat drop on you. " +
+        "Remove every Burn, Poison, Stun, Freeze, Sleep, Blind, Hex, Hypnotize, Silence, Mana Regeneration stop and stat drop on you. " +
         $"You can't get new debuffs for {N(immuneTurns, "turn")}, and you heal {PctF(healPerEffect)} of your max HP for each effect removed.";
 
     public override void Activate(CardRuntime self, CardRuntime enemy)
